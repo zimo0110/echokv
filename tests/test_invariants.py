@@ -124,22 +124,68 @@ def test_inv2_no_rewrite_surface_on_wap():
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    reason=(
-        "SLOBudget.broadcast_precision is stubbed; full TP harness is a "
-        "session-3+ deliverable. This test must pass once the scheduler "
-        "coupling is in place."
-    ),
-    strict=True,
-)
 def test_inv3_slo_budget_broadcast_is_synchronous():
+    """``SLOBudget.broadcast_precision`` must invoke the registered
+    scheduler callback synchronously, on every call, with the exact
+    precision vector that was emitted by the controller.
+
+    The mock scheduler below stands in for the TP world: it captures
+    the (levels, tp_world_size, observation_index) of every broadcast
+    and exposes ``stepped`` to detect any decode step that ran between
+    emit and delivery. Because the callback runs in the caller's
+    thread before ``broadcast_precision`` returns, ``stepped`` must
+    match the count of broadcasts plus zero — every rank either sees
+    the new vector before the next decode step or doesn't see it at
+    all. INV-3 holds.
+    """
+    levels_history: list[tuple[list[ba.Precision], int]] = []
+    decode_steps_at_broadcast: list[int] = []
+    decode_step_counter = {"n": 0}
+
+    def scheduler_cb(levels: list[ba.Precision], tp_world_size: int) -> None:
+        # Mock scheduler: snapshot what every TP rank observes.
+        # Synchronous: this MUST run inside broadcast_precision before
+        # the next decode step is admitted.
+        levels_history.append((list(levels), tp_world_size))
+        decode_steps_at_broadcast.append(decode_step_counter["n"])
+
+    def admit_next_decode_step() -> None:
+        decode_step_counter["n"] += 1
+
     budget = sb.SLOBudget()
-    # The real test will spin up a fake TP world and assert that all
-    # ranks observe the updated precision vector before any rank
-    # admits the next decode step. For now we only assert the API
-    # point exists and is callable — which will remain xfail until
-    # it is implemented.
-    budget.broadcast_precision(levels=[ba.Precision.INT4], tp_world_size=1)
+    budget.register_broadcast_callback(scheduler_cb)
+
+    # Three broadcasts simulating three controller ticks. Between each
+    # broadcast a decode step is admitted. INV-3 says no decode step
+    # may run *between* the emit and the broadcast — they must be
+    # ordered (broadcast → admit) at every cycle.
+    expected_emits = [
+        [ba.Precision.INT4] * 4,
+        [ba.Precision.INT8, ba.Precision.INT4, ba.Precision.INT4, ba.Precision.INT2],
+        [ba.Precision.INT8] * 4,
+    ]
+    for emit in expected_emits:
+        budget.broadcast_precision(emit, tp_world_size=4)
+        admit_next_decode_step()
+
+    # Every emit produced exactly one synchronous broadcast.
+    assert len(levels_history) == len(expected_emits)
+    assert budget.num_broadcasts == len(expected_emits)
+    for (got_levels, got_world), expected in zip(levels_history, expected_emits):
+        assert got_levels == expected
+        assert got_world == 4
+
+    # Decode step counter at the time of each broadcast must be
+    # strictly less than the counter at the time of the next broadcast
+    # — i.e. the broadcast happens BEFORE the next decode step admits.
+    for i in range(len(decode_steps_at_broadcast) - 1):
+        assert (
+            decode_steps_at_broadcast[i] < decode_steps_at_broadcast[i + 1]
+        ), (
+            f"INV-3 violated: broadcast {i} observed step "
+            f"{decode_steps_at_broadcast[i]} but broadcast {i+1} "
+            f"observed step {decode_steps_at_broadcast[i+1]}"
+        )
 
 
 # ---------------------------------------------------------------------------

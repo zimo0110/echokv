@@ -1,0 +1,56 @@
+2026-04-26 05:16:32,301 INFO loading meta-llama/Llama-3.1-8B-Instruct on cuda:0 (torch.bfloat16)
+hooked 32 attention layers (n=40, seed=0)
+[00] gsm8k_cot:1101                  δ_KL=0.00675  δ_OUT=0.00584  ΔNLL=+0.0157
+[01] gsm8k_cot:120                   δ_KL=0.00692  δ_OUT=0.00597  ΔNLL=+0.0166
+[02] gsm8k_cot:474                   δ_KL=0.00665  δ_OUT=0.00581  ΔNLL=+0.0316
+[03] gsm8k_cot:991                   δ_KL=0.00814  δ_OUT=0.00620  ΔNLL=+0.0156
+[04] gsm8k_cot:192                   δ_KL=0.00730  δ_OUT=0.00591  ΔNLL=+0.0167
+[05] gsm8k_cot:1020                  δ_KL=0.00695  δ_OUT=0.00597  ΔNLL=+0.0183
+[06] gsm8k_cot:350                   δ_KL=0.00835  δ_OUT=0.00609  ΔNLL=+0.0115
+[07] gsm8k_cot:480                   δ_KL=0.00725  δ_OUT=0.00599  ΔNLL=+0.0031
+[08] gsm8k_cot:883                   δ_KL=0.00804  δ_OUT=0.00591  ΔNLL=+0.0045
+[09] gsm8k_cot:1062                  δ_KL=0.00802  δ_OUT=0.00599  ΔNLL=+0.0060
+[10] gsm8k_cot:799                   δ_KL=0.00672  δ_OUT=0.00587  ΔNLL=+0.0078
+[11] gsm8k_cot:1257                  δ_KL=0.00728  δ_OUT=0.00600  ΔNLL=+0.0147
+[12] gsm8k_cot:1070                  δ_KL=0.00812  δ_OUT=0.00601  ΔNLL=+0.0122
+[13] gsm8k_cot:1234                  δ_KL=0.00672  δ_OUT=0.00594  ΔNLL=+0.0236
+[14] gsm8k_cot:590                   δ_KL=0.00839  δ_OUT=0.00591  ΔNLL=+0.0306
+[15] gsm8k_cot:446                   δ_KL=0.00766  δ_OUT=0.00599  ΔNLL=+0.0096
+[16] gsm8k_cot:1302                  δ_KL=0.00772  δ_OUT=0.00589  ΔNLL=+0.0208
+[17] gsm8k_cot:265                   δ_KL=0.00839  δ_OUT=0.00582  ΔNLL=+0.0051
+[18] gsm8k_cot:175                   δ_KL=0.00761  δ_OUT=0.00600  ΔNLL=+0.0073
+[19] gsm8k_cot:554                   δ_KL=0.00745  δ_OUT=0.00604  ΔNLL=+0.0202
+[20] gsm8k_cot:1161                  δ_KL=0.00788  δ_OUT=0.00588  ΔNLL=+0.0274
+[21] gsm8k_cot:625                   δ_KL=0.00715  δ_OUT=0.00591  ΔNLL=+0.0127
+[22] gsm8k_cot:605                   δ_KL=0.00806  δ_OUT=0.00603  ΔNLL=+0.0043
+[23] gsm8k_cot:1110                  δ_KL=0.00813  δ_OUT=0.00593  ΔNLL=+0.0178
+[24] gsm8k_cot:204                   δ_KL=0.00778  δ_OUT=0.00610  ΔNLL=+0.0162
+[25] gsm8k_cot:789                   δ_KL=0.00829  δ_OUT=0.00600  ΔNLL=+0.0176
+[26] gsm8k_cot:197                   δ_KL=0.00696  δ_OUT=0.00589  ΔNLL=+0.0168
+[27] gsm8k_cot:1126                  δ_KL=0.00722  δ_OUT=0.00591  ΔNLL=+0.0134
+[28] gsm8k_cot:23                    δ_KL=0.00678  δ_OUT=0.00591  ΔNLL=+0.0055
+[29] gsm8k_cot:1137                  δ_KL=0.00867  δ_OUT=0.00607  ΔNLL=+0.0058
+[30] gsm8k_cot:1083                  δ_KL=0.00743  δ_OUT=0.00598  ΔNLL=+0.0153
+[31] gsm8k_cot:1052                  δ_KL=0.00823  δ_OUT=0.00610  ΔNLL=+0.0029
+[32] gsm8k_cot:952                   δ_KL=0.00680  δ_OUT=0.00594  ΔNLL=+0.0227
+[33] gsm8k_cot:867                   δ_KL=0.00746  δ_OUT=0.00592  ΔNLL=+0.0079
+[34] gsm8k_cot:712                   δ_KL=0.00675  δ_OUT=0.00587  ΔNLL=+0.0131
+[35] gsm8k_cot:950                   δ_KL=0.00726  δ_OUT=0.00591  ΔNLL=+0.0285
+[36] gsm8k_cot:620                   δ_KL=0.00751  δ_OUT=0.00604  ΔNLL=+0.0165
+[37] gsm8k_cot:543                   δ_KL=0.00671  δ_OUT=0.00580  ΔNLL=+0.0033
+[38] gsm8k_cot:934                   δ_KL=0.00814  δ_OUT=0.00612  ΔNLL=+0.0079
+[39] gsm8k_cot:1226                  δ_KL=0.00785  δ_OUT=0.00593  ΔNLL=+0.0146
+
+==============================================================
+n = 40 (GSM8K, seed=99)
+  ρ(δ_KL,  ΔNLL) = -0.201
+  ρ(δ_OUT, ΔNLL) = -0.164
+  mean δ_KL  = 0.00754
+  mean δ_OUT = 0.00596
+  mean ΔNLL  = +0.0140
+  σ    ΔNLL  = 0.0076
+  σ    δ_KL  = 0.00059
+  σ    δ_OUT = 0.00009
+
+rows written -> results/motivation/diagnostic_attn_out.tsv
+[W426 05:20:25.570718313 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())

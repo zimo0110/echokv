@@ -1,0 +1,5 @@
+2026-04-26 05:30:41,821 INFO loading meta-llama/Llama-3.1-8B-Instruct on cuda:0 (torch.bfloat16)
+2026-04-26 05:30:46,573 INFO installed attention hooks on 32 layers
+2026-04-26 05:31:04,711 INFO   4 records in 18.1s
+2026-04-26 05:32:38,420 INFO done: 40 records in 111.8s -> results/motivation/delta_records_v7_eosfix.jsonl
+[W426 05:32:38.554849609 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())

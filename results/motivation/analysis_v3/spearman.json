@@ -1,0 +1,39 @@
+{
+  "per_workload": {
+    "gsm8k_cot": 0.07071926873006233
+  },
+  "pooled": 0.8609270979465057,
+  "n": 964,
+  "reports": [
+    {
+      "workload": "gsm8k_cot",
+      "n": 400,
+      "rho": 0.07071926873006233,
+      "accuracy_mean": 0.01,
+      "accuracy_stdev": 0.099498743710662,
+      "outcome": "undetermined"
+    },
+    {
+      "workload": "humaneval",
+      "n": 0,
+      "rho": null,
+      "accuracy_mean": null,
+      "accuracy_stdev": null,
+      "outcome": "insufficient"
+    },
+    {
+      "workload": "ruler_32k",
+      "n": 400,
+      "rho": null,
+      "accuracy_mean": 1.0,
+      "accuracy_stdev": 0.0,
+      "outcome": "undetermined"
+    }
+  ],
+  "gate": {
+    "decision": "no_signal",
+    "rationale": "no workload produced enough accuracy variance to evaluate \u03c1. Likely HumanEval sandboxing is missing or RULER/GSM8K scores are saturated \u2014 inspect per-workload variance before pivoting.",
+    "rho_threshold": 0.5,
+    "low_variance_stdev": 0.1
+  }
+}

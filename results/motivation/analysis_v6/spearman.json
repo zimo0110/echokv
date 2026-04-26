@@ -1,0 +1,36 @@
+{
+  "per_workload": {
+    "gsm8k_cot": -0.1926729965553403,
+    "humaneval": 0.07402772298777088
+  },
+  "pooled": -0.5295936336216757,
+  "n": 584,
+  "reports": [
+    {
+      "workload": "gsm8k_cot",
+      "n": 420,
+      "rho": -0.1926729965553403,
+      "accuracy_mean": 0.8023809523809524,
+      "accuracy_stdev": 0.39820316377094267,
+      "delta_nll_mean": 0.17653232325045837,
+      "delta_nll_stdev": 0.15558703531321386,
+      "outcome": "uninformative"
+    },
+    {
+      "workload": "humaneval",
+      "n": 164,
+      "rho": 0.07402772298777088,
+      "accuracy_mean": null,
+      "accuracy_stdev": null,
+      "delta_nll_mean": 0.013400775914239446,
+      "delta_nll_stdev": 0.07939209200937511,
+      "outcome": "undetermined"
+    }
+  ],
+  "gate": {
+    "decision": "fail",
+    "rationale": "\u03b4 failed to predict \u0394NLL on workload(s) with variance: gsm8k_cot (\u03c1=-0.19, \u0394NLL_\u03c3=0.156). Pivot: evaluate attention entropy / per-head kurtosis.",
+    "rho_threshold": 0.4,
+    "low_variance_stdev": 0.1
+  }
+}

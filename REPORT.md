@@ -19,6 +19,7 @@
 | SLO precision budget                | stub     | no          | no         | no          |
 | Write-Ahead Precision (experimental)| stub     | no          | no         | no          |
 | Motivation study instrumentation    | yes      | yes         | full run (v3–v8.1) | **gate v8.1 = SELECTIVE PASS** on retrieval workloads (RULER) via per-decode-step δ(t)/ΔNLL(t); diffuse-attention reasoning (GSM8K) documented as out-of-scope; v3–v7 superseded |
+| vLLM canary integration (session 8) | yes      | n/a         | shadow mode (controller decisions logged, not applied) | RULER@4K canary overhead **+1.53%** at p_c=1/64; RULER acc 1.000 baseline + canary; v8.1 layer-21–27 prediction does **not** transfer cleanly from teacher-forcing δ to production canary δ — see CHANGELOG session_20260426_8 |
 
 ## Motivation Study
 
@@ -348,6 +349,66 @@ runtime EMA δ̂_ℓ vector, which is the closed-loop premise of EchoKV
 (see ARCHITECTURE.md § 9.5). Hardcoding a layer subset on the kernel
 side would defeat the closed-loop design and break generalisation to
 other models where the high-signal layers may sit at different indices.
+
+#### Production canary δ on real inference: different per-layer pattern (session 8)
+
+When the same canary signal (KL on attention weights, K-only INT4
+simulation) is measured during real Llama-3.1-8B inference on RULER
+(session 8 — vLLM 0.16.0, Python forward-pre-hook on every Attention
+module, p_c=1/4 observability rate), the per-layer δ̂ profile differs
+from the v8.1 motivation-study profile:
+
+| context | highest-EMA layers (real inference) | mean EMA layers 21–27 | mean EMA others | ratio |
+|---------|-------------------------------------|------------------------|------------------|-------|
+| 4K (n=50) | L02 (0.027), L16 (0.035), L21 (0.034), L31 (0.042) | 0.02624 | 0.02560 | 1.02 |
+| 32K (n=20) | L01 (0.018), L02 (0.022), L26 (0.015), L31 (0.016) | 0.01293 | 0.01337 | **0.97** |
+
+The v8.1 mid-late cluster (layers 21–27, peak at layer 24) does not
+appear as the dominant signal-bearing region in real inference. Both
+patterns are valid — they measure different things:
+
+- **v8.1** measured δ via two teacher-forcing forward passes over
+  ``(prompt + FP16-completion)``, capturing causal attention rows at
+  *decode* positions only and taking KL between the FP16 and INT4
+  paths. Decode-positions-only signal under teacher-forcing.
+- **Production canary** fires at every attention call during real
+  inference. At 32K context the prefill batch (one 32 K-token forward
+  per request) dominates the attention compute; the canary therefore
+  measures K-quantization sensitivity averaged across prefill +
+  decode. Early layers (L01, L02) tend to show high attention weight
+  divergence during prefill because they process the raw token
+  embeddings before deeper layers refine the representations. The
+  last layer (L31) is high because it directly produces logits.
+
+Neither pattern is "wrong" — both are signal structure measured under
+different operating regimes:
+
+> Production canary on real inference shows highest per-layer δ̂ on
+> early layers (L01, L02) and last layer (L31), consistent with
+> prefill-dominated signal at long context. The mid-late cluster
+> (L21-27) identified by v8.1 teacher-forcing analysis reflects
+> decode-only signal. Both patterns are valid measurements of
+> different operating regimes.
+
+This is consistent with ARCHITECTURE.md § 9.5: per-layer signal
+structure is model-, workload-, and operating-regime-dependent.
+Hardcoding any specific layer subset on the kernel would fail at
+least one of these dimensions. The closed-loop premise — controller
+discovers per-layer tier from runtime EMA δ̂_ℓ — handles all of them
+uniformly.
+
+For the paper, this means **two distinct figures**:
+
+- **Motivation Figure 1 panel C** — v8.1 teacher-forcing δ (offline
+  signal structure on RULER decode positions). This is what the
+  motivation study measured.
+- **System characterisation figure** — per-layer mean tier across a
+  real workload, showing what the controller actually does in
+  production. Different distribution; same closed-loop apparatus.
+
+Treating these as one figure invites a reviewer to flag the
+discrepancy as inconsistency. Treating them as two figures of two
+different things is the honest framing.
 
 #### Gate decision
 

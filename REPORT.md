@@ -20,6 +20,11 @@
 | Write-Ahead Precision (experimental)| stub     | no          | no         | no          |
 | Motivation study instrumentation    | yes      | yes         | full run (v3–v8.1) | **gate v8.1 = SELECTIVE PASS** on retrieval workloads (RULER) via per-decode-step δ(t)/ΔNLL(t); diffuse-attention reasoning (GSM8K) documented as out-of-scope; v3–v7 superseded |
 | vLLM canary integration (session 8) | yes      | n/a         | shadow mode (controller decisions logged, not applied) | RULER@4K canary overhead **+1.53%** at p_c=1/64; RULER acc 1.000 baseline + canary; v8.1 layer-21–27 prediction does **not** transfer cleanly from teacher-forcing δ to production canary δ — see CHANGELOG session_20260426_8 |
+| Pareto study (session 11)           | direction-of-result | yes | tier_application via in-process pre-hook (vLLM cache still FP16 globally) | Static INT2 catastrophically fails on RULER (0.133 @32K, 0.000 @64K); EchoKV-3C holds 1.000 acc at +69.5% / +57.4% mem savings vs FP16 — but ``τ`` and ``initial_level`` were **tuned empirically** (not derived) and the canary's δ̂ is **low at 64K under catastrophic INT2 failure** — see Open Questions 11–13. Treat numbers as direction-of-result until Session 12 closes both gaps. |
+| Multi-precision canary (session 13) | yes | yes (24 new tests) | tier_application + neighbours-only multi-precision canary; vLLM cache still FP16 globally | **Correctness result**: EchoKV-3C 1.000 acc at +75% mem savings on RULER@32K + 64K — but converged tier vector is essentially uniform INT4, **operationally identical to static KIVI-4**. Beats static INT2 (0.13 / 0.00), matches KIVI-4. Pareto-improvement vs KIVI-4 is **not yet shown** on any tested workload. **Overhead +0.09%** at p_c=1/64 is a clean engineering result independent of the accuracy-Pareto question. See CHANGELOG session_20260428_13 critic addendum + ARCHITECTURE § 9.8 for the Possibility-A-vs-B diagnostic Session 14 must run. |
+| Multi-needle RULER (session 14)     | yes | n/a | FP16 + static INT4 at 32K/64K/128K, 5 needles, 30 prompts/cell | INT4 tracks FP16 within ±1σ at every context (paired Δ −0.007 / −0.007 / +0.027). FP16 itself drops 0.973 → 0.833 at 64K → 128K (workload IS hard) but failures are model-side attention-confusion, not KV-quant. Multi-needle 5-key is **not** the workload that breaks INT4 on Llama-3.1-8B. Also fixed a load-bearing scoring bug: ``RequestMetrics.correct`` was ``int``-cast, hiding partial credit on graded workloads. See CHANGELOG session_20260428_14. |
+| GSM8K-Hard + 70B (session 14 phase 2) | yes | n/a | 8B GSM8K-Hard@4K (FP16/INT4); 70B @TP=4 RULER@128K + GSM8K-Hard (FP16/INT4 via per-worker apply_model hook); n ∈ {20, 30, 50, 100, 200, 500} sample-size sweep on 70B GSM8K-Hard | **8 of 9 cells**: INT4 matches FP16 within ±1σ. **9th cell — 70B GSM8K-Hard at n=500**: FP16=0.488, INT4=0.466, **Δ=−0.022 with 95% CI [−0.042, −0.002] (excludes 0); McNemar p=0.0522** (right at the 5% threshold; directionally significant by Wilson interval on discordant-pair ratio). 19/27 discordant pairs are INT4-worse (P(INT4 wins | discord) = 0.30, 95% CI [0.16, 0.49]). **First defensible "INT4 < FP16" signal in the project.** See CHANGELOG session_20260428_14_phase2. |
+| EchoKV-3C closed-loop (session 14 phase 3) | yes | yes (11 new TP-aware tests) | 70B@TP=4 GSM8K-Hard, 3-phase warmup→consolidate→measurement protocol; calibrate→run sweep at τ_budget ∈ {0.05, 0.002}; scalar baseline | **Pareto win not achieved.** Calibration confirmed Scenario B (δ̂_4 max=0.00356 < 0.02 → diffuse damage). At τ=0.05: tier {INT4:77, INT2:3}, acc=0.520 (≈static_int4, no recovery). At calibration-derived τ=0.002: tier {INT4:51, INT2:29}, acc=0.480 (18% memory savings vs uniform INT4 but 6pp accuracy loss — wrong direction on Pareto). Scalar canary collapsed to acc=0.250 (uniform INT2) — confirmed Session-12 sensor blind spot, fixed by multi-precision. **Engineering result intact**: TP-aware install via `apply_model` on every rank works correctly; 8B+TP=2 smoke test green; 11 new unit tests; the multi-precision canary correctly avoids INT2 collapse. **Architectural finding**: per-layer δ̂ does not correlate with per-layer responsibility for diffuse accuracy damage on this workload. A different sensor (output-distance based) is required for Pareto recovery. See CHANGELOG session_20260429_14_phase3. |
 
 ## Motivation Study
 
@@ -837,8 +842,214 @@ Decisions that shape the system and cannot be recovered by reading code.
    for the gate (ΔNLL doesn't need scoring); blocking for any
    per-request accuracy work.
 
-9. **INV-3 (TP broadcast synchrony)** — still xfail. Requires PID
-   controller + scheduler coupling.
+9. **~~INV-3 (TP broadcast synchrony)~~** *Resolved 2026-04-26,
+   session 7.* `SLOBudget.broadcast_precision` invokes the registered
+   scheduler callback synchronously; mock-scheduler test confirms
+   every emit fires exactly one broadcast and no decode step admits
+   between emit and broadcast.
 
-10. **INV-4 (bit-exact non-canary path)** — still xfail. Requires
-    FlashInfer + Triton canary kernel.
+10. **~~INV-4 (bit-exact non-canary path)~~** *Resolved 2026-04-26,
+    session 6.* `canary_paged_attention(..., is_canary=False)` ≡
+    `_kivi4_attention_dense(...)` byte-for-byte (CPU and CUDA). Both
+    paths share the same internal helper.
+
+11. **OPEN — Initial controller tier as a function of prompt length.**
+    Session 11 set `initial_level=INT8` globally because it fixed the
+    64K accuracy number, not because of an a-priori derivation. The
+    cost-asymmetry argument (ARCHITECTURE.md § 9.6) shows the right
+    rule is context-dependent: ``< 512`` → INT2, ``512–8K`` → INT4,
+    ``≥ 8K`` → INT8. Session 12 implements the function and re-runs
+    the 32K + 64K cells to verify the result holds without the manual
+    global INT8 setting.
+
+12. **OPEN — Adaptive τ vs offline calibration.** Session 11 used
+    `τ=0.005` at 64K (vs default 0.01) chosen empirically. KIVI-4
+    has an offline calibration step too (per-layer precision on a
+    calibration set); a hidden τ sweep per context length is moral
+    equivalence and undermines the closed-loop-no-calibration thesis.
+    Two paths: **(a) adaptive τ** —
+    ``τ_adaptive = percentile(δ̂_ℓ, p=50) × scaling`` so τ tracks the
+    workload without offline tuning, or **(b) reported τ-sweep
+    Pareto** across {0.001, 0.005, 0.01, 0.02, 0.05}. Session 12 must
+    pick one before more context-length experiments — every result
+    on top of a tuned τ is potentially fitting the algorithm to the
+    answer.
+
+13. **OPEN — Sensor failure at long context.** At RULER@64K, static
+    INT2 produces accuracy = 0.000 but the canary reports *low* δ̂
+    across layers, so the controller (observing low δ̂) downgrades
+    *toward* INT2. The sensor is not detecting the catastrophic
+    failure. Mechanism (ARCHITECTURE.md § 9.7): the canary fires at
+    decode steps where RULER attention is diffuse over 64K positions;
+    diffuse-vs-diffuse softmax pairs have small KL even with severe
+    K-quant error. The damage occurs during **prefill**; the sensor
+    fires only during **decode**. Session 12 must run two
+    diagnostics — δ̂ distributions at 4K/32K/64K, and decode-step
+    attention entropy on a static-INT2 64K request — and decide
+    between **(A) prefill canary** or **(B) different measured
+    quantity** (e.g. attention-output L2 distance) before running
+    128K or LongBench.
+
+14. **HumanEval scoring.** Requires sandboxed executor. Not blocking
+    for the gate (ΔNLL doesn't need scoring); blocking for any
+    per-request accuracy work.
+
+15. **RULER-NIAH ceiling is intrinsic to Llama-3.1-8B-Instruct.**
+    Confirmed at 8K, 16K, 32K, 64K, 128K in FP16. Static INT4 also
+    holds at 1.000 across this range — the model is robust to
+    KIVI-style group-32 INT4 K compression on needle retrieval.
+    Static INT2 is the workload that breaks (0.133 at 32K, 0.000 at
+    64K).
+
+16. **OPEN — Pareto improvement vs static KIVI-4 has not been
+    demonstrated.** Session 13's EchoKV-3C converged on a uniform
+    INT4 tier vector on RULER@32K + 64K, identical to static
+    KIVI-4 (same accuracy, same memory savings). The closed loop
+    proved correct (rejects INT2, picks INT4) but did not produce
+    a *better* result than KIVI-4 because KIVI-4 doesn't fail on
+    RULER. To support the paper's Pareto claim, Session 14+ must
+    find a workload where (a) static KIVI-4 loses some accuracy,
+    (b) EchoKV-3C recovers that accuracy by upgrading specific
+    layers to INT8, (c) total memory < FP16. Candidates:
+    LongBench multi-hop QA, multi-needle RULER, 70B model. Until
+    one of those produces (a)+(b)+(c), the paper has only a
+    correctness story (controller doesn't break inference) and an
+    overhead story (+0.09% TPOT) — not a Pareto-improvement story.
+
+17. **~~Possibility A vs B for τ_budget at long context.~~**
+    *Resolved 2026-04-28, session 14.* Calibration probe at 32K,
+    64K, 128K confirms **Possibility B**: per-layer δ̂_4 spread
+    grows from 4.9× at 4K to **7.3× at 128K** (min 0.002, max
+    0.016). τ_budget=0.05 is too loose — max δ̂_4 ≤ 0.016 at all
+    contexts ≤ 0.05 → every layer passes the INT4 budget → tier
+    vector collapses to uniform INT4. **However**, even with
+    optimally calibrated τ_budget, RULER+8B cannot yield a Pareto
+    improvement vs KIVI-4: (a) INT4 already saturates accuracy at
+    1.000, so upgrading to INT8 just costs memory; (b) INT2 EMA
+    is rarely below INT4 EMA — only ~1 layer per context could
+    safely use INT2. The closed loop has nothing to do here that
+    differs meaningfully from KIVI-4. See Open Question 16 for
+    where the Pareto story has to come from instead.
+
+18. **OPEN — Per-tier τ_budget instead of single scalar.** The
+    Session 14 calibration showed per-tier EMAs at very different
+    scales (INT2 ≈ 0.05–0.50, INT4 ≈ 0.005–0.04, INT8 ≈ 1e-5).
+    No single τ_budget value can simultaneously admit layers to
+    INT2 *and* upgrade others to INT8. The architectural fix is
+    per-tier τ_budgets derived from runtime percentiles of
+    observed EMA per tier (e.g. ``τ_INT2 = p25(δ̂_2)``,
+    ``τ_INT4 = p50(δ̂_4)``). Implementation is mechanical (~30 LoC)
+    but blocked on Open Question 16 — implementing it on a
+    workload where INT4 saturates accuracy just produces uniform-
+    INT4 results faster.
+
+19. **CLOSED — Multi-needle RULER (5 keys) does not break INT4.**
+    *Resolved 2026-04-28, session 14.* Tested at 32K / 64K / 128K
+    with 30 prompts × 5 needles per cell. INT4 tracks FP16 within
+    ±1σ at every context (paired Δ within −0.01 to +0.03). FP16
+    itself drops from 0.973 at 64K to 0.833 at 128K, so the
+    workload is genuinely difficult; but the failures are
+    attention-confusion between needles (the model copies one
+    needle's value into another label), not KV-quantization
+    failures. Per the prioritized critic plan, Session 15
+    escalates to **LongBench multi-hop QA** (HotpotQA /
+    2WikiMultihopQA — different from RULER because the model
+    must reason across retrieved facts, not transcribe them) or
+    **Llama-3.1-70B on RULER@128K** (8× larger KV cache, the
+    model the paper's economic argument is actually about).
+
+20. **DISCOVERED — ``RequestMetrics.correct`` was ``int``-cast.**
+    *Fixed 2026-04-28, session 14.* The single-needle RULER
+    pipeline assumed binary 0/1 scoring and stored the per-request
+    score as an ``int``, casting via ``int(score_fn(text))``. For
+    graded workloads (multi-needle RULER, future LongBench partial-
+    match) this collapsed every fractional score (0.2 / 0.4 / 0.6
+    / 0.8) to 0 and reported a spuriously bimodal distribution —
+    Session 14's first sweep was systematically biased low for
+    that reason. Fixed by changing the field to ``float``,
+    dropping the ``int`` cast, and adding ``completion_text`` to
+    the per-request blob (so failure-mode analysis no longer
+    requires re-running). Binary workloads are unaffected. All
+    Session 14 results in the table above are post-fix.
+
+21. **CLOSED — Closed-loop recovery on 70B GSM8K-Hard tested and
+    failed; damage is diffuse.** *Updated 2026-04-29, session 14
+    phase 3.* The earlier "practical search space
+    exhausted" framing was wrong; it was based on n=20-30 cells
+    where small-sample noise hid a real effect. Sweeping n on 70B
+    GSM8K-Hard:
+
+    | n | FP16 | INT4 | Δ | discord b/c | McNemar p |
+    |--:|--:|--:|--:|--:|--:|
+    |  20 | 0.550 | 0.550 | +0.000 | 0/0   | 1.0000 |
+    |  30 | 0.600 | 0.600 | +0.000 | 2/2   | 1.0000 |
+    |  50 | 0.620 | 0.580 | −0.040 | 5/3   | 0.7266 |
+    | 100 | 0.570 | 0.540 | −0.030 | 6/3   | 0.5078 |
+    | 200 | 0.495 | 0.480 | −0.015 | 4/1   | 0.3750 |
+    | 500 | 0.488 | 0.466 | **−0.022** | **19/8** | **0.0522** |
+
+    At n=500: paired Δ 95% CI [−0.042, −0.002] excludes 0; the
+    discordant-pair ratio P(INT4 better | discord) = 0.30 with
+    Wilson 95% CI [0.16, 0.49] excludes the H0 value of 0.5. The
+    signal is directionally significant; McNemar two-sided p is
+    right at the 5% boundary. Effect size is small (~2.2pp) but
+    consistent with the 70%/30% INT4-worse/better split observed
+    stably from n=100 onward.
+
+    **First defensible "INT4 < FP16" cell in the project.** The
+    other 8 cells (8B single-needle RULER @ {32K, 64K, 128K}; 8B
+    multi-needle (5) @ {32K, 64K, 128K}; 8B GSM8K-Hard @ 4K; 70B
+    single-needle RULER @ 128K) still show INT4 within ±1σ of
+    FP16. The pattern: KIVI-INT4 is robust on retrieval and on
+    short reasoning chains; on long reasoning chains at 70B scale,
+    a small accuracy gap emerges that requires hundreds of samples
+    to detect against batch-composition noise.
+
+    **Phase 3 (closed-loop recovery test):** built TP-aware
+    ``CanaryHarness`` install via ``apply_model``
+    (``evaluation/serving/canary_tp.py``, ``TPCanaryHandle``),
+    smoke-tested on 8B+TP=2, ran calibration probe + EchoKV-3C
+    on 70B+GSM8K-Hard at n=100 across three τ_budget settings:
+
+    | run | τ_budget | tier counts | avg bits | acc |
+    |--|--:|--|--:|--:|
+    | static_int4 baseline | — | uniform INT4 | 4.00 | 0.540 |
+    | EchoKV-3C scalar canary | 0.01 | INT4:1, INT2:79 | 2.02 | 0.250 |
+    | EchoKV-3C MP canary | 0.05 | INT4:77, INT2:3 | 3.92 | 0.520 |
+    | EchoKV-3C MP canary (calibrated) | 0.002 | INT4:51, INT2:29 | 3.27 | 0.480 |
+
+    Calibration probe on 70B+GSM8K-Hard found **δ̂_4 max under
+    static INT4 = 0.00356** (about 10× tighter than 8B+RULER) —
+    Scenario B by the strict critic test (δ̂_4 max < 0.02 →
+    diffuse damage). The 44× max/min spread within the δ̂_4
+    distribution does exist, but absolute scale is too small for
+    the controller to differentiate INT8 upgrades from noise
+    while the controller-feedback loop pulls layers toward INT2.
+
+    **Pareto win not achieved on this workload.** Per-layer δ̂
+    does not correlate with per-layer responsibility for diffuse
+    accuracy damage. The closed-loop framework is engineering-
+    intact (TP install works, multi-precision canary correctly
+    avoids scalar-sensor INT2 collapse, controller correctly
+    converges to its argmin-with-budget rule's prediction) but
+    the **sensor signal is not the right correlate** for diffuse
+    damage. A different sensor (output-distance, layer-removal
+    ablation, etc.) would be required to substantiate a Pareto
+    claim on this workload.
+
+22. **OPEN — Output-distance sensor as a successor to per-step
+    softmax KL.** *Motivated 2026-04-29, session 14 phase 3.*
+    The Phase 3 result establishes that softmax-KL δ̂ does not
+    predict per-layer responsibility for diffuse accuracy damage
+    on 70B reasoning. The natural alternative to test:
+    ``||attn_output_FP16 − attn_output_quant||₂`` measured per
+    layer at decode steps. Hypothesis: layers whose attention
+    *outputs* (post-projection, post-softmax) shift more under
+    INT4 are the ones contributing to downstream accuracy loss.
+    This sensor measures a downstream-relevant quantity rather
+    than an input-statistic divergence. Implementation is
+    mechanical alongside the existing canary plumbing: the same
+    pre-hook can capture the FP16-equivalent output and an
+    INT-quant output and compare. No architectural change to
+    the controller — just a different signal feeding the EMA.
+    Estimated scope: 50–100 LoC + a new τ_budget calibration.

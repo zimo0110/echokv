@@ -56,6 +56,7 @@ INV-3  Broadcast happens via :class:`SLOBudget.broadcast_precision`;
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import List, Optional, Sequence
@@ -262,3 +263,91 @@ class PIDPrecisionController:
     def _step_down(p: Precision) -> Precision:
         i = _INDEX[p]
         return _LADDER[max(i - 1, 0)]
+
+    # ------------------------------------------------------------------
+    # Multi-precision decision rule (ARCHITECTURE.md § 9.8)
+    # ------------------------------------------------------------------
+
+    def tick_multi_precision(
+        self,
+        per_tier_ema: list,
+        tau_budget: float,
+    ) -> List[PrecisionDecision]:
+        """Multi-precision controller tick using the argmin-with-budget rule.
+
+        Decision rule: for each layer, choose the lowest-bit tier among
+        ``{current ± 1 step}`` whose per-tier EMA is below ``tau_budget``.
+        If no candidate tier satisfies the budget (or no per-tier EMA is
+        available yet), the layer holds. Hysteresis is implicit in the
+        neighbour set; ``min_dwell_ticks`` still applies to consecutive
+        transitions.
+
+        Parameters
+        ----------
+        per_tier_ema:
+            Per-layer mapping ``{tier: ema_value}``. Length must equal
+            ``num_layers``. Missing entries (no observations yet) treated
+            as ``+inf`` (not actionable).
+        tau_budget:
+            Divergence budget in absolute KL units. A tier with
+            ``EMA(δ̂_b) < τ_budget`` is considered safe at that
+            precision.
+        """
+        if len(per_tier_ema) != self.num_layers:
+            raise ValueError(
+                f"per_tier_ema has {len(per_tier_ema)} entries, "
+                f"expected {self.num_layers}"
+            )
+        if tau_budget <= 0:
+            raise ValueError("tau_budget must be > 0")
+
+        self._tick += 1
+        decisions: List[PrecisionDecision] = []
+        for layer_id in range(self.num_layers):
+            current = self._levels[layer_id]
+            since_last = self._tick - self._last_change_tick[layer_id]
+            ema_map = per_tier_ema[layer_id] or {}
+
+            # Build candidate set: current + reachable neighbours.
+            i = _INDEX[current]
+            candidates = [current]
+            if i > 0:
+                candidates.append(_LADDER[i - 1])
+            if i < len(_LADDER) - 1:
+                candidates.append(_LADDER[i + 1])
+            candidates.sort(key=int)  # ascending bit-width
+
+            target = current
+            direction = ControllerDirection.HOLD
+            if since_last >= self.min_dwell_ticks:
+                # Pick the lowest-bit tier whose EMA is within budget.
+                # A missing / zero EMA is "no signal yet" — skip.
+                chosen: Optional[Precision] = None
+                for tier in candidates:
+                    ema_val = ema_map.get(tier)
+                    if ema_val is None or not math.isfinite(ema_val) or ema_val <= 0.0:
+                        continue
+                    if ema_val < tau_budget:
+                        chosen = tier
+                        break
+                if chosen is not None and chosen is not current:
+                    target = chosen
+                    if int(chosen) > int(current):
+                        direction = ControllerDirection.UPGRADE
+                    else:
+                        direction = ControllerDirection.DOWNGRADE
+
+            if direction != ControllerDirection.HOLD:
+                self._levels[layer_id] = target
+                self._last_change_tick[layer_id] = self._tick
+
+            decisions.append(
+                PrecisionDecision(
+                    layer_id=layer_id,
+                    previous=current,
+                    target=target,
+                    direction=direction,
+                    tick=self._tick,
+                )
+            )
+        return decisions

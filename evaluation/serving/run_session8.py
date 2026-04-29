@@ -94,11 +94,18 @@ class RequestMetrics:
     request_id: str
     prompt_tokens: int
     completion_tokens: int
-    correct: int            # 0 / 1 — RULER's score function
+    # Per-request score from the workload's score_fn. For binary
+    # workloads (single-needle RULER, GSM8K) this is 0.0 / 1.0; for
+    # graded workloads (multi-needle RULER) it can be any value in
+    # [0, 1]. The previous ``int()`` cast collapsed 0.2/0.4/0.6/0.8 to
+    # 0 and only preserved exact-1.0; that hid partial credit and
+    # produced a spurious bimodal distribution.
+    correct: float
     arrival_t: float
     first_scheduled_t: Optional[float]
     first_token_t: Optional[float]
     finished_t: Optional[float]
+    completion_text: Optional[str] = None
 
     @property
     def ttft_s(self) -> Optional[float]:
@@ -130,7 +137,7 @@ def _extract_metrics(req: Request, output: Any) -> RequestMetrics:
     """
     completion_text = output.outputs[0].text
     completion_tokens = len(output.outputs[0].token_ids)
-    correct = int(req.score_fn(completion_text)) if req.score_fn else 0
+    correct = float(req.score_fn(completion_text)) if req.score_fn else 0.0
     return RequestMetrics(
         request_id=req.request_id,
         prompt_tokens=len(output.prompt_token_ids),
@@ -140,6 +147,7 @@ def _extract_metrics(req: Request, output: Any) -> RequestMetrics:
         first_scheduled_t=None,
         first_token_t=None,
         finished_t=None,
+        completion_text=completion_text,
     )
 
 
@@ -522,16 +530,25 @@ def main(argv: Optional[list[str]] = None) -> int:
     if echokv_3c is not None:
         print()
         print(f"--- EchoKV-3C (tier_application=True, p_c={args.observability_rate} for signal) ---")
-        print(f"  wall={echokv_3c.wall_clock_s:.1f}s  acc={echokv_3c.accuracy:.3f}  "
-              f"thru={echokv_3c.output_throughput_tps:.1f} tok/s  Δacc={echokv_3c.accuracy - baseline.accuracy:+.3f}")
+        print(f"  wall={echokv_3c.wall_clock_s:.1f}s (simulation — quantisation cost in Python)  "
+              f"acc={echokv_3c.accuracy:.3f}  Δacc={echokv_3c.accuracy - baseline.accuracy:+.3f}")
         rpt3c = echokv_3c.canary_report
         if rpt3c:
             tab = rpt3c["tier_apply_count_by_bits"]
             print(f"  tier applications: {rpt3c['tier_applications']} total  "
                   f"INT2={tab.get(2, 0)}  INT4={tab.get(4, 0)}  INT8={tab.get(8, 0)}")
             print(f"  final tier vector: {rpt3c['final_levels_per_layer']}")
-            print(f"  tier_application overhead: {rpt3c['tier_application_overhead_s']:.3f}s "
+            print(f"  tier_application overhead (simulation cost): {rpt3c['tier_application_overhead_s']:.3f}s "
                   f"({100.0*rpt3c['tier_application_overhead_s']/echokv_3c.wall_clock_s:.2f}% of run wall)")
+            mp = rpt3c.get("memory_projection")
+            if mp:
+                tc = (mp["tier_count_int2"], mp["tier_count_int4"], mp["tier_count_int8"])
+                print(f"  KV cache memory projection (real-fork-equivalent):")
+                print(f"    avg bits/element: {mp['avg_bits']:.2f}  "
+                      f"(INT2/INT4/INT8 = {tc[0]}/{tc[1]}/{tc[2]})")
+                print(f"    savings vs FP16:   {mp['savings_vs_baseline_pct']:+.1f}%")
+                print(f"    vs static KIVI-4:  {mp['savings_vs_kivi4_pct']:+.1f}% "
+                      f"(negative = EchoKV uses MORE memory than KIVI-4)")
 
     print()
     print(f"--- v8.1 falsifiable check (observability run, p_c={args.observability_rate}) ---")

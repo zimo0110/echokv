@@ -143,6 +143,121 @@ def _ruler_stream(n: int, seed: int) -> Iterator[Request]:
 
 
 # ---------------------------------------------------------------------------
+# Multi-needle RULER (Session 14) — multi-query variant
+# ---------------------------------------------------------------------------
+#
+# Single-needle RULER lets attention concentrate on one position. The
+# critic's Session-14 Step-1 hypothesis is that requiring the model to
+# attend to *several* positions during decode is what stresses INT4
+# enough to break it. We adapt the single-needle generator to insert
+# ``n_needles`` (default 5) labeled key/value needles spread across the
+# body, then ask for all of them at once.
+#
+# Score: fraction of the n_needles correctly recovered from the model's
+# completion. Headline accuracy aggregates the per-request fractions.
+
+_MULTINEEDLE_LABELS: tuple[str, ...] = (
+    "alpha", "bravo", "charlie", "delta", "echo",
+    "foxtrot", "golf", "hotel", "india", "juliet",
+)
+
+
+def _ruler_multineedle_sample(
+    idx: int,
+    seed: int,
+    target_tokens: int = 8_000,
+    n_needles: int = 5,
+) -> Request:
+    """One synthetic *multi-needle* haystack request.
+
+    ``n_needles`` distinct labeled magic numbers are inserted at evenly
+    spread positions; the model must retrieve all of them. Score is the
+    fraction recovered correctly (0/n_needles … n_needles/n_needles).
+    """
+    if n_needles < 1 or n_needles > len(_MULTINEEDLE_LABELS):
+        raise ValueError(
+            f"n_needles must be in [1, {len(_MULTINEEDLE_LABELS)}], got {n_needles}"
+        )
+    rng = random.Random(hash((seed, idx, n_needles)) & 0xFFFFFFFF)
+    labels = list(_MULTINEEDLE_LABELS[:n_needles])
+    # Independent 6-digit magic numbers per label (collision-free with the
+    # 4+ digit-extracting regex we use for scoring).
+    magic_numbers: dict[str, int] = {
+        lab: rng.randrange(100_000, 1_000_000) for lab in labels
+    }
+
+    filler_rep = max(1, target_tokens * 4 // len(_RULER_FILLER))
+    body = _RULER_FILLER * filler_rep
+    # Spread n_needles insertion points evenly across the body, avoiding
+    # the outer 10% margins so no needle lands at the prompt boundary.
+    body_lo = len(body) // 10
+    body_hi = 9 * len(body) // 10
+    seg_w = (body_hi - body_lo) // n_needles
+    insert_points: list[int] = []
+    for s in range(n_needles):
+        seg_start = body_lo + s * seg_w
+        seg_end = seg_start + seg_w
+        insert_points.append(rng.randrange(seg_start, seg_end))
+    # Build the body by walking through insertion points in order so
+    # later inserts don't shift earlier ones.
+    parts: list[str] = []
+    cursor = 0
+    # Pair labels with insertion points, randomize which label lands at
+    # which slot so the model can't infer the order from filler context.
+    rng.shuffle(labels)  # in-place shuffle of the label-to-position assignment
+    for ip, lab in zip(insert_points, labels):
+        parts.append(body[cursor:ip])
+        parts.append(
+            f" REMEMBER: the magic number for {lab} is "
+            f"{magic_numbers[lab]}. Write it down somewhere safe. "
+        )
+        cursor = ip
+    parts.append(body[cursor:])
+    body_with_needles = "".join(parts)
+
+    # Question: ask for all needles in a single, machine-parseable format.
+    label_list = ", ".join(_MULTINEEDLE_LABELS[:n_needles])
+    question = (
+        "\n\nQ: Recall the magic numbers stored above. Output one line "
+        f"per label in the format 'label=number' for these labels in "
+        f"this exact order: {label_list}.\nA:"
+    )
+    prompt = body_with_needles + question
+
+    # Reference: deterministic ordering by canonical label sequence (not
+    # the shuffled assignment order), so scoring is independent of the
+    # model's output ordering.
+    canonical_labels = list(_MULTINEEDLE_LABELS[:n_needles])
+    reference = " ".join(
+        f"{lab}={magic_numbers[lab]}" for lab in canonical_labels
+    )
+    expected: dict[str, str] = {
+        lab: str(magic_numbers[lab]) for lab in canonical_labels
+    }
+
+    def score(completion: str) -> float:
+        # Per-label match: regex finds the label followed by '=' and a
+        # 4+-digit number anywhere in the completion. We accept any
+        # whitespace / punctuation between '=' and the digits.
+        hits = 0
+        for lab, want in expected.items():
+            m = re.search(
+                rf"\b{re.escape(lab)}\s*=\s*(\d{{4,}})", completion, re.IGNORECASE
+            )
+            if m and m.group(1) == want:
+                hits += 1
+        return hits / float(n_needles)
+
+    return Request(
+        workload=f"ruler_multineedle_{n_needles}",
+        request_id=f"ruler_multineedle_{n_needles}:{idx}",
+        prompt=prompt,
+        reference=reference,
+        score_fn=score,
+    )
+
+
+# ---------------------------------------------------------------------------
 # GSM8K-CoT (HuggingFace ``gsm8k``)
 # ---------------------------------------------------------------------------
 
@@ -170,6 +285,111 @@ def _extract_gsm8k_answer(text: str) -> Optional[str]:
     # Fallback: last number in the string.
     nums = re.findall(r"-?\d[\d,]*\.?\d*", text)
     return nums[-1].replace(",", "") if nums else None
+
+
+# ---------------------------------------------------------------------------
+# GSM8K-Hard (HuggingFace ``reasoning-machines/gsm-hard``)
+# ---------------------------------------------------------------------------
+#
+# Same word problems as GSM8K but with the small-integer constants replaced
+# with much larger numbers — making the arithmetic genuinely hard to do
+# mentally. The model has to track 7-9 digit intermediate values across a
+# 10-20 step chain of reasoning. Per the Session-14 critic plan, this is
+# the cheapest workload that plausibly stresses KV precision via accumulating
+# numerical error during multi-step reasoning, distinct from RULER's
+# pure-retrieval pattern.
+#
+# Dataset columns: ``input`` (question), ``code`` (reference solution as a
+# Python function — we ignore it), ``target`` (ground-truth answer as float).
+
+
+def _normalize_number(s: str) -> Optional[float]:
+    """Parse the last numeric-looking token from a string into a float.
+
+    Tolerates commas as thousands separators and optional minus signs.
+    Returns ``None`` if no number-like token is found.
+    """
+    if not s:
+        return None
+    matches = re.findall(r"-?\d[\d,]*(?:\.\d+)?", s)
+    if not matches:
+        return None
+    last = matches[-1].replace(",", "")
+    try:
+        return float(last)
+    except ValueError:
+        return None
+
+
+def _extract_gsm8k_hard_answer(text: str) -> Optional[float]:
+    """Extract the final answer from a CoT completion.
+
+    Preference order:
+      1. ``#### <number>`` terminator (the format we instruct).
+      2. ``answer is <number>`` / ``answer: <number>``.
+      3. Last numeric token in the completion (fallback).
+    """
+    m = re.search(r"####\s*(-?\d[\d,]*(?:\.\d+)?)", text)
+    if m:
+        return _normalize_number(m.group(1))
+    m = re.search(
+        r"(?:answer is|answer:\s*)(-?\d[\d,]*(?:\.\d+)?)",
+        text,
+        re.IGNORECASE,
+    )
+    if m:
+        return _normalize_number(m.group(1))
+    return _normalize_number(text)
+
+
+def _gsm8k_hard_stream(n: int, seed: int) -> Iterator[Request]:
+    from datasets import load_dataset  # local import: keep import-time cheap
+
+    ds = load_dataset("reasoning-machines/gsm-hard", split="train")
+    rng = random.Random(seed)
+    indices = list(range(len(ds)))
+    rng.shuffle(indices)
+    for di in indices[:n]:
+        row = ds[di]
+        question = row["input"]
+        # ``target`` is a float; for whole-number answers it stores e.g.
+        # 3431580.0. We score in float space with absolute tolerance.
+        target = float(row["target"])
+
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "Solve the math problem step by step. "
+                    "End your solution with '#### [answer]' where [answer] "
+                    "is the final numeric answer only (no units, no commas)."
+                ),
+            },
+            {"role": "user", "content": question},
+        ]
+        prompt = f"[GSM8K-Hard] {question}"
+
+        def make_score(gold: float) -> Callable[[str], float]:
+            def score(completion: str) -> float:
+                got = _extract_gsm8k_hard_answer(completion)
+                if got is None:
+                    return 0.0
+                # All gsm-hard targets are integer-valued floats (e.g.
+                # 3431580.0). For integer gold, require exact integer
+                # equality — off-by-one must NOT pass. ``< 0.5`` accepts
+                # only "rounds to the same integer".
+                return 1.0 if abs(got - gold) < 0.5 else 0.0
+
+            return score
+
+        yield Request(
+            workload="gsm8k_hard",
+            request_id=f"gsm8k_hard:{di}",
+            prompt=prompt,
+            reference=str(target),
+            score_fn=make_score(target),
+            messages=messages,
+        )
 
 
 def _gsm8k_stream(n: int, seed: int) -> Iterator[Request]:

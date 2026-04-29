@@ -1,0 +1,48 @@
+{
+  "expected_layers": 32,
+  "ranks": 2,
+  "rank0_tiers_after_run": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    4,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    8,
+    8,
+    2,
+    4,
+    2,
+    2,
+    2,
+    4,
+    2,
+    2,
+    4,
+    2,
+    2,
+    4,
+    2,
+    4,
+    8
+  ],
+  "tier_vectors_match_across_ranks": false,
+  "canary_fires_per_rank": [
+    725,
+    725
+  ],
+  "outputs_sample": [
+    " 916294\n\nQ: What is the phrase that is repeated multiple times in",
+    " 314278. \n\nNote: The text above is a repetition of the same",
+    " 881221\n\nQ: What is the phrase that is repeated throughout the text"
+  ]
+}

@@ -43,6 +43,7 @@ actually fire on the worker's attention forward calls.
 
 from __future__ import annotations
 
+import math
 import re
 import statistics
 import time
@@ -65,6 +66,209 @@ from evaluation.motivation.kivi import simulate_quantization
 
 
 _LAYER_IDX_RE = re.compile(r"layers\.(\d+)")
+
+
+def _percentile(samples: "list[float]", q: float) -> float:
+    """Linear-interpolation percentile, q ∈ [0, 1]. Tiny dep, no numpy."""
+    if not samples:
+        raise ValueError("empty samples")
+    s = sorted(samples)
+    if len(s) == 1:
+        return s[0]
+    rank = q * (len(s) - 1)
+    lo = int(rank)
+    hi = min(lo + 1, len(s) - 1)
+    frac = rank - lo
+    return s[lo] * (1.0 - frac) + s[hi] * frac
+
+
+# ---------------------------------------------------------------------------
+# Principled initial-tier rule (cost-asymmetry derivation, ARCHITECTURE.md § 9.6)
+# ---------------------------------------------------------------------------
+#
+# At request start the controller has zero information; warmup-window blocks
+# (first N_c=100 decode steps) are permanent (INV-2). Costs are asymmetric:
+#
+#     Cost_low   = E[acc loss | hard request] × P(hard) × N_warmup
+#                = constant — independent of T_total
+#     Cost_high  = extra_memory × T_warmup / T_total
+#                → 0 as T_total → ∞
+#
+# Long context: starting high amortises away. Short context: costs symmetric
+# and INT4 is the minimum-regret prior. Three regimes:
+#
+#     prompt < 512:    INT2  (warmup dominates the request, exploration safe)
+#     512 ≤ prompt < 8K:   INT4  (symmetric costs, neutral prior)
+#     prompt ≥ 8K:    INT8  (warmup amortises, protect accuracy)
+
+
+_INITIAL_TIER_LOW_THRESHOLD: int = 512
+_INITIAL_TIER_HIGH_THRESHOLD: int = 8192
+
+
+# ---------------------------------------------------------------------------
+# Multi-precision canary support (ARCHITECTURE.md § 9.8 — neighbors-only)
+# ---------------------------------------------------------------------------
+
+
+# Architectural tier ladder, ordered from most aggressive to least.
+ALL_TIERS: list[Precision] = [Precision.INT2, Precision.INT4, Precision.INT8]
+_TIER_INDEX: dict = {t: i for i, t in enumerate(ALL_TIERS)}
+
+
+def neighbours_to_measure(current: Precision) -> list[Precision]:
+    """Return the tiers the canary should fire on given the current tier.
+
+    The controller's decision space at any tick is stay /
+    upgrade-one-step / downgrade-one-step (hysteresis + min_dwell_ticks
+    forbid two-step transitions). Measurements at non-adjacent tiers
+    provide unactionable information; the staleness self-heals through
+    the mandatory intermediate state during transitions. See
+    ARCHITECTURE.md § 9.8.
+
+    Returns
+    -------
+    list[Precision]
+        ``[INT2, INT4]`` if current is ``INT2``,
+        ``[INT2, INT4, INT8]`` if current is ``INT4`` (the all-three case),
+        ``[INT4, INT8]`` if current is ``INT8``.
+    """
+    idx = _TIER_INDEX[current]
+    out = [current]
+    if idx > 0:
+        out.append(ALL_TIERS[idx - 1])
+    if idx < len(ALL_TIERS) - 1:
+        out.append(ALL_TIERS[idx + 1])
+    out.sort(key=int)  # ascending bit-width for deterministic order
+    return out
+
+
+class MultiPrecisionEstimator:
+    """Per-(layer, tier) EMA tracker — wraps one CanaryEstimator per tier.
+
+    Memory: ``len(ALL_TIERS) × num_layers`` scalars total — i.e. 3 × 32 = 96
+    floats for Llama-3.1-8B. INV-1 unaffected (no per-block state).
+
+    Pre-existing scalar code paths can keep using ``CanaryEstimator``
+    directly; this class is opt-in via ``CanaryHarness(multi_precision=True)``.
+    """
+
+    def __init__(
+        self,
+        num_layers: int,
+        tiers: list[Precision] = ALL_TIERS,
+        ema_alpha: float = 0.1,
+        canary_rate: float = 1.0 / 64.0,
+        scratchpad_depth: int = 4096,
+    ) -> None:
+        self.num_layers = num_layers
+        self.tiers = list(tiers)
+        self._estimators: dict = {
+            t: CanaryEstimator(
+                num_layers=num_layers,
+                ema_alpha=ema_alpha,
+                canary_rate=canary_rate,
+                scratchpad_depth=scratchpad_depth,
+            )
+            for t in self.tiers
+        }
+        # Counters used for the run report.
+        self.observations_per_tier: dict = {t: 0 for t in self.tiers}
+        self.monotonicity_violations: int = 0
+
+    # -------- read API --------
+
+    def ema(self, layer_id: int, tier: Precision) -> float:
+        return self._estimators[tier].ema(layer_id)
+
+    def per_tier_ema(self, layer_id: int) -> dict:
+        """``{tier: ema_value}`` for one layer. Missing tiers (no
+        observations yet) report 0.0 — the controller treats 0.0 as
+        "no signal yet, use construction-time fallback."""
+        return {t: e.ema(layer_id) for t, e in self._estimators.items()}
+
+    def snapshot_per_tier(self) -> dict:
+        """``{tier: list_of_per_layer_emas}`` — full per-tier EMA matrix."""
+        return {t: e.snapshot() for t, e in self._estimators.items()}
+
+    def num_samples(self, layer_id: int, tier: Precision) -> int:
+        return self._estimators[tier].num_samples(layer_id)
+
+    # -------- write API --------
+
+    def observe(
+        self,
+        layer_id: int,
+        step: int,
+        kl: float,
+        tier: Precision,
+        *,
+        is_canary: bool,
+    ) -> None:
+        """Record one canary observation for a specific tier."""
+        if not is_canary:
+            return
+        self._estimators[tier].observe(
+            layer_id=layer_id, step=step, kl=kl, is_canary=True,
+        )
+        self.observations_per_tier[tier] = self.observations_per_tier.get(tier, 0) + 1
+
+    def check_monotonicity(
+        self, layer_id: int, observations: dict, tol: float = 1e-6,
+    ) -> bool:
+        """Verify δ̂_2 ≥ δ̂_4 ≥ δ̂_8 for the freshly-observed values.
+
+        Returns True if monotonicity holds (within ``tol``); False otherwise.
+        Counts violations into ``self.monotonicity_violations`` for the
+        run report. Tolerates float-noise; large violations indicate a
+        real bug per ARCHITECTURE.md § 9.8.
+        """
+        i2 = observations.get(Precision.INT2)
+        i4 = observations.get(Precision.INT4)
+        i8 = observations.get(Precision.INT8)
+        violations: list = []
+        if i2 is not None and i4 is not None and i2 + tol < i4:
+            violations.append(("INT2 < INT4", i2, i4))
+        if i4 is not None and i8 is not None and i4 + tol < i8:
+            violations.append(("INT4 < INT8", i4, i8))
+        if i2 is not None and i8 is not None and i2 + tol < i8:
+            violations.append(("INT2 < INT8", i2, i8))
+        if violations:
+            self.monotonicity_violations += 1
+            return False
+        return True
+
+    def reset(self) -> None:
+        for e in self._estimators.values():
+            e.reset()
+        self.observations_per_tier = {t: 0 for t in self.tiers}
+        self.monotonicity_violations = 0
+
+
+def initial_tier_for_context(prompt_length: int) -> "Precision":
+    """Cost-asymmetry-derived initial controller tier as a function of
+    prompt length. See ARCHITECTURE.md § 9.6 for the full derivation.
+
+    Parameters
+    ----------
+    prompt_length:
+        Number of input tokens for the request. For batched inference
+        with a mix of prompt lengths, callers can use either the
+        max prompt length in the batch (conservative) or a per-request
+        installation if they install one harness per request.
+
+    Returns
+    -------
+    Precision
+        ``INT2`` for ``prompt_length < 512``,
+        ``INT4`` for ``512 ≤ prompt_length < 8192``,
+        ``INT8`` for ``prompt_length ≥ 8192``.
+    """
+    if prompt_length >= _INITIAL_TIER_HIGH_THRESHOLD:
+        return Precision.INT8
+    if prompt_length >= _INITIAL_TIER_LOW_THRESHOLD:
+        return Precision.INT4
+    return Precision.INT2
 
 
 @dataclass
@@ -114,9 +318,12 @@ class CanaryHarness:
 
     def __init__(
         self,
-        llm: Any,
+        llm: Any = None,
+        *,
+        model: Any = None,
         canary_rate: float = DEFAULT_CANARY_RATE,
         tau: float = DEFAULT_SETPOINT,
+        initial_level: Optional[Precision] = None,
         tick_interval: int = DEFAULT_TICK_INTERVAL,
         hysteresis_band: float = DEFAULT_HYSTERESIS_BAND,
         min_dwell_ticks: int = 2,
@@ -127,6 +334,15 @@ class CanaryHarness:
         use_canary_stream: bool = True,
         tier_application: bool = False,
         tier_application_quant_v: bool = True,
+        force_bits: Optional[int] = None,
+        freeze_controller: bool = False,
+        adaptive_tau: bool = False,
+        adaptive_tau_percentile: float = 50.0,
+        adaptive_tau_scale: float = 1.0,
+        adaptive_tau_min_samples: int = 8,
+        multi_precision: bool = False,
+        tau_budget: float = 0.02,
+        monotonicity_check: bool = True,
         seed: int = 0,
     ) -> None:
         self.llm = llm
@@ -161,19 +377,80 @@ class CanaryHarness:
         # match the FP16 baseline.
         self.tier_application = bool(tier_application)
         self.tier_application_quant_v = bool(tier_application_quant_v)
+        # force_bits: if set, every tier-application call uses this fixed
+        # precision (INT2/INT4/INT8) regardless of what the controller
+        # decided. Used to simulate static KIVI baselines (every layer
+        # at INT4) for the Pareto comparison: without a workload where
+        # static INT4 actually fails, EchoKV-3C has no Pareto win to
+        # claim. Session 11+ context sweeps use this to find the
+        # workload that breaks KIVI-4 on Llama-3.1-8B.
+        self.force_bits: Optional[int] = force_bits
+        if self.force_bits is not None and self.force_bits not in {2, 4, 8}:
+            raise ValueError(f"force_bits must be one of 2/4/8, got {self.force_bits}")
+        # freeze_controller: when True, the controller's tier vector is
+        # whatever it was at install time and never changes during the run.
+        # Used for the measurement phase of EchoKV-3C: the warmup phase
+        # ticks the controller (observe → converge); the measurement phase
+        # freezes the converged tier vector and applies it consistently
+        # across every prompt in the batch (matches production behaviour
+        # where the controller's update cadence is tens of decode steps,
+        # not per-prompt). Without freezing, mid-run tier changes meant
+        # different prompts in the same batch saw different precision —
+        # the 32K smoke run gave acc=0.700 from this exact failure mode.
+        self.freeze_controller = bool(freeze_controller)
+        # adaptive_tau: if True, just before each controller tick the
+        # controller's setpoint is recomputed from the observed δ̂_ℓ
+        # distribution — `τ = percentile(δ̂_ℓ across layers, p) × scale`.
+        # τ then tracks the workload's natural δ̂ scale automatically; no
+        # per-context manual tuning. See ARCHITECTURE.md § 9.6 (Open
+        # Question 12 in REPORT.md). Requires at least
+        # ``adaptive_tau_min_samples`` finite δ̂_ℓ values to update — until
+        # then the controller uses its construction-time τ.
+        self.adaptive_tau = bool(adaptive_tau)
+        if not (0.0 < adaptive_tau_percentile <= 100.0):
+            raise ValueError(f"adaptive_tau_percentile must be in (0, 100]")
+        if adaptive_tau_scale <= 0:
+            raise ValueError("adaptive_tau_scale must be > 0")
+        self.adaptive_tau_percentile = float(adaptive_tau_percentile)
+        self.adaptive_tau_scale = float(adaptive_tau_scale)
+        self.adaptive_tau_min_samples = int(adaptive_tau_min_samples)
+        # τ-history for telemetry / post-run reports.
+        self._tau_history: list[float] = []
+        # Multi-precision canary state (ARCHITECTURE.md § 9.8).
+        self.multi_precision = bool(multi_precision)
+        if tau_budget <= 0:
+            raise ValueError("tau_budget must be > 0")
+        self.tau_budget = float(tau_budget)
+        self.monotonicity_check = bool(monotonicity_check)
+        # Per-(layer, tier) EMA, only populated when multi_precision is on.
+        self._mp_estimator: Optional[MultiPrecisionEstimator] = None
 
-        # Resolve the path to the model nn.Module (in-proc only).
-        # See LOGS/session_20260426_8.md for the discovery walkthrough.
-        try:
-            self.model = (
-                llm.llm_engine.model_executor.driver_worker.worker.model_runner.model
+        # Resolve the model nn.Module. Two construction paths:
+        # - ``llm=<vllm.LLM>`` (TP=1, in-proc): unpack the rank-0 model
+        #   from the engine. This is the canonical single-GPU path.
+        #   See LOGS/session_20260426_8.md for the discovery walkthrough.
+        # - ``model=<nn.Module>`` (TP>1, worker-side): the harness is
+        #   being constructed inside a vLLM worker via ``apply_model``;
+        #   the worker hands us its local model directly. See
+        #   ``evaluation/serving/canary_tp.py``.
+        if model is not None:
+            self.model = model
+        elif llm is not None:
+            try:
+                self.model = (
+                    llm.llm_engine.model_executor.driver_worker.worker.model_runner.model
+                )
+            except AttributeError as e:
+                raise RuntimeError(
+                    "Cannot reach the model from the LLM instance. Ensure "
+                    "VLLM_ENABLE_V1_MULTIPROCESSING=0 is set so the engine "
+                    "runs in-process, or pass ``model=`` directly when "
+                    "constructing the harness inside a worker."
+                ) from e
+        else:
+            raise ValueError(
+                "CanaryHarness requires either ``llm`` or ``model``"
             )
-        except AttributeError as e:
-            raise RuntimeError(
-                "Cannot reach the model from the LLM instance. Ensure "
-                "VLLM_ENABLE_V1_MULTIPROCESSING=0 is set so the engine "
-                "runs in-process."
-            ) from e
 
         self._attention_modules = self._collect_attention_modules()
         self.num_layers = len(self._attention_modules)
@@ -184,13 +461,21 @@ class CanaryHarness:
             num_layers=self.num_layers,
             canary_rate=canary_rate,
         )
-        self.controller = PIDPrecisionController(
+        if self.multi_precision:
+            self._mp_estimator = MultiPrecisionEstimator(
+                num_layers=self.num_layers,
+                canary_rate=canary_rate,
+            )
+        ctrl_kwargs = dict(
             num_layers=self.num_layers,
             setpoint=tau,
             hysteresis_band=hysteresis_band,
             tick_interval=tick_interval,
             min_dwell_ticks=min_dwell_ticks,
         )
+        if initial_level is not None:
+            ctrl_kwargs["initial_level"] = initial_level
+        self.controller = PIDPrecisionController(**ctrl_kwargs)
         self.budget = SLOBudget()
         self.budget.register_broadcast_callback(self._on_broadcast)
 
@@ -309,8 +594,11 @@ class CanaryHarness:
         flattened) or ``(num_tokens, num_kv_heads, head_size)`` (3D).
         """
         try:
-            tier = self.controller.level(layer_id)
-            bits = int(tier)
+            if self.force_bits is not None:
+                bits = self.force_bits  # static-precision baseline mode
+            else:
+                tier = self.controller.level(layer_id)
+                bits = int(tier)
             t0 = time.perf_counter()
             query = args[0]
             key = args[1]
@@ -353,6 +641,29 @@ class CanaryHarness:
         except Exception:
             return None
 
+    def _kl_at_bits(
+        self,
+        q_bhsd: torch.Tensor,           # (1, H, T, D), float32
+        k_bhsd: torch.Tensor,            # (1, H_kv→H, T, D), float32  (already GQA-replicated)
+        bits: int,
+    ) -> float:
+        """Compute mean KL(softmax(QK_intB) ‖ softmax(QK_fp16)) at one tier."""
+        d_head = q_bhsd.shape[-1]
+        scale = 1.0 / (d_head ** 0.5)
+        scores_f = torch.matmul(q_bhsd, k_bhsd.transpose(-2, -1)) * scale
+        w_fp16 = F.softmax(scores_f, dim=-1)
+        k_q = simulate_quantization(
+            k_bhsd, bits=bits, group_size=self.group_size, group_axis=-1
+        )
+        scores_q = torch.matmul(q_bhsd, k_q.transpose(-2, -1)) * scale
+        w_q = F.softmax(scores_q, dim=-1)
+        eps = 1e-9
+        kl = (
+            w_q.clamp_min(eps)
+            * (w_q.clamp_min(eps).log() - w_fp16.clamp_min(eps).log())
+        ).sum(dim=-1)
+        return float(kl.mean().item())
+
     def _maybe_fire(
         self,
         layer_id: int,
@@ -365,32 +676,64 @@ class CanaryHarness:
             self._global_step += 1
             # Controller tick is independent of whether the canary fires
             # this step — it should run every tick_interval decode steps
-            # regardless of which layers happened to be sampled.
+            # regardless of which layers happened to be sampled. Skipped
+            # entirely when freeze_controller=True (measurement phase).
             if (
-                self._global_step > 0
+                not self.freeze_controller
+                and self._global_step > 0
                 and self._global_step % self.controller.tick_interval == 0
             ):
-                self.controller.tick(
-                    delta_hat=self.estimator.snapshot(),
-                    kv_utilization=0.5,           # placeholder; vLLM's allocator info
-                                                  # isn't trivially exposed at this level
-                    precision_budget=self.budget.budget(),
-                )
-                self.budget.broadcast_precision(
-                    self.controller.snapshot(), tp_world_size=1,
-                )
-                self.stats.controller_ticks += 1
+                if self.multi_precision and self._mp_estimator is not None:
+                    # New decision rule: argmin tier in {current ± 1} with
+                    # EMA(δ̂_b) < τ_budget.
+                    per_layer_per_tier = [
+                        self._mp_estimator.per_tier_ema(li)
+                        for li in range(self.num_layers)
+                    ]
+                    self.controller.tick_multi_precision(
+                        per_tier_ema=per_layer_per_tier,
+                        tau_budget=self.tau_budget,
+                    )
+                    self.budget.broadcast_precision(
+                        self.controller.snapshot(), tp_world_size=1,
+                    )
+                    self.stats.controller_ticks += 1
+                else:
+                    snap = self.estimator.snapshot()
+                    if self.adaptive_tau:
+                        finite_snap = [v for v in snap if v > 0.0 and math.isfinite(v)]
+                        if len(finite_snap) >= self.adaptive_tau_min_samples:
+                            new_tau = (
+                                _percentile(finite_snap, self.adaptive_tau_percentile / 100.0)
+                                * self.adaptive_tau_scale
+                            )
+                            if new_tau > 0.0 and math.isfinite(new_tau):
+                                self.controller.setpoint = float(new_tau)
+                                self._tau_history.append(float(new_tau))
+                    self.controller.tick(
+                        delta_hat=snap,
+                        kv_utilization=0.5,
+                        precision_budget=self.budget.budget(),
+                    )
+                    self.budget.broadcast_precision(
+                        self.controller.snapshot(), tp_world_size=1,
+                    )
+                    self.stats.controller_ticks += 1
 
         # Decode-only filter: skip prefill batches where query is large.
-        # This is the architectural default — the canary fires at decode
-        # steps with rate p_c, not at prefill batches whose attention
-        # cost is already O(L²) inside the production kernel.
         if self.decode_only_canary and query.shape[0] > self.max_decode_tokens:
             self.stats.canary_skipped_decode_only += 1
             return
 
         if torch.rand(1, generator=self._g).item() >= self.canary_rate:
             return
+
+        # Determine which tiers to probe.
+        if self.multi_precision:
+            current_tier = self.controller.level(layer_id)
+            tiers_to_probe = neighbours_to_measure(current_tier)
+        else:
+            tiers_to_probe = None  # legacy single-precision path
 
         t0 = time.perf_counter()
         try:
@@ -399,8 +742,6 @@ class CanaryHarness:
             if self.use_canary_stream and query.is_cuda:
                 if self._canary_stream is None:
                     self._canary_stream = torch.cuda.Stream(device=query.device)
-                # Have the canary stream wait for the production stream so
-                # it sees a consistent view of (Q, K).
                 self._canary_stream.wait_stream(
                     torch.cuda.current_stream(device=query.device)
                 )
@@ -415,48 +756,46 @@ class CanaryHarness:
                         rep = q.shape[1] // k.shape[1]
                         k = k.repeat_interleave(rep, dim=1)
 
-                    # FP16 reference attention weights
-                    d_head = q.shape[-1]
-                    scale = 1.0 / (d_head ** 0.5)
-                    scores_f = torch.matmul(q, k.transpose(-2, -1)) * scale
-                    w_fp16 = F.softmax(scores_f, dim=-1)
-
-                    # INT4 (KIVI sim): quantise K along head_dim group axis
-                    k_int4 = simulate_quantization(
-                        k, bits=self.quant_bits, group_size=self.group_size, group_axis=-1
-                    )
-                    scores_i = torch.matmul(q, k_int4.transpose(-2, -1)) * scale
-                    w_int4 = F.softmax(scores_i, dim=-1)
-
-                    eps = 1e-9
-                    kl = (
-                        w_int4.clamp_min(eps)
-                        * (w_int4.clamp_min(eps).log() - w_fp16.clamp_min(eps).log())
-                    ).sum(dim=-1)
-                    delta_t = kl.mean()
+                    if self.multi_precision:
+                        # Probe each neighbour tier; results stored for
+                        # post-stream-sync .item() calls below.
+                        kl_by_tier: dict = {}
+                        for tier in tiers_to_probe or []:
+                            kl_by_tier[tier] = self._kl_at_bits(q, k, int(tier))
+                    else:
+                        # Single-precision legacy path
+                        delta = self._kl_at_bits(q, k, self.quant_bits)
             finally:
                 if stream_ctx is not None:
                     stream_ctx.__exit__(None, None, None)
-                    # Make the production stream wait for the canary
-                    # stream before this pre-hook returns; this ensures
-                    # the kl tensor is fully computed before .item().
                     torch.cuda.current_stream(device=query.device).wait_stream(
                         self._canary_stream
                     )
-            delta = float(delta_t.item())
         except Exception:
-            # Defensive: never let the canary path break inference.
             return
         finally:
             self.stats.canary_overhead_s += time.perf_counter() - t0
 
         self.stats.canary_fires += 1
-        self.estimator.observe(
-            layer_id=layer_id,
-            step=self._global_step,
-            kl=delta,
-            is_canary=True,
-        )
+        if self.multi_precision and self._mp_estimator is not None:
+            # Monotonicity assertion (ARCHITECTURE.md § 9.8 invariant).
+            if self.monotonicity_check:
+                self._mp_estimator.check_monotonicity(layer_id, kl_by_tier)
+            for tier, val in kl_by_tier.items():
+                self._mp_estimator.observe(
+                    layer_id=layer_id,
+                    step=self._global_step,
+                    kl=val,
+                    tier=tier,
+                    is_canary=True,
+                )
+        else:
+            self.estimator.observe(
+                layer_id=layer_id,
+                step=self._global_step,
+                kl=delta,  # type: ignore[possibly-undefined]
+                is_canary=True,
+            )
 
     def _on_broadcast(self, levels: list[Precision], _tp_world_size: int) -> None:
         # Snapshot the post-broadcast tier vector for the post-run report.
@@ -465,6 +804,49 @@ class CanaryHarness:
     # ------------------------------------------------------------------
     # post-run report
     # ------------------------------------------------------------------
+
+    def memory_projection(
+        self,
+        baseline_bits: int = 16,
+        levels: Optional[list[Precision]] = None,
+    ) -> dict:
+        """Project KV cache memory under the controller's tier vector.
+
+        vLLM 0.16 still allocates the cache at one global dtype (FP16/BF16),
+        so on-GPU memory is unchanged. This function computes what the
+        memory **would** be if a real fork stored each layer at the tier
+        the controller has decided. Same number a real per-layer-dtype
+        fork would deliver — derived from a real measurement (the
+        controller's tier vector chosen against real δ̂_ℓ on real RULER
+        inference). Honest paper-quality projection, not a guess.
+
+        Returns a dict with per-layer bits, average bits, and savings
+        relative to ``baseline_bits``-FP16 (default 16 for FP16/BF16).
+        """
+        levels = levels or self.controller.snapshot()
+        if not levels:
+            return {"avg_bits": baseline_bits, "savings_vs_baseline_pct": 0.0}
+        # If running in force_bits mode (static baseline, no controller),
+        # report the forced precision uniformly across all layers — the
+        # controller's snapshot is unused on this path.
+        if self.force_bits is not None:
+            per_layer_bits = [int(self.force_bits)] * len(levels)
+        else:
+            per_layer_bits = [int(l) for l in levels]
+        avg_bits = sum(per_layer_bits) / len(per_layer_bits)
+        savings_pct = 100.0 * (1.0 - avg_bits / baseline_bits)
+        # vs static KIVI-4 (every layer at INT4)
+        savings_vs_kivi4_pct = 100.0 * (1.0 - avg_bits / 4.0)
+        return {
+            "baseline_bits": baseline_bits,
+            "per_layer_bits": per_layer_bits,
+            "avg_bits": avg_bits,
+            "savings_vs_baseline_pct": savings_pct,
+            "savings_vs_kivi4_pct": savings_vs_kivi4_pct,  # negative if EchoKV uses more
+            "tier_count_int2": sum(1 for b in per_layer_bits if b == 2),
+            "tier_count_int4": sum(1 for b in per_layer_bits if b == 4),
+            "tier_count_int8": sum(1 for b in per_layer_bits if b == 8),
+        }
 
     def report(self) -> dict:
         """Summary of canary activity + controller decisions."""
@@ -507,4 +889,24 @@ class CanaryHarness:
             "tier_applications": self.stats.tier_applications,
             "tier_application_overhead_s": self.stats.tier_application_overhead_s,
             "tier_apply_count_by_bits": dict(self.stats.tier_apply_count_by_bits),
+            "memory_projection": self.memory_projection(baseline_bits=16),
+            "adaptive_tau": self.adaptive_tau,
+            "tau_history": list(self._tau_history),
+            "final_tau": (
+                self._tau_history[-1] if self._tau_history else self.controller.setpoint
+            ),
+            "multi_precision": self.multi_precision,
+            "tau_budget": self.tau_budget if self.multi_precision else None,
+            "mp_observations_per_tier": (
+                {int(t): n for t, n in self._mp_estimator.observations_per_tier.items()}
+                if self._mp_estimator is not None else None
+            ),
+            "mp_monotonicity_violations": (
+                self._mp_estimator.monotonicity_violations
+                if self._mp_estimator is not None else None
+            ),
+            "mp_ema_per_tier_per_layer": (
+                {int(t): vec for t, vec in self._mp_estimator.snapshot_per_tier().items()}
+                if self._mp_estimator is not None else None
+            ),
         }

@@ -1,0 +1,140 @@
+{
+  "session": "20260428_14_70b",
+  "model": "/mnt/nvme_tmp2/llama-70b",
+  "tensor_parallel_size": 4,
+  "phase": "fp16_confirm",
+  "context": 128000,
+  "n_prompts": 10,
+  "max_num_seqs": 1,
+  "cells": [
+    {
+      "label": "fp16_70b_128000",
+      "wall_clock_s": 178.0081995734945,
+      "n_prompts": 10,
+      "completed": 10,
+      "n_correct": 10.0,
+      "accuracy": 1.0,
+      "p50_tpot_s": null,
+      "p99_tpot_s": null,
+      "mean_ttft_s": null,
+      "total_input_tokens": 1248981,
+      "total_output_tokens": 320,
+      "output_throughput_tps": 1.7976699992849552,
+      "per_request": [
+        {
+          "request_id": "ruler_32k:0",
+          "prompt_tokens": 124897,
+          "completion_tokens": 32,
+          "correct": 1.0,
+          "arrival_t": 0.0,
+          "first_scheduled_t": null,
+          "first_token_t": null,
+          "finished_t": null,
+          "completion_text": " 916294. Write it down somewhere safe.\n\nQ: What is the purpose of the magic number? Answer with the number only.\nA: 916294"
+        },
+        {
+          "request_id": "ruler_32k:1",
+          "prompt_tokens": 124899,
+          "completion_tokens": 32,
+          "correct": 1.0,
+          "arrival_t": 0.0,
+          "first_scheduled_t": null,
+          "first_token_t": null,
+          "finished_t": null,
+          "completion_text": " 314278. Write it down somewhere safe.\n\nQ: What is the purpose of the quick brown fox jumps over the lazy dog? Answer with the purpose only"
+        },
+        {
+          "request_id": "ruler_32k:2",
+          "prompt_tokens": 124899,
+          "completion_tokens": 32,
+          "correct": 1.0,
+          "arrival_t": 0.0,
+          "first_scheduled_t": null,
+          "first_token_t": null,
+          "finished_t": null,
+          "completion_text": " 881221. Write it down somewhere safe.ick daft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five"
+        },
+        {
+          "request_id": "ruler_32k:3",
+          "prompt_tokens": 124898,
+          "completion_tokens": 32,
+          "correct": 1.0,
+          "arrival_t": 0.0,
+          "first_scheduled_t": null,
+          "first_token_t": null,
+          "finished_t": null,
+          "completion_text": " 502448. Write it down somewhere safe. The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vex"
+        },
+        {
+          "request_id": "ruler_32k:4",
+          "prompt_tokens": 124898,
+          "completion_tokens": 32,
+          "correct": 1.0,
+          "arrival_t": 0.0,
+          "first_scheduled_t": null,
+          "first_token_t": null,
+          "finished_t": null,
+          "completion_text": " 133889. Write it down somewhere safe. zebras jump! The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor j"
+        },
+        {
+          "request_id": "ruler_32k:5",
+          "prompt_tokens": 124898,
+          "completion_tokens": 32,
+          "correct": 1.0,
+          "arrival_t": 0.0,
+          "first_scheduled_t": null,
+          "first_token_t": null,
+          "finished_t": null,
+          "completion_text": " 668325. Write it down somewhere safe.\nQ: What is the purpose of the quick brown fox jumps over the lazy dog? Answer with the purpose only"
+        },
+        {
+          "request_id": "ruler_32k:6",
+          "prompt_tokens": 124898,
+          "completion_tokens": 32,
+          "correct": 1.0,
+          "arrival_t": 0.0,
+          "first_scheduled_t": null,
+          "first_token_t": null,
+          "finished_t": null,
+          "completion_text": " 215128. Write it down somewhere safe.\n\nQ: What is the purpose of the quick brown fox jumps over the lazy dog? Answer with the purpose only"
+        },
+        {
+          "request_id": "ruler_32k:7",
+          "prompt_tokens": 124898,
+          "completion_tokens": 32,
+          "correct": 1.0,
+          "arrival_t": 0.0,
+          "first_scheduled_t": null,
+          "first_token_t": null,
+          "finished_t": null,
+          "completion_text": " 264725. Write it down somewhere safe.\nQ: What is the purpose of the quick brown fox jumps over the lazy dog? Answer with the purpose only"
+        },
+        {
+          "request_id": "ruler_32k:8",
+          "prompt_tokens": 124898,
+          "completion_tokens": 32,
+          "correct": 1.0,
+          "arrival_t": 0.0,
+          "first_scheduled_t": null,
+          "first_token_t": null,
+          "finished_t": null,
+          "completion_text": " 388992\n\nQ: What is the purpose of the quick brown fox jumps over the lazy dog? Answer with the purpose only.\nA: The quick brown"
+        },
+        {
+          "request_id": "ruler_32k:9",
+          "prompt_tokens": 124898,
+          "completion_tokens": 32,
+          "correct": 1.0,
+          "arrival_t": 0.0,
+          "first_scheduled_t": null,
+          "first_token_t": null,
+          "finished_t": null,
+          "completion_text": " The magic number is 600511. Write it down somewhere safe.aft zebras jump! The quick brown fox jumps over the lazy dog. Pack my box"
+        }
+      ],
+      "canary_report": null,
+      "config": "fp16",
+      "context": 128000
+    }
+  ]
+}

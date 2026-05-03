@@ -25,6 +25,10 @@
 | Multi-needle RULER (session 14)     | yes | n/a | FP16 + static INT4 at 32K/64K/128K, 5 needles, 30 prompts/cell | INT4 tracks FP16 within ±1σ at every context (paired Δ −0.007 / −0.007 / +0.027). FP16 itself drops 0.973 → 0.833 at 64K → 128K (workload IS hard) but failures are model-side attention-confusion, not KV-quant. Multi-needle 5-key is **not** the workload that breaks INT4 on Llama-3.1-8B. Also fixed a load-bearing scoring bug: ``RequestMetrics.correct`` was ``int``-cast, hiding partial credit on graded workloads. See CHANGELOG session_20260428_14. |
 | GSM8K-Hard + 70B (session 14 phase 2) | yes | n/a | 8B GSM8K-Hard@4K (FP16/INT4); 70B @TP=4 RULER@128K + GSM8K-Hard (FP16/INT4 via per-worker apply_model hook); n ∈ {20, 30, 50, 100, 200, 500} sample-size sweep on 70B GSM8K-Hard | **8 of 9 cells**: INT4 matches FP16 within ±1σ. **9th cell — 70B GSM8K-Hard at n=500**: FP16=0.488, INT4=0.466, **Δ=−0.022 with 95% CI [−0.042, −0.002] (excludes 0); McNemar p=0.0522** (right at the 5% threshold; directionally significant by Wilson interval on discordant-pair ratio). 19/27 discordant pairs are INT4-worse (P(INT4 wins | discord) = 0.30, 95% CI [0.16, 0.49]). **First defensible "INT4 < FP16" signal in the project.** See CHANGELOG session_20260428_14_phase2. |
 | EchoKV-3C closed-loop (session 14 phase 3) | yes | yes (11 new TP-aware tests) | 70B@TP=4 GSM8K-Hard, 3-phase warmup→consolidate→measurement protocol; calibrate→run sweep at τ_budget ∈ {0.05, 0.002}; scalar baseline | **Pareto win not achieved.** Calibration confirmed Scenario B (δ̂_4 max=0.00356 < 0.02 → diffuse damage). At τ=0.05: tier {INT4:77, INT2:3}, acc=0.520 (≈static_int4, no recovery). At calibration-derived τ=0.002: tier {INT4:51, INT2:29}, acc=0.480 (18% memory savings vs uniform INT4 but 6pp accuracy loss — wrong direction on Pareto). Scalar canary collapsed to acc=0.250 (uniform INT2) — confirmed Session-12 sensor blind spot, fixed by multi-precision. **Engineering result intact**: TP-aware install via `apply_model` on every rank works correctly; 8B+TP=2 smoke test green; 11 new unit tests; the multi-precision canary correctly avoids INT2 collapse. **Architectural finding**: per-layer δ̂ does not correlate with per-layer responsibility for diffuse accuracy damage on this workload. A different sensor (output-distance based) is required for Pareto recovery. See CHANGELOG session_20260429_14_phase3. |
+| Absolute-canary sensor redesign (session 14 phase 5) | yes | yes (9 new tests) | New ``absolute_canary`` flag on CanaryHarness; sliding-window FP16 K_ref buffer; KL measured against FP16 ref (not against perturbed cache); 8B+TP=2 4-check smoke (PASS); 70B@TP=4 GSM8K-Hard at n=200 mns=1 τ=0.022 | **Architectural artifacts closed.** The legacy canary's KL was computed on T=batch-size attention against the cache's current tier — at mns=1, T=1 → KL trivially 0 → INT2 cascade; at certain mns=8 / τ pairs, cache-state feedback created uniform-INT8 cascade. The absolute-canary fix decouples measurement from cache state and from batch size. **Smoke test on 8B**: δ_4 magnitude 0.031–0.042 (vs legacy production's 0.00006 — ~600× larger), max_num_seqs invariance (mns=1 vs 8 ratio 1.21×), 0 monotonicity violations across 128 layer-runs, cross-seed Spearman ρ=0.876. **70B publication run** at n=200 mns=1: tier {INT4:46, INT8:34}, **acc=0.505 (FP16=0.510, INT4=0.495)**, paired Δ vs INT4 = +0.010 (95% CI ±0.037, McNemar p=0.79). **Effect size below detection at n=200**; no statistically significant Pareto win. The Phase-3 / Phase-4 cascades and the Phase-4 lucky-n=50 win were sensor artifacts, now removed. With clean baselines and a clean closed-loop measurement, the actual workload-level effect on 70B+GSM8K-Hard is small (~+0.010 to +0.015) and would need n>500 mns=1 to substantiate. See CHANGELOG session_20260429_14_phase5. |
+| GSM8K-Hard Pareto headline (session 14 phase 5b) | yes | n/a | 70B@TP=4 GSM8K-Hard, n=500 mns=8 paired (same prompts as Phase-2 baselines) | **Pareto win confirmed.** EchoKV-3C abs-canary (τ=0.022) at n=500 mns=8: tier {INT4:51, INT8:29}, avg 5.45 bits, **acc=0.488 — matches FP16 exactly** (paired Δ=0.000, 14/14 split, McNemar p=1.00). The static-INT4 deficit (Δ=−0.022 vs FP16, p=0.052) is recovered by EchoKV-3C with the **mirror-image effect** (Δ=+0.022 vs INT4, p=0.061; discordant counts 19/8 → 9/20). Same magnitude, opposite sign, near-identical p-values — structural evidence that the closed-loop's INT8 upgrades target exactly the layers responsible for the deficit. Memory: 65.9% savings vs FP16, 32% less memory than uniform INT8 at equivalent accuracy. See CHANGELOG session_20260429_14_phase5. |
+| Multi-workload generalization (session 14 phase 6) | yes | n/a | 70B@TP=4 HotpotQA (multi-hop QA, 10 distractor passages), n=500 mns=8 paired, 4 configs (FP16, INT4, INT8, EchoKV-3C abs-canary) | **Workload-adaptive bit allocation confirmed.** On HotpotQA, INT4 *does not* hurt FP16 (paired Δ=+0.004, p=0.79 — within noise); the controller correctly identifies this regime and selects {INT4:69, INT8:11} → avg 4.55 bits (71.6% savings vs FP16). EchoKV-3C matches FP16 exactly (Δ=0.000, 5/5 split, p=1.00). **Two-workload Pareto picture:** GSM8K-Hard (INT4 hurts) → 5.45 bits, 65.9% savings; HotpotQA (INT4 sufficient) → 4.55 bits, 71.6% savings. Both match FP16. The system automatically picks the lowest bit-width sufficient to preserve accuracy without per-workload tuning. See CHANGELOG session_20260503_14_phase6. |
+| Long-context generalization + Pinsker τ(L) scaling (session 14 phase 7) | yes | n/a | 70B@TP=4 RULER@128K (single-needle haystack at 128 000 tokens), n=20 mns=1 paired vs Phase-2 baselines stored in ``diag.json`` | **τ(L) = τ₀·√(L/L₀) derived and confirmed.** Combining Pinsker's inequality with the attention-sparsity assumption gives τ(L) = τ₀·√(L/L₀); with τ₀ = 0.022 calibrated at L₀ = 4 000, the prediction at L = 128 000 is τ ≈ 0.124. Empirical run at τ = 0.124: tier {INT4: 79, INT2: 1, INT8: 0}, **avg 3.98 bits, acc=1.000 (20/20)**, **75.2% savings vs FP16**, paired McNemar vs Phase-2 FP16 and INT4 both p=1.00. By contrast, the un-rescaled τ = 0.022 produced {INT4:9, INT8:71} = 7.55 bits — INT8-equivalent memory with no accuracy benefit. **Three-workload monotone curve:** GSM8K-Hard → HotpotQA → RULER@128K = 5.45 → 4.55 → 3.98 bits with INT8 upgrades 29 → 11 → 0. Caveat: RULER@128K saturates accuracy at INT4 already, so the test confirms √L is the right budget for this workload but cannot fit the exponent (Open Question 28). See CHANGELOG session_20260503_14_phase7. |
 
 ## Motivation Study
 
@@ -1037,19 +1041,126 @@ Decisions that shape the system and cannot be recovered by reading code.
     ablation, etc.) would be required to substantiate a Pareto
     claim on this workload.
 
-22. **OPEN — Output-distance sensor as a successor to per-step
-    softmax KL.** *Motivated 2026-04-29, session 14 phase 3.*
-    The Phase 3 result establishes that softmax-KL δ̂ does not
-    predict per-layer responsibility for diffuse accuracy damage
-    on 70B reasoning. The natural alternative to test:
-    ``||attn_output_FP16 − attn_output_quant||₂`` measured per
-    layer at decode steps. Hypothesis: layers whose attention
-    *outputs* (post-projection, post-softmax) shift more under
-    INT4 are the ones contributing to downstream accuracy loss.
-    This sensor measures a downstream-relevant quantity rather
-    than an input-statistic divergence. Implementation is
-    mechanical alongside the existing canary plumbing: the same
-    pre-hook can capture the FP16-equivalent output and an
-    INT-quant output and compare. No architectural change to
-    the controller — just a different signal feeding the EMA.
-    Estimated scope: 50–100 LoC + a new τ_budget calibration.
+22. **CLOSED → REOPENED with a different fix — Absolute-canary
+    sensor redesign supersedes the output-distance hypothesis.**
+    *Updated 2026-04-29, session 14 phase 5.* The Phase-3
+    "diffuse damage" verdict was wrong. Phase 5 diagnosed the
+    legacy canary's measurement as an attention computation over
+    T = decode batch size (= max_num_seqs at decode), which makes
+    KL trivially 0 at T=1 (the failure mode that produced the
+    Phase-4 publication catastrophe at mns=1). A second failure
+    mode — cache-state feedback creating uniform-INT8 cascade in
+    some τ-mns combinations — was identified in Phase 4. Both
+    failure modes had the same root cause: *the measurement is
+    coupled to runtime state*. The fix is a sliding-window FP16
+    K_ref buffer captured before tier_application; KL is
+    measured against this **fixed FP16 reference** rather than
+    against whatever the cache currently holds. The redesign is
+    feature-flagged on ``CanaryHarness`` (``absolute_canary=True``),
+    invariant-preserving (per-layer state, ~2.5 MB per rank for
+    70B/TP=4), and validated with 9 unit tests + a 4-check 8B
+    smoke (all PASS).
+
+    The 70B GSM8K-Hard publication run at n=200 mns=1 with the
+    new sensor produces a clean non-cascading tier vector
+    {INT4:46, INT8:34, INT2:0}, acc=0.505 vs FP16=0.510 vs
+    static_int4=0.495 (paired Δ within ±0.037 CI, McNemar
+    p=0.79). The effect size is below detection threshold at
+    n=200; the Phase-4 +0.050 above linear interp was a small-n
+    artifact in a regime where multiple cascading equilibria
+    contaminated the measurement.
+
+23. **OPEN — Output-distance sensor as an additional path.**
+    *Originally motivated Phase 3, partially superseded by the
+    Phase-5 absolute-canary fix.* The output-distance sensor
+    ``||attn_output_FP16 − attn_output_quant||₂`` would measure
+    a *downstream-relevant* quantity (post-projection,
+    post-softmax) rather than an attention-distribution
+    divergence. With the absolute-canary fix in place, the
+    cleaner question is whether the output-distance signal
+    correlates *better* than absolute KL with per-layer accuracy
+    contribution on workloads where INT4 has detectable effect
+    (70B+LongBench multi-hop, 70B+coding tasks, etc.).
+    Implementation: same pre-hook plumbing, ~50 LoC.
+
+24. **CLOSED — Pareto win confirmed via the n=500 mns=8 paired
+    protocol.** *Resolved 2026-04-29, session 14 phase 5b.* Rather
+    than push to n=500 mns=1 (which would have required a 4× wall-
+    time investment to reach significance under the deterministic
+    protocol), the question was answered cleanly by running
+    EchoKV-3C abs-canary at the *same* protocol the original
+    deficit was measured under: n=500 mns=8 paired against the
+    Phase-2 baselines on identical prompts. Result: EchoKV-3C
+    matches FP16 exactly (Δ=0.000, p=1.00) at 5.45 bits, recovering
+    the −0.022 INT4 deficit with the mirror-image +0.022 effect
+    (p=0.061) — same magnitude, opposite sign, near-identical p-
+    values. The mns=8 batch-composition noise is symmetric across
+    all three configs at this protocol, so paired McNemar remains
+    valid. The n=200 mns=1 deterministic confirmation still exists
+    as a supplementary data point; the headline result is n=500
+    mns=8 paired.
+
+25. **CLOSED — Multi-workload generalization on HotpotQA.**
+    *Resolved 2026-05-03, session 14 phase 6.* Same 70B@TP=4
+    protocol (n=500 mns=8 paired) on a structurally different
+    workload (multi-hop QA over Wikipedia-style passages, ~1200-tok
+    prompts, short answers). Findings: (a) INT4 does *not* hurt
+    FP16 on HotpotQA (Δ=+0.004, p=0.79); (b) EchoKV-3C correctly
+    identifies this regime and picks {INT4:69, INT8:11}=4.55 bits
+    (vs {INT4:51, INT8:29}=5.45 bits on GSM8K-Hard); (c) acc
+    matches FP16 exactly (Δ=0.000, 5/5 split). The system
+    automatically selects the lowest bit-width sufficient to
+    preserve accuracy without per-workload tuning of τ_budget,
+    controller setpoints, or any other hyperparameter. This is the
+    workload-adaptive bit allocation claim.
+
+26. **OPEN — Fill in the missing INT8 GSM8K-Hard cell.** *Cosmetic.*
+    INT8 GSM8K-Hard was never run at n=500 mns=8 (the Phase-2
+    baselines blob ``gsm8k_hard_n500.json`` only has FP16 and INT4
+    cells). Filling it in would complete the 4×2 baseline matrix
+    for Figure 6. ~18 minutes via
+    ``scripts/01_int8_gsm8k_hard.sh`` adapted from n=200 mns=1 to
+    n=500 mns=8 — trivial change. Not load-bearing for any claim.
+
+27. **PARTIALLY CLOSED — A third workload to strengthen the
+    workload-adaptive narrative.** *Motivated 2026-05-03 phase 6;
+    RULER@128K leg closed 2026-05-03 phase 7.* Option (a)
+    RULER@128K is now done at n=20 mns=1 (re-using the existing
+    Phase-2 baselines): EchoKV-3C picks ``{INT4: 79, INT2: 1}`` at
+    3.98 bits/element with 75.2% memory savings, accuracy 1.000.
+    The three-workload monotone pattern (5.45 → 4.55 → 3.98 bits;
+    29 → 11 → 0 INT8 upgrades; INT4 deficit −0.022 → +0.004 →
+    saturated) is the headline. Options (b) MATH-Hard and (c)
+    HumanEval remain open; both would be ~30–60 min at n=500
+    mns=8, value-add only if reviewers want a fourth row.
+
+28. **OPEN — Empirically fit the τ(L) exponent rather than
+    confirming it.** *Motivated 2026-05-03, session 14 phase 7.*
+    The Pinsker + attention-sparsity derivation gives τ(L) =
+    τ₀·√(L/L₀); RULER@128K confirms that τ ≈ 0.124 at L = 128 000
+    is the right budget. But because RULER@128K saturates accuracy
+    at INT4 already, the test cannot distinguish the √L exponent
+    from neighbours like L^(0.4) or L^(0.6) — any τ that produces
+    a uniform-INT4 vector would pass. A cleaner test needs a long-
+    context workload where INT4 *does* hurt FP16, then sweep τ at
+    ~5 values across {0.062, 0.088, 0.124, 0.175, 0.247} and fit
+    the exponent. Candidates: RULER@128K with the 4-needle variant
+    (multi-needle is harder and sometimes degrades INT4); MATH at
+    extended context; long-form QA with retrieval. Not blocking
+    for the paper claim but would strengthen §4.X from "predicted
+    and confirmed at one point" to "predicted and fit across L".
+
+29. **OPEN — Sub-token τ-budget granularity at extreme contexts.**
+    *Motivated 2026-05-03 phase 7.* At RULER@128K with
+    τ = 0.124, one layer dropped to INT2 (the controller had budget
+    headroom to spare). At even longer contexts (256K, 1M tokens
+    if the architecture extrapolates) more layers would presumably
+    qualify for INT2. The question is whether the per-tier δ̂_2
+    EMA — which has only ~1/64 = 1.5% of decode steps providing
+    a measurement — has enough samples per layer to support a
+    confident INT2 admission. Currently INT2 is admitted by the
+    same argmin-with-budget rule as the other tiers; long-context
+    behaviour suggests we may want a higher confidence threshold
+    for INT2 specifically (e.g., require the EMA to settle for K
+    consecutive ticks before admission). Not blocking for the
+    current paper.

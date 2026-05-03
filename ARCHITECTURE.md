@@ -1385,3 +1385,156 @@ Independent of the Pareto-recovery question:
 
 These are the engineering and characterisation contributions
 that don't depend on a Pareto win.
+
+### 9.9 Absolute-canary sensor (post-Phase-4 redesign)
+
+#### What the legacy sensor actually measured
+
+The legacy ``CanaryHarness`` (§§9.5–9.8) computes
+``KL(softmax(Q · quant(K)^T) ‖ softmax(Q · K^T))`` where Q and K
+are the **just-projected FP16 tensors** for the current attention
+call (before ``tier_application``). Q has shape
+``(1, H, T, D)``; K has shape ``(1, H_kv, T, D)``. The KL is on
+a ``T × T`` attention matrix where each "query" (one of T new
+tokens) attends to each "key" (one of T new tokens) within the
+same forward call.
+
+T equals:
+
+- **Decode**: the number of decode tokens in this batch
+  (``= max_num_seqs`` when all requests are at decode step).
+- **Prefill**: the chunk size, capped at
+  ``max_decode_tokens=256`` by the harness's prefill filter
+  (``decode_only_canary=True``); below the cap, T equals the
+  prompt length.
+
+#### Failure mode 1 — the T=1 collapse
+
+When ``max_num_seqs=1`` in pure decode, T=1. Softmax over a
+single element is ``[1.0]`` regardless of what's being computed.
+KL between any two such distributions is identically 0. The
+canary returns no signal, the controller sees ``δ̂_b = 0`` for
+every candidate b, and the argmin-with-budget rule picks the
+**lowest tier** (INT2) since 0 < τ_budget for every tier.
+
+This caused the Phase-4 publication catastrophe: at n=200
+``max_num_seqs=1``, EchoKV-3C cascaded to {INT2:60, INT4:20,
+INT8:0} and acc dropped from ~0.50 (FP16/INT4) to **0.365**
+(13pp below static_int4). The cascade is mechanical, not
+feedback-driven — at T=1 there is no attention distribution to
+be perturbed.
+
+#### Failure mode 2 — cache-state feedback (two-equilibria)
+
+Even at T > 1, the legacy sensor's measurement was indirectly
+coupled to the running tier via the sequence of K projections
+processed so far. Phase 4's τ-sweep documented two distinct
+attractors:
+
+| regime | warmup δ̂_4 max | tier counts | sweep cells |
+|:--|--:|:--|:--|
+| mixed-precision (stable) | ~6e-5 | ~half INT8, half INT4 | τ=6e-5, 3e-5, 2e-5 |
+| uniform-INT8 (cascaded) | ~3e-3 to ~7e-3 | ~all INT8 | τ=4e-5, 1e-5 |
+
+The 50× difference in warmup δ̂_4 magnitude between the two
+regimes is the signature of positive feedback: a small bias
+toward INT8 transitions during warmup keeps the cache cleaner →
+the canary's δ̂_4 measurements grow → more INT8 transitions →
+loop closes. Conversely, INT2 transitions cause the cache to
+become more perturbed → δ̂ measurements shrink → INT2 reinforced.
+
+#### The fix — absolute KL against a sliding-window FP16 reference
+
+Both failure modes share a root cause: the canary's measurement
+is coupled to runtime state (T from the batch, K projections
+through the cache feedback). The redesign decouples both:
+
+1. Maintain a **per-layer rolling FP16 buffer** of the last N=64
+   K-projection rows, captured **before** ``tier_application``.
+   The buffer's contents are always FP16 — never quantised, never
+   cache-dependent.
+2. At canary fires, compute KL using ``K_ref`` (the buffer)
+   instead of the current step's K:
+
+   ```
+   K_ref ∈ R^(N × num_kv_heads × head_size)   # always FP16
+   for b ∈ {2, 4, 8}:
+       attn_b = softmax(Q · quant(K_ref, b)^T / √d)
+   attn_FP16 = softmax(Q · K_ref^T / √d)
+   δ_absolute(b) = KL(attn_b ‖ attn_FP16)
+   ```
+
+3. T_key = N (always ≥ 2), so the T=1 collapse mode is
+   structurally impossible.
+4. Both terms in the KL use the same FP16 reference; the cache's
+   current bit-width does not enter the measurement, breaking
+   the cache-state feedback loop in both directions.
+
+#### Memory and overhead
+
+Per layer per rank: ``N × num_kv_heads × head_size × 2 bytes``.
+For Llama-3.1-70B at TP=4 (``num_kv_heads=8``, sharded to 2 per
+rank, ``head_size=128``, N=64): ``64 × 2 × 128 × 2 = 32 KB`` per
+layer per rank, **2.5 MB total per rank** for 80 layers — three
+orders of magnitude smaller than the KV cache itself. INV-1
+(no per-block aux state) is preserved because the buffer is
+per-layer, not per-block.
+
+Per canary fire, the marginal cost is one extra
+``simulate_quantization`` and one extra small attention
+softmax. At ``canary_rate=1/64``, total overhead remains
+within the +0.09% TPOT budget measured in Sessions 8-13.
+
+#### Smoke-test validation
+
+Before committing to the 70B re-run, the redesign was validated
+on Llama-3.1-8B at TP=2 with four checks:
+
+| check | result |
+|:--|:--|
+| Magnitude (δ_4 above 1e-6 floor) | δ_4 max 0.031–0.042 across 4 runs |
+| ``max_num_seqs`` invariance | mns=1 / mns=8 max-δ_4 ratio = 1.21× |
+| Cross-tier monotonicity | 0 violations across 32 layers × 4 runs |
+| Cross-seed stability | Spearman ρ = 0.876 between seeds 0 and 7 |
+
+**All four PASS.** The δ_4 magnitude (~0.04) is comparable to
+the calibration-probe scale, confirming the previous 60×
+calibration-vs-production gap was an artifact of measuring
+different things.
+
+#### 70B + GSM8K-Hard re-run
+
+At n=200 ``max_num_seqs=1`` with τ_budget=0.022:
+
+| run | bits | acc | Δ vs INT4 (95% CI) | McNemar p |
+|:--|--:|--:|:--|--:|
+| FP16        | 16.00 | 0.510 | +0.015 (±0.033) | 0.55 |
+| static_int4 |  4.00 | 0.495 | (baseline)      | —    |
+| EchoKV-3C abs-canary τ=0.022 | 5.70 | 0.505 | +0.010 (±0.037) | 0.79 |
+
+The tier vector ``{INT4:46, INT8:34, INT2:0}`` is reproducible
+from n=50 → n=200 (identical pattern). No INT2 cascade. No INT8
+cascade. The closed-loop framework is empirically intact.
+
+The accuracy effect, however, is **below the noise floor at
+n=200**: paired Δ vs static_int4 is +0.010 with 95% CI
+[−0.027, +0.047]. The static_int4 vs FP16 deficit on this
+n=200 mns=1 paired set is also non-significant (Δ=−0.015,
+p=0.55) — smaller than the n=500 mns=8 finding of −0.022 with
+p=0.052. The honest summary: the workload-level effect is
+small enough that confirming a Pareto win on 70B+GSM8K-Hard
+requires either a much larger n or a workload with a larger
+static-INT4 deficit.
+
+#### What this means for the architecture
+
+The absolute-canary sensor is the right design. It removes
+three classes of measurement artifact (T=1 collapse,
+cache-state feedback, calibration-vs-production scale gap) and
+produces a stable, batch-independent, layer-intrinsic signal.
+The closed-loop framework operates correctly with this sensor:
+it produces a meaningful non-uniform tier vector that survives
+configuration changes and replication. What it does *not* do is
+manufacture a large Pareto win on a workload where the
+underlying static-tier deficit is itself small. That's the right
+behaviour for a measurement system, not a failure of the design.

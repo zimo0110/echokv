@@ -343,6 +343,8 @@ class CanaryHarness:
         multi_precision: bool = False,
         tau_budget: float = 0.02,
         monotonicity_check: bool = True,
+        absolute_canary: bool = False,
+        kref_window_size: int = 64,
         seed: int = 0,
     ) -> None:
         self.llm = llm
@@ -424,6 +426,21 @@ class CanaryHarness:
         self.monotonicity_check = bool(monotonicity_check)
         # Per-(layer, tier) EMA, only populated when multi_precision is on.
         self._mp_estimator: Optional[MultiPrecisionEstimator] = None
+        # Absolute-canary mode (ARCHITECTURE.md § 9.9):
+        # measure δ_absolute = KL(softmax(Q · quant(K_ref)^T) ‖ softmax(Q · K_ref^T))
+        # against a sliding-window FP16 K reference. Decouples the canary's
+        # measurement from cache state and from batch size T (T_key = window
+        # size, not max_num_seqs). Closes the T=1 collapse mode and breaks
+        # the cache-state feedback loop simultaneously.
+        self.absolute_canary = bool(absolute_canary)
+        if kref_window_size < 2:
+            raise ValueError("kref_window_size must be >= 2")
+        self.kref_window_size = int(kref_window_size)
+        # Lazy per-layer state. Populated on first pre-hook fire so we can
+        # use the actual tensor dtype/device. Keys are layer_id.
+        self._kref_buf: dict[int, torch.Tensor] = {}
+        self._kref_fill: dict[int, int] = {}
+        self._kref_write_idx: dict[int, int] = {}
 
         # Resolve the model nn.Module. Two construction paths:
         # - ``llm=<vllm.LLM>`` (TP=1, in-proc): unpack the rank-0 model
@@ -529,6 +546,87 @@ class CanaryHarness:
         self.remove()
 
     # ------------------------------------------------------------------
+    # K_ref sliding-window buffer (absolute-canary mode)
+    # ------------------------------------------------------------------
+
+    def _kref_update(
+        self,
+        layer_id: int,
+        key: torch.Tensor,
+        num_kv_heads: int,
+    ) -> None:
+        """Append the current pre-tier-application K projection rows to
+        the layer's sliding-window FP16 buffer.
+
+        Buffer is a circular ring of ``kref_window_size`` rows, each
+        ``(num_kv_heads, head_size)``. The order of rows in the buffer
+        is irrelevant for the canary's KL computation (softmax over the
+        key axis is permutation-invariant), so we do not need to
+        track row insertion order — just keep the latest N rows.
+
+        Idempotent / lazy: allocates the buffer on first call.
+        """
+        if not self.absolute_canary:
+            return
+        # Bring K to (T, num_kv_heads, head_size)
+        if key.dim() == 2:
+            T, hd = key.shape
+            head_size = hd // num_kv_heads
+            k_thd = key.view(T, num_kv_heads, head_size)
+        elif key.dim() == 3:
+            k_thd = key
+        else:
+            return  # unexpected shape; bail silently
+        T = k_thd.shape[0]
+        head_size = k_thd.shape[-1]
+
+        # Lazy-allocate buffer matching the K's dtype/device.
+        if layer_id not in self._kref_buf:
+            self._kref_buf[layer_id] = torch.zeros(
+                self.kref_window_size, num_kv_heads, head_size,
+                dtype=key.dtype, device=key.device,
+            )
+            self._kref_fill[layer_id] = 0
+            self._kref_write_idx[layer_id] = 0
+
+        buf = self._kref_buf[layer_id]
+        size = buf.shape[0]
+        write_idx = self._kref_write_idx[layer_id]
+
+        if T >= size:
+            # Replace the entire buffer with the most recent ``size`` rows.
+            buf.copy_(k_thd[-size:].detach())
+            self._kref_fill[layer_id] = size
+            self._kref_write_idx[layer_id] = 0
+            return
+
+        # Insert T rows starting at write_idx; wrap around if needed.
+        end = write_idx + T
+        if end <= size:
+            buf[write_idx:end].copy_(k_thd.detach())
+        else:
+            split = size - write_idx
+            buf[write_idx:].copy_(k_thd[:split].detach())
+            buf[:T - split].copy_(k_thd[split:].detach())
+        self._kref_write_idx[layer_id] = end % size
+        self._kref_fill[layer_id] = min(size, self._kref_fill[layer_id] + T)
+
+    def _kref_view(self, layer_id: int) -> Optional[torch.Tensor]:
+        """Return the filled portion of the per-layer K_ref buffer, or
+        None if the buffer hasn't been populated yet. Order is undefined
+        (circular insertion); softmax-over-keys is permutation-invariant
+        so this doesn't matter for the canary's KL computation."""
+        buf = self._kref_buf.get(layer_id)
+        if buf is None:
+            return None
+        fill = self._kref_fill[layer_id]
+        if fill < 2:
+            return None  # need at least 2 rows for a non-trivial softmax
+        if fill >= buf.shape[0]:
+            return buf
+        return buf[:fill]
+
+    # ------------------------------------------------------------------
     # hook
     # ------------------------------------------------------------------
 
@@ -553,6 +651,13 @@ class CanaryHarness:
                 value = args[2] if len(args) >= 3 else None
             except Exception:
                 return None
+            # 0) Absolute-canary mode: append the FP16 K (pre-tier-app) to
+            #    the sliding-window K_ref buffer. No-op when flag is off.
+            self._kref_update(
+                layer_id=layer_id,
+                key=key,
+                num_kv_heads=num_kv_heads or num_heads,
+            )
             # 1) Read-only canary fire on the original (FP16) K so the
             #    measurement is on the unquantised signal.
             self._maybe_fire(
@@ -751,7 +856,20 @@ class CanaryHarness:
             try:
                 with torch.no_grad():
                     q = _to_bhsd(query.detach(), num_heads).float()       # (1, H, T, D)
-                    k = _to_bhsd(key.detach(), num_kv_heads).float()       # (1, H_kv, T, D)
+                    if self.absolute_canary:
+                        # Use the sliding-window FP16 K_ref instead of
+                        # the current step's K. Decouples the canary
+                        # measurement from cache state and from batch
+                        # size T. Bail if the buffer hasn't filled yet
+                        # (need at least 2 rows for a non-trivial KL).
+                        kref = self._kref_view(layer_id)
+                        if kref is None:
+                            return
+                        # kref shape: (N_filled, num_kv_heads, head_size).
+                        # Reshape to (1, H_kv, N, D).
+                        k = kref.unsqueeze(0).permute(0, 2, 1, 3).float()
+                    else:
+                        k = _to_bhsd(key.detach(), num_kv_heads).float()   # (1, H_kv, T, D)
                     if k.shape[1] != q.shape[1]:
                         rep = q.shape[1] // k.shape[1]
                         k = k.repeat_interleave(rep, dim=1)

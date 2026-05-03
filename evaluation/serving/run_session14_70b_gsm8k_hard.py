@@ -47,6 +47,7 @@ from evaluation.motivation.workloads import _gsm8k_hard_stream, Request
 from evaluation.serving.run_session8 import RunResult, run_one, warmup
 from evaluation.serving.run_session14_gsm8k_hard import materialize_chat_prompts
 from evaluation.serving.static_int4_tp import install_static_int4_hooks
+from evaluation.serving.static_int8_tp import install_static_int8_hooks
 
 
 log = logging.getLogger("session14_70b_gsm8k_hard")
@@ -65,6 +66,12 @@ def install_static_int4_via_apply_model(llm: Any) -> list[int]:
     return counts
 
 
+def install_static_int8_via_apply_model(llm: Any) -> list[int]:
+    counts = llm.apply_model(install_static_int8_hooks)
+    log.info("static_int8: installed hooks per rank: %s", counts)
+    return counts
+
+
 def run_phase(
     llm: Any,
     *,
@@ -80,6 +87,7 @@ def run_phase(
     cells: list[dict] = []
 
     int4_installed = False
+    int8_installed = False
     for cfg in configs:
         if cfg == "fp16":
             log.info("=== fp16  n=%d ===", n_prompts)
@@ -105,6 +113,20 @@ def run_phase(
             )
             cells.append({**asdict(res), "config": "static_int4"})
             log.info("    static_int4: acc=%.3f wall=%.1fs",
+                     res.accuracy, res.wall_clock_s)
+        elif cfg == "static_int8":
+            log.info("=== static_int8  n=%d ===", n_prompts)
+            if not int8_installed:
+                install_static_int8_via_apply_model(llm)
+                int8_installed = True
+            res = run_one(
+                llm, prompts,
+                label=f"static_int8_70b_gsm8k_hard",
+                max_new_tokens=max_new_tokens,
+                harness=None,
+            )
+            cells.append({**asdict(res), "config": "static_int8"})
+            log.info("    static_int8: acc=%.3f wall=%.1fs",
                      res.accuracy, res.wall_clock_s)
         else:
             raise ValueError(f"unknown config: {cfg}")
@@ -132,8 +154,10 @@ def main(argv: Optional[list[str]] = None) -> int:
     p.add_argument(
         "--configs", nargs="+",
         default=["fp16", "static_int4"],
-        choices=["fp16", "static_int4"],
-        help="order matters; INT4 hooks are sticky once installed",
+        choices=["fp16", "static_int4", "static_int8"],
+        help="order matters; INT4/INT8 hooks are sticky once installed. "
+             "Note: cannot mix int4 and int8 hooks in the same process; "
+             "run them in separate invocations.",
     )
     p.add_argument(
         "--out", type=Path,

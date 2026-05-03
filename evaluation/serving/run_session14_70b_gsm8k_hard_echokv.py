@@ -151,6 +151,17 @@ def main(argv: Optional[list[str]] = None) -> int:
              "static-INT2 EMA mean (≈0.36, acc=0.05).",
     )
     p.add_argument(
+        "--absolute-canary", action="store_true",
+        help="use the sliding-window absolute-KL sensor (ARCHITECTURE.md § "
+             "9.9). Decouples the canary measurement from cache state and "
+             "from batch size T. Fixes the T=1 INT2 cascade observed in "
+             "Phase-4 max_num_seqs=1 runs.",
+    )
+    p.add_argument(
+        "--kref-window-size", type=int, default=64,
+        help="K_ref sliding-window size when --absolute-canary is on.",
+    )
+    p.add_argument(
         "--out", type=Path,
         default=Path("results/serving/session14_70b/echokv_3c_n100.json"),
     )
@@ -204,6 +215,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             "freeze_controller": False,
             "multi_precision": a.multi_precision,
             "tau_budget": a.tau_budget,
+            "absolute_canary": a.absolute_canary,
+            "kref_window_size": a.kref_window_size,
             "seed": a.seed,
         },
     )
@@ -273,6 +286,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             "freeze_controller": True,
             "multi_precision": a.multi_precision,
             "tau_budget": a.tau_budget,
+            "absolute_canary": a.absolute_canary,
+            "kref_window_size": a.kref_window_size,
             "seed": a.seed + 1,
         },
     )
@@ -351,12 +366,101 @@ def main(argv: Optional[list[str]] = None) -> int:
           f"vs KIVI-4: {proj['savings_vs_kivi4_pct']:+.1f}%)")
     print(f"accuracy:    {measure_result.accuracy:.3f}")
     print("=" * 64)
-    print("Compare against the n=100 reference cell")
-    print("(results/serving/session14_70b/gsm8k_hard_n100.json):")
-    print("    fp16:        0.570")
-    print("    static_int4: 0.540")
-    print("=" * 64)
+    # Look up the matching reference cell (FP16 / static_int4 at the
+    # same n) and run a paired McNemar test if the file exists.
+    _print_paired_comparison(
+        ech_scores={r["request_id"]: r["correct"]
+                    for r in measure_result.per_request},
+        n=a.n_prompts,
+        max_num_seqs=a.max_num_seqs,
+    )
     return 0
+
+
+def _find_reference_file(n: int, max_num_seqs: int) -> Optional[Path]:
+    """Best-effort lookup of FP16+INT4 reference cells at the same n
+    and protocol (max_num_seqs). Returns ``None`` if no matching file
+    is found — caller should print a soft note rather than fail."""
+    base = Path("results/serving/session14_70b")
+    candidates = [
+        # n=200 mns=1 publication runs are split across two files
+        (base / "publication" / "fp16_n200_seq1.json", n == 200 and max_num_seqs == 1),
+        # The phase-2 batched n-sweep is one file with three cells
+        (base / f"gsm8k_hard_n{n}.json", max_num_seqs != 1),
+        # Try the smaller-n batched files as fallback
+        (base / "gsm8k_hard.json", n == 20),
+    ]
+    for path, _hint in candidates:
+        if path.exists():
+            return path
+    return None
+
+
+def _print_paired_comparison(
+    *, ech_scores: dict, n: int, max_num_seqs: int,
+) -> None:
+    """If a reference file exists at the matching (n, mns) protocol,
+    print a paired McNemar comparison. Otherwise print a soft note."""
+    ref_path = _find_reference_file(n, max_num_seqs)
+    if ref_path is None:
+        print(f"No paired reference found for n={n} mns={max_num_seqs}; "
+              f"skipping comparison.")
+        print("=" * 64)
+        return
+
+    print(f"Paired comparison vs reference cells in:")
+    print(f"  {ref_path}")
+    blob = json.loads(ref_path.read_text())
+
+    def _scores(b: dict, cfg: str) -> Optional[dict]:
+        # gsm8k_hard driver: top-level "cells", each with config + per_request
+        if "cells" in b:
+            for c in b["cells"]:
+                if c.get("config") == cfg:
+                    return {r["request_id"]: r["correct"]
+                            for r in c["per_request"]}
+            return None
+        # publication driver: single config per file
+        if "measurement" in b:
+            m = b["measurement"]
+            return {r["request_id"]: r["correct"] for r in m["per_request"]}
+        return None
+
+    fp = _scores(blob, "fp16")
+    i4 = _scores(blob, "static_int4")
+    # If the n=200 mns=1 path was used, FP16 and INT4 are in separate
+    # files. Try to find INT4 alongside.
+    if fp is not None and i4 is None:
+        sib = ref_path.parent / "int4_n200_seq1.json"
+        if sib.exists():
+            i4_blob = json.loads(sib.read_text())
+            i4 = _scores(i4_blob, "static_int4") or _scores(i4_blob, "fp16")
+
+    import math as _math
+
+    def _mcnemar(a: dict, b: dict) -> tuple:
+        common = sorted(set(a) & set(b))
+        bw = sum(1 for k in common if b[k] < a[k])
+        cw = sum(1 for k in common if b[k] > a[k])
+        nd = bw + cw
+        if nd > 1:
+            kk = max(bw, cw)
+            p_one = sum(_math.comb(nd, i) * 0.5 ** nd for i in range(kk, nd + 1))
+            p = min(2 * p_one, 1.0)
+        else:
+            p = 1.0
+        delta = (cw - bw) / len(common) if common else 0.0
+        return bw, cw, p, delta, len(common)
+
+    print(f"  {'comparison':<22} {'b/c':<10} {'McNemar p':<11} {'paired Δ':>9}")
+    print("  " + "-" * 56)
+    if fp:
+        bw, cw, p, d, n_paired = _mcnemar(fp, ech_scores)
+        print(f"  {'EchoKV-3C vs FP16':<22} {bw}/{cw:<8} {p:<11.4f} {d:+.4f}")
+    if i4:
+        bw, cw, p, d, n_paired = _mcnemar(i4, ech_scores)
+        print(f"  {'EchoKV-3C vs INT4':<22} {bw}/{cw:<8} {p:<11.4f} {d:+.4f}")
+    print("=" * 64)
 
 
 if __name__ == "__main__":

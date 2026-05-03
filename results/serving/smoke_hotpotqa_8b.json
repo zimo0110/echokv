@@ -1,0 +1,76 @@
+{
+  "session": "20260428_14_70b_hotpotqa",
+  "model": "/mnt/nvme_tmp/nazar_hf/hub/models--NousResearch--Meta-Llama-3.1-8B-Instruct/snapshots/d10aef7999a2b5ba950ab3974312feeedbfe0b77",
+  "tensor_parallel_size": 2,
+  "max_model_len": 4096,
+  "max_new_tokens": 64,
+  "n_prompts": 4,
+  "max_num_seqs": 4,
+  "configs": [
+    "fp16"
+  ],
+  "cells": [
+    {
+      "label": "fp16_70b_hotpotqa",
+      "wall_clock_s": 0.2611769400537014,
+      "n_prompts": 4,
+      "completed": 4,
+      "n_correct": 1.0,
+      "accuracy": 0.25,
+      "p50_tpot_s": null,
+      "p99_tpot_s": null,
+      "mean_ttft_s": null,
+      "total_input_tokens": 6372,
+      "total_output_tokens": 21,
+      "output_throughput_tps": 80.40526087671493,
+      "per_request": [
+        {
+          "request_id": "hotpotqa:5abf63f15542997ec76fd3ea",
+          "prompt_tokens": 1965,
+          "completion_tokens": 3,
+          "correct": 0.0,
+          "arrival_t": 0.0,
+          "first_scheduled_t": null,
+          "first_token_t": null,
+          "finished_t": null,
+          "completion_text": "1923"
+        },
+        {
+          "request_id": "hotpotqa:5a7555215542996c70cfaee1",
+          "prompt_tokens": 1626,
+          "completion_tokens": 3,
+          "correct": 0.0,
+          "arrival_t": 0.0,
+          "first_scheduled_t": null,
+          "first_token_t": null,
+          "finished_t": null,
+          "completion_text": "1966"
+        },
+        {
+          "request_id": "hotpotqa:5a8595a85542992a431d1b48",
+          "prompt_tokens": 1900,
+          "completion_tokens": 11,
+          "correct": 1.0,
+          "arrival_t": 0.0,
+          "first_scheduled_t": null,
+          "first_token_t": null,
+          "finished_t": null,
+          "completion_text": "The Bahamian island of Great Exuma."
+        },
+        {
+          "request_id": "hotpotqa:5a7fb7985542994857a767d2",
+          "prompt_tokens": 881,
+          "completion_tokens": 4,
+          "correct": 0.0,
+          "arrival_t": 0.0,
+          "first_scheduled_t": null,
+          "first_token_t": null,
+          "finished_t": null,
+          "completion_text": "Claudio L\u00f3pez"
+        }
+      ],
+      "canary_report": null,
+      "config": "fp16"
+    }
+  ]
+}

@@ -392,6 +392,120 @@ def _gsm8k_hard_stream(n: int, seed: int) -> Iterator[Request]:
         )
 
 
+# ---------------------------------------------------------------------------
+# HotpotQA (multi-hop reading comprehension)
+# ---------------------------------------------------------------------------
+#
+# 10 Wikipedia-style paragraphs (mix of supporting + distractor), one
+# question that requires combining facts from 2+ paragraphs. Hard-level
+# subset stresses multi-document reasoning. Different from RULER (pure
+# retrieval over synthetic filler) and GSM8K-Hard (single-document
+# arithmetic) — it tests the model's ability to integrate scattered
+# evidence under KV compression.
+#
+# Scoring: standard SQuAD-style normalized exact match (lowercase,
+# strip articles + punctuation, collapse whitespace). Token-level F1
+# would also work but exact-match is sharper for binary outcomes.
+
+
+def _normalize_answer(s: str) -> str:
+    """SQuAD/HotpotQA reference normalizer."""
+    s = s.lower()
+    # Strip punctuation
+    s = re.sub(r"[\(\)\[\]\.\,\!\?\;\:\"\'\-]", " ", s)
+    # Drop articles
+    s = re.sub(r"\b(a|an|the)\b", " ", s)
+    # Collapse whitespace
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
+def _hotpotqa_stream(
+    n: int, seed: int, level: Optional[str] = "hard",
+) -> Iterator[Request]:
+    """Multi-hop QA from HotpotQA distractor split.
+
+    ``level`` filters to a difficulty bucket (``"easy"``, ``"medium"``,
+    ``"hard"``, or ``None`` for all). Hard is the multi-hop subset
+    that genuinely requires combining facts.
+    """
+    from datasets import load_dataset
+    ds = load_dataset("hotpot_qa", "distractor", split="validation")
+    rng = random.Random(seed)
+    indices = list(range(len(ds)))
+    rng.shuffle(indices)
+    yielded = 0
+    for di in indices:
+        if yielded >= n:
+            break
+        row = ds[di]
+        if level is not None and row.get("level") != level:
+            continue
+        question = row["question"]
+        gold = row["answer"]
+        # context is {"title": [...], "sentences": [[...], ...]}
+        ctx = row["context"]
+        titles = ctx["title"]
+        sentences = ctx["sentences"]
+        # Build numbered paragraphs.
+        paragraphs = []
+        for i, (title, sents) in enumerate(zip(titles, sentences)):
+            body = " ".join(sents)
+            paragraphs.append(f"[{i+1}] {title}: {body}")
+        context_str = "\n\n".join(paragraphs)
+
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "Answer the question using only the provided "
+                    "passages. Output only the final answer, as briefly "
+                    "as possible (a single name, phrase, or yes/no). "
+                    "Do not output reasoning."
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Passages:\n{context_str}\n\n"
+                    f"Question: {question}\nAnswer:"
+                ),
+            },
+        ]
+
+        def make_score(gold_str: str) -> Callable[[str], float]:
+            gold_norm = _normalize_answer(gold_str)
+            def score(completion: str) -> float:
+                # Take the first non-empty line as the model's answer.
+                ans = completion.strip().split("\n")[0].strip()
+                # Strip any "Answer:" prefix the model echoes back.
+                ans = re.sub(r"^answer:\s*", "", ans, flags=re.IGNORECASE)
+                cand_norm = _normalize_answer(ans)
+                if not cand_norm or not gold_norm:
+                    return 0.0
+                # Normalized EM: exact match after normalization.
+                if cand_norm == gold_norm:
+                    return 1.0
+                # Substring containment (for cases where the model
+                # outputs "The answer is X" → catches X if X is in
+                # the candidate after stripping "answer is").
+                if gold_norm in cand_norm:
+                    return 1.0
+                return 0.0
+            return score
+
+        prompt = f"[HotpotQA] {question[:80]}..."
+        yield Request(
+            workload="hotpotqa",
+            request_id=f"hotpotqa:{row['id']}",
+            prompt=prompt,
+            reference=gold,
+            score_fn=make_score(gold),
+            messages=messages,
+        )
+        yielded += 1
+
+
 def _gsm8k_stream(n: int, seed: int) -> Iterator[Request]:
     from datasets import load_dataset  # local import: keep import-time cheap
 

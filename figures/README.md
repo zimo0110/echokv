@@ -250,7 +250,7 @@ fig5_70b_results (n=500 mns=8 paired):
                   | EchoKV vs INT4 +0.022 (p=0.061) — mirror recovery
                   | EchoKV vs FP16  0.000 (p=1.00)  — matches
 
-fig6_workload_adaptive:
+fig6_workload_adaptive (frozen-tier protocol):
   GSM8K-Hard (n=500 mns=8 paired):
     FP16=0.488  INT4=0.466  INT8=(n/a)  EchoKV-3C=0.488
     EchoKV bits = 5.45  ({INT4:51, INT8:29}, 65.9% savings vs FP16)
@@ -267,6 +267,29 @@ fig6_workload_adaptive:
   / 0.124. Pinsker-predicted τ₀·√(L/L₀) at those L = 0.0070 / 0.0135
   / 0.124 (RULER lies on the curve; the two short-context workloads
   use the τ₀ floor, which dominates at small L).
+
+continuously-dynamic protocol (Phase 8 — load-bearing for the
+"closed-loop / dynamic" abstract claim):
+  GSM8K-Hard (n=500 mns=8, --continuous-dynamic, τ=0.022):
+    acc=0.486 (frozen 0.488, paired McNemar p=1.00)
+    seeded {INT4:37, INT8:43} = 6.15 bits  →
+    final consolidated {INT4:65, INT8:15} = 4.75 bits
+    per-rank avg = 4.33 bits (4.20 / 4.20 / 4.38 / 4.42)
+    drift: 28 monotone INT8→INT4 downgrades, 0 upgrades
+  HotpotQA (n=500 mns=8, --continuous-dynamic, τ=0.022):
+    acc=0.686 (frozen 0.682, paired McNemar p=0.75 — directional bump)
+    seeded {INT4:67, INT8:13} = 4.65 bits  →
+    final consolidated {INT4:62, INT8:18} = 4.90 bits
+    per-rank avg = 4.40 bits (4.30 / 4.40 / 4.30 / 4.60)
+    drift: 4 INT8→INT4 + 9 INT4→INT8 upgrades (controller catches
+    layers warmup batch missed)
+  RULER@128K (n=20 mns=1, --continuous-dynamic, τ=0.124):
+    acc=1.000 (frozen 1.000, paired McNemar p=1.00)
+    seeded = final = {INT4:79, INT2:1} = 3.98 bits  (zero drift)
+    per-rank avg = 3.97 bits (3.95 / 3.98 / 3.98 / 3.98)
+  Headline per-rank bits across three workloads (dynamic protocol):
+    GSM8K-Hard ~4.33  HotpotQA ~4.40  RULER@128K ~3.97
+    (≈73% / 72% / 75% memory savings vs FP16)
 ```
 
 ## Suggested captions
@@ -324,22 +347,36 @@ fig6_workload_adaptive:
 **Figure 6**:
 > Workload-adaptive bit allocation and τ(L) scaling.
 > Llama-3.1-70B-Instruct on three workload classes spanning short to
-> long context. (a) EchoKV-3C matches FP16 accuracy on all three
-> workloads (GSM8K-Hard 0.488 vs 0.488 at n=500 mns=8; HotpotQA
-> 0.682 vs 0.682 at n=500 mns=8; RULER@128K 1.000 vs 1.000 at n=20
-> mns=1). (b) EchoKV-3C's chosen bit budget is workload-adaptive:
-> 5.45 bits ({INT4:51, INT8:29}) on GSM8K-Hard, where INT4 has a
-> measurable deficit; 4.55 bits ({INT4:69, INT8:11}) on HotpotQA,
-> where INT4 is sufficient; 3.98 bits ({INT4:79, INT2:1}) on
-> RULER@128K, where INT4 already saturates accuracy. The same
-> controller produces all three allocations — no per-workload
-> manual tuning. (c) The τ-budget itself scales as
-> τ(L) = τ₀·√(L/L₀), derived from Pinsker's inequality plus the
-> attention-sparsity assumption (§4.X). The dashed Pinsker curve
-> (τ₀=0.022, L₀=4 000) passes through the RULER@128K marker
-> (τ=0.124), confirming the predicted scaling empirically; both
-> short-context workloads run at the τ₀ floor where the curve is
-> dominated by L₀.
+> long context, frozen-tier measurement protocol. (a) EchoKV-3C
+> matches FP16 accuracy on all three workloads (GSM8K-Hard 0.488 vs
+> 0.488 at n=500 mns=8; HotpotQA 0.682 vs 0.682 at n=500 mns=8;
+> RULER@128K 1.000 vs 1.000 at n=20 mns=1). (b) EchoKV-3C's chosen
+> bit budget is workload-adaptive: 5.45 bits ({INT4:51, INT8:29})
+> on GSM8K-Hard, where INT4 has a measurable deficit; 4.55 bits
+> ({INT4:69, INT8:11}) on HotpotQA, where INT4 is sufficient; 3.98
+> bits ({INT4:79, INT2:1}) on RULER@128K, where INT4 already
+> saturates accuracy. The same controller produces all three
+> allocations — no per-workload manual tuning. (c) The τ-budget
+> itself scales as τ(L) = τ₀·√(L/L₀), derived from Pinsker's
+> inequality plus the attention-sparsity assumption (§4.X). The
+> dashed Pinsker curve (τ₀=0.022, L₀=4 000) passes through the
+> RULER@128K marker (τ=0.124), confirming the predicted scaling
+> empirically; both short-context workloads run at the τ₀ floor
+> where the curve is dominated by L₀. Continuously-dynamic
+> measurements (Phase 8, §6.X) tighten the per-rank bit-budget on
+> the two short-context workloads to ~4.33 / ~4.40 bits at the same
+> accuracy; RULER@128K stays at zero drift.
+
+## Pending follow-ups
+
+- **Figure 7 candidate** — a frozen-vs-continuously-dynamic
+  comparison panel showing the three drift signatures (GSM8K-Hard
+  monotone-down, HotpotQA mostly-up, RULER@128K zero), plus a
+  per-rank vs consolidated bit-budget table. Source data already
+  on disk in
+  ``results/serving/session14_70b/{,hotpotqa_n500_mns8/}*continuous_dynamic.json``.
+  Not yet added because Phase 8 just landed; flag for the next
+  figure-regeneration pass once the §6.X narrative is stable.
 
 ## Reproducibility
 

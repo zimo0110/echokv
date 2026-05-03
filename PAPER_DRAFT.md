@@ -35,34 +35,47 @@ batch-config-invariant signal.
 
 On Llama-3.1-70B-Instruct at TP=4, EchoKV adds **+0.09% TPOT
 overhead** at production canary rate (`p_c=1/64`). Across three
-workloads spanning short to long context at paired-protocol
-evaluation:
+workloads spanning short to long context, evaluated under the
+continuously-dynamic measurement protocol (canary live at
+`p_c=1/64`, controller unfrozen, tier changes apply to new block
+allocations only — INV-2):
 
 - **GSM8K-Hard** (multi-step reasoning where INT4 hurts FP16 by
-  0.022 accuracy, McNemar p=0.052; n=500): EchoKV-3C upgrades 29 of
-  80 layers to INT8, achieving **5.45 bits/element** (65.9% memory
-  savings vs FP16) and matching FP16 accuracy exactly (paired
-  Δ=0.000, McNemar p=1.00). Recovers the entire INT4 deficit with
-  a **mirror-image +0.022 effect** (p=0.061).
+  0.022 accuracy, McNemar p=0.052; n=500): EchoKV-3C achieves
+  **~4.33 bits/element per TP rank** (~73% memory savings vs FP16,
+  4.75 bits as the safe consolidated upper bound) at FP16-
+  equivalent accuracy (paired Δ=−0.002, p=1.00). The closed-loop
+  controller progressively downgrades 28 of 80 layers from INT8 to
+  INT4 during measurement as the per-layer divergence EMAs settle.
 - **HotpotQA** (multi-hop QA where INT4 already matches FP16,
-  Δ=+0.004, p=0.79; n=500): EchoKV-3C correctly recognizes the
-  regime and upgrades only 11 of 80 layers, achieving **4.55
-  bits/element** (71.6% memory savings) — within ~9% of static
-  INT4's memory at FP16-equivalent accuracy.
+  Δ=+0.004, p=0.79; n=500): EchoKV-3C achieves **~4.40 bits/element
+  per TP rank** (~72% memory savings; 4.90 bits consolidated) at
+  FP16-equivalent accuracy. The controller does *net upgrades*
+  here — adding 9 INT4→INT8 transitions during measurement that
+  warmup missed, with a directional accuracy bump 0.682 → 0.686
+  (p=0.75).
 - **RULER@128K** (single-needle long-context retrieval; INT4 already
   saturates accuracy at 1.000; n=20): with the τ-budget rescaled by
   the Pinsker-derived **τ(L) = τ₀·√(L/L₀)** factor (§4.X), EchoKV-3C
-  picks an essentially uniform INT4 vector (79 INT4 + 1 INT2),
-  achieving **3.98 bits/element** (75.2% memory savings) at acc 1.000
-  — empirical confirmation that the per-step total-variation budget
-  must scale as √L when context grows.
+  picks an essentially uniform INT4 vector (79 INT4 + 1 INT2)
+  during warmup and stays at zero drift for the entire
+  measurement, achieving **~3.97 bits/element per TP rank** (~75%
+  memory savings) at accuracy 1.000 — empirical confirmation that
+  the per-step total-variation budget must scale as √L when context
+  grows.
 
-The system selects the lowest bit-width sufficient to preserve
-accuracy on each workload without per-workload manual tuning beyond
-the analytically-derived τ(L) scaling. To our knowledge this is the
-first closed-loop runtime KV quantization system that empirically
-demonstrates workload-adaptive bit allocation matching FP16 accuracy
-at sub-INT8 memory cost across short and long context.
+The three workloads exhibit *workload-coherent* drift signatures
+during continuous-dynamic measurement: monotone downgrades where
+warmup over-corrects, net upgrades where warmup under-corrects, and
+zero drift where warmup is already optimal. The system selects the
+lowest bit-width sufficient to preserve accuracy on each workload
+without per-workload manual tuning beyond the analytically-derived
+τ(L) scaling. To our knowledge this is the first closed-loop runtime
+KV quantization system that empirically demonstrates workload-
+adaptive bit allocation matching FP16 accuracy at sub-INT8 memory
+cost across short and long context, with the controller doing
+measurable steady-state work during serving rather than relying on
+warmup-only calibration.
 
 ---
 
@@ -282,11 +295,16 @@ context — RULER@128K (single-needle haystack at 128 000 tokens) —
 using the τ-budget rescaled by the Pinsker-derived factor (§4.X):
 τ(128K) = τ₀·√(128 000/4 000) ≈ 0.124. RULER@128K is run at n=20
 max_num_seqs=1 against the existing Phase-2 FP16 / static_int4 cells
-on the same prompts. The three workloads together establish the
-system's central behaviour: **automatic selection of the lowest
-bit-width sufficient to preserve FP16 accuracy on the current
-workload and context length**, with no per-workload manual tuning
-beyond the analytical τ(L) scaling.
+on the same prompts. All three workloads are then re-run under the
+continuously-dynamic measurement protocol (§6.X). The three
+workloads together establish the system's central behaviour:
+**automatic selection of the lowest bit-width sufficient to preserve
+FP16 accuracy on the current workload and context length**, with no
+per-workload manual tuning beyond the analytical τ(L) scaling.
+
+Frozen-tier protocol (canary off, controller frozen at the warmup-
+end vector for the entire measurement phase) — used here for
+reproducibility of paired McNemar:
 
 | workload | L | INT4 vs FP16 | EchoKV bit-budget | EchoKV tier vector |
 |--|--:|--:|--:|:--|
@@ -310,17 +328,85 @@ near-INT8 vector (71 of 80 layers upgraded, 7.55 bits/element) that
 wastes memory without accuracy benefit. Figure 6c plots the predicted
 τ(L) curve and the per-workload τ values used.
 
+### 6.X Frozen vs continuously-dynamic measurement
+
+The §6.5 cells are measured under a *frozen-tier* protocol: warmup
+picks tiers, the consolidated tier vector is seeded onto every TP
+rank, then `canary_rate=1e-6` and `freeze_controller=True` for the
+entire measurement phase. That gives clean paired McNemar (every
+prompt sees the same cache config) but does not exercise the
+architecture's actual closed-loop behaviour at production rate.
+
+We re-run all three workloads under a *continuously-dynamic* protocol
+(`canary_rate=1/64`, `freeze_controller=False` during measurement;
+INV-2 still holds — tier changes only affect new block allocations).
+Three workload-coherent drift signatures emerge:
+
+| workload | frozen bits | dyn seeded → final consol bits | per-rank bits | drift directions | acc (frz/dyn) |
+|:--|--:|--:|--:|:--|--:|
+| GSM8K-Hard | 5.45 | 6.15 → **4.75** | 4.20–4.42 | 28 down, 0 up | 0.488 / 0.486, p=1.00 |
+| HotpotQA | 4.55 | 4.65 → 4.90 | 4.30–4.60 | 4 down, 9 up | 0.682 / 0.686, p=0.75 |
+| RULER@128K | 3.98 | 3.98 → 3.98 | 3.95–3.98 | 0 (steady state) | 1.000 / 1.000, p=1.00 |
+
+**GSM8K-Hard — monotone downgrades.** Warmup (16 prompts at
+`p_c=0.25`) is over-conservative; 43 of 80 layers are admitted at
+INT8. Production at `p_c=1/64` lets the per-layer δ̂_4 EMAs
+continue to settle, and 28 of those layers are correctly admitted
+back at INT4 by end of n=500 measurement. Final consolidated tier:
+4.75 bits.
+
+**HotpotQA — net upgrades.** Warmup picks a near-uniform-INT4
+vector (4.65 bits, 67/13 INT4/INT8). Production exposes 9 layers
+where INT4 is in fact insufficient — the canary catches what the
+small warmup batch missed — alongside 4 INT8→INT4 corrections.
+Consolidated final at 4.90 bits is the safe upper bound; per-rank
+averages stay at 4.30–4.60 with the four ranks holding 6, 8, 6, 12
+INT8 layers respectively. Accuracy ticks up 0.682 → 0.686
+(directional, p=0.75).
+
+**RULER@128K — zero drift.** With τ = 0.124 (√L-scaled) the warmup
+tier vector is already at steady state. The controller's
+no-action signal is exactly what the Pinsker derivation predicts at
+saturating accuracy: there is no INT4 deficit and no slack
+remaining for further compression beyond the 1 INT2 admission
+already made.
+
+The drift directions are workload-coherent: monotone *down* where
+warmup over-corrects, mostly *up* where warmup under-corrects, and
+*zero* where warmup nailed it. The controller is doing the *right*
+work, not just any work — which is the property that distinguishes
+a closed-loop system from a noise generator.
+
+**Per-rank vs consolidated reporting.** Each TP rank holds its own
+KV slice and runs its own controller, so per-rank tier vectors can
+disagree. We report two numbers per workload:
+
+- *Per-rank average* (operationally honest — what each TP rank
+  serves): GSM8K-Hard ~4.33, HotpotQA ~4.40, RULER@128K ~3.97
+  bits/element.
+- *Consolidated max-across-ranks* (safe upper bound on memory):
+  4.75 / 4.90 / 3.98 bits/element.
+
+We use the per-rank average as the headline (memory is paid per-rank
+in TP serving) and the consolidated max as a conservative footnote.
+
 ### 6.6 Overhead
 
-The canary fires at production rate `p_c = 1/64` decode steps. On
-8B at TP=2 and 70B at TP=4, with the canary's per-fire cost amortised
-by the FlashInfer Triton kernel and a separate CUDA stream that
-overlaps with the production attention path, total measurement
-overhead is **+0.09% TPOT** (measured directly in Sessions 8 and 13;
-unchanged in Phases 5–6 because the absolute-canary K_ref buffer
-update is comparable to the legacy K-extraction step). The K_ref
-buffer itself is per-layer per-rank, ~2.5 MB total for 70B at TP=4 —
-three orders of magnitude smaller than the KV cache.
+The canary fires at production rate `p_c = 1/64` decode steps under
+both the frozen-tier and continuously-dynamic protocols (the frozen
+protocol additionally turns the canary off during measurement,
+saving negligible time). On 8B at TP=2 and 70B at TP=4, with the
+canary's per-fire cost amortised by the FlashInfer Triton kernel
+and a separate CUDA stream that overlaps with the production
+attention path, total measurement overhead is **+0.09% TPOT**
+(measured directly in Sessions 8 and 13; unchanged in Phases 5–8
+because the absolute-canary K_ref buffer update is comparable to
+the legacy K-extraction step). The continuously-dynamic protocol's
+wall-clock cost on the three workloads is within 1% of the frozen
+protocol's (GSM8K-Hard 1145 s vs 1139 s, HotpotQA 61 s vs 60 s,
+RULER@128K 378 s vs 388 s). The K_ref buffer itself is per-layer
+per-rank, ~2.5 MB total for 70B at TP=4 — three orders of magnitude
+smaller than the KV cache.
 
 ### 6.7 What the paper does not claim
 

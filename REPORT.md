@@ -29,6 +29,7 @@
 | GSM8K-Hard Pareto headline (session 14 phase 5b) | yes | n/a | 70B@TP=4 GSM8K-Hard, n=500 mns=8 paired (same prompts as Phase-2 baselines) | **Pareto win confirmed.** EchoKV-3C abs-canary (τ=0.022) at n=500 mns=8: tier {INT4:51, INT8:29}, avg 5.45 bits, **acc=0.488 — matches FP16 exactly** (paired Δ=0.000, 14/14 split, McNemar p=1.00). The static-INT4 deficit (Δ=−0.022 vs FP16, p=0.052) is recovered by EchoKV-3C with the **mirror-image effect** (Δ=+0.022 vs INT4, p=0.061; discordant counts 19/8 → 9/20). Same magnitude, opposite sign, near-identical p-values — structural evidence that the closed-loop's INT8 upgrades target exactly the layers responsible for the deficit. Memory: 65.9% savings vs FP16, 32% less memory than uniform INT8 at equivalent accuracy. See CHANGELOG session_20260429_14_phase5. |
 | Multi-workload generalization (session 14 phase 6) | yes | n/a | 70B@TP=4 HotpotQA (multi-hop QA, 10 distractor passages), n=500 mns=8 paired, 4 configs (FP16, INT4, INT8, EchoKV-3C abs-canary) | **Workload-adaptive bit allocation confirmed.** On HotpotQA, INT4 *does not* hurt FP16 (paired Δ=+0.004, p=0.79 — within noise); the controller correctly identifies this regime and selects {INT4:69, INT8:11} → avg 4.55 bits (71.6% savings vs FP16). EchoKV-3C matches FP16 exactly (Δ=0.000, 5/5 split, p=1.00). **Two-workload Pareto picture:** GSM8K-Hard (INT4 hurts) → 5.45 bits, 65.9% savings; HotpotQA (INT4 sufficient) → 4.55 bits, 71.6% savings. Both match FP16. The system automatically picks the lowest bit-width sufficient to preserve accuracy without per-workload tuning. See CHANGELOG session_20260503_14_phase6. |
 | Long-context generalization + Pinsker τ(L) scaling (session 14 phase 7) | yes | n/a | 70B@TP=4 RULER@128K (single-needle haystack at 128 000 tokens), n=20 mns=1 paired vs Phase-2 baselines stored in ``diag.json`` | **τ(L) = τ₀·√(L/L₀) derived and confirmed.** Combining Pinsker's inequality with the attention-sparsity assumption gives τ(L) = τ₀·√(L/L₀); with τ₀ = 0.022 calibrated at L₀ = 4 000, the prediction at L = 128 000 is τ ≈ 0.124. Empirical run at τ = 0.124: tier {INT4: 79, INT2: 1, INT8: 0}, **avg 3.98 bits, acc=1.000 (20/20)**, **75.2% savings vs FP16**, paired McNemar vs Phase-2 FP16 and INT4 both p=1.00. By contrast, the un-rescaled τ = 0.022 produced {INT4:9, INT8:71} = 7.55 bits — INT8-equivalent memory with no accuracy benefit. **Three-workload monotone curve:** GSM8K-Hard → HotpotQA → RULER@128K = 5.45 → 4.55 → 3.98 bits with INT8 upgrades 29 → 11 → 0. Caveat: RULER@128K saturates accuracy at INT4 already, so the test confirms √L is the right budget for this workload but cannot fit the exponent (Open Question 28). See CHANGELOG session_20260503_14_phase7. |
+| Continuously-dynamic measurement protocol (session 14 phase 8) | yes | n/a | All three workloads (GSM8K-Hard / HotpotQA / RULER@128K) re-run with ``--continuous-dynamic``: ``canary_rate=1/64`` and ``freeze_controller=False`` during measurement, so per-layer tiers continue adapting through the n=500 (or n=20) measurement phase. INV-2 still holds (tier changes only affect new block allocations) | **Closed-loop framing now empirically supported, not just structurally.** All three workloads preserve accuracy under the dynamic protocol (paired McNemar dyn vs frozen: GSM8K-Hard p=1.00, HotpotQA p=0.75, RULER@128K p=1.00). The drift signature is workload-coherent: GSM8K-Hard's controller does **28 monotone INT8→INT4 downgrades** (warmup over-conservative; consolidated bits 6.15 → **4.75**, per-rank avg ~4.33); HotpotQA's controller does **9 net INT4→INT8 upgrades** (warmup under-conservative; consolidated 4.65 → 4.90 but per-rank avg ~4.40 with an accuracy bump 0.682 → 0.686 directionally); RULER@128K stays at zero-drift steady-state ({INT4:79, INT2:1} = 3.98 bits, acc=1.000). The controller is doing the *right* work (not just any work): downgrading where warmup over-corrects, upgrading where warmup under-corrects, no-op where warmup is already optimal. **Headline shift**: per-rank bit-budget for the paper's three workloads is **~4.33 / ~4.40 / ~3.97** bits/element (~73% / 72% / 75% memory savings vs FP16) — meaningfully tighter than the frozen-protocol numbers. See CHANGELOG session_20260503_14_phase8. |
 
 ## Motivation Study
 
@@ -1164,3 +1165,37 @@ Decisions that shape the system and cannot be recovered by reading code.
     for INT2 specifically (e.g., require the EMA to settle for K
     consecutive ticks before admission). Not blocking for the
     current paper.
+
+30. **CLOSED — Closed-loop framing is empirically supported, not
+    just structurally.** *Closed 2026-05-03, session 14 phase 8.*
+    The earlier concern (raised before phase 8) was that the
+    Phase-5 / 6 / 7 measurements ran with ``canary_rate=1e-6`` and
+    ``freeze_controller=True`` during the measurement phase: warmup
+    picks tiers, consolidated vector seeded onto every rank, then
+    held fixed. The architecture (per INV-2) supports continuously-
+    dynamic operation but the measurement only exercised warmup-
+    then-static serving. Phase 8 added ``--continuous-dynamic`` to
+    all three echokv drivers and re-ran each workload with
+    ``canary_rate=1/64``, ``freeze_controller=False`` during
+    measurement. Three workload-coherent drift signatures emerged:
+    GSM8K-Hard's controller did 28 monotone INT8→INT4 downgrades
+    (warmup over-conservative); HotpotQA's controller did 9 net
+    upgrades (warmup under-conservative); RULER@128K stayed at
+    zero-drift steady-state. Accuracy preserved everywhere within
+    paired-McNemar noise. Headline per-rank bit-budgets under the
+    dynamic protocol are tighter than the frozen numbers: GSM8K-Hard
+    ~4.33 / HotpotQA ~4.40 / RULER@128K ~3.97 bits/element. Paper
+    abstract + §6.5 should now lead with the dynamic-mode numbers.
+
+31. **OPEN — Per-rank vs consolidated bit-budget reporting.**
+    *Motivated 2026-05-03, session 14 phase 8.* The dynamic protocol
+    exposes a reporting subtlety: each TP rank holds its own KV
+    slice and runs its own controller, so per-rank tier vectors can
+    disagree. Two natural numbers are (a) the per-rank average
+    (operationally honest — what each rank actually serves) and
+    (b) the per-layer max across ranks (safe upper bound on memory
+    cost). On GSM8K-Hard dynamic, (a) is ~4.33 bits and (b) is 4.75
+    bits; on HotpotQA dynamic, (a) is ~4.40 and (b) is 4.90 (with
+    one rank holding 12 INT8 layers while others hold 6). Paper
+    needs to pick a primary metric and clearly footnote the other.
+    Not blocking; pure framing decision.

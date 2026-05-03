@@ -3453,3 +3453,152 @@ Unchanged from Phase-6: 203 passed, 1 skipped. No new code paths
 exercised by the RULER@128K driver beyond the existing
 ``run_session8.make_ruler_prompts`` helper and the unchanged
 ``CanaryHarness`` plumbing.
+
+## [2026-05-03] - session_20260503_14_phase8 (continuously-dynamic measurement protocol — closed-loop framing now empirically supported)
+
+### Goal
+
+Phase-5 / Phase-6 / Phase-7 all measured EchoKV-3C under a *frozen-tier*
+protocol: warmup picks a tier vector, the consolidated vector is seeded
+onto every TP rank, ``canary_rate=1e-6`` and ``freeze_controller=True``
+during the n=500 (or n=20) measurement phase. That gives clean paired
+McNemar (every prompt sees the same cache config) but **does not
+exercise the architecture's actual closed-loop behaviour**. The paper
+abstract markets EchoKV as a closed-loop runtime system; the
+measurement only demonstrated warmup-then-static serving.
+
+This phase adds a continuously-dynamic measurement protocol
+(``--continuous-dynamic`` flag on all three echokv drivers) and runs
+all three workloads under it. INV-2 still holds: tier changes only
+affect new block allocations; existing blocks are never modified.
+
+### What was done
+
+1. **Driver edit**: added ``--continuous-dynamic`` and
+   ``--measurement-canary-rate`` (default 1/64) flags to
+   ``run_session14_70b_gsm8k_hard_echokv.py``,
+   ``run_session14_70b_hotpotqa_echokv.py``, and
+   ``run_session14_70b_ruler_echokv.py``. When set, Phase 3 runs at
+   ``canary_rate=1/64`` and ``freeze_controller=False`` instead of
+   ``1e-6`` / ``True``. Default behaviour (and every prior script that
+   doesn't pass the flag) is unchanged.
+2. **JSON schema additions**: dynamic runs save
+   ``measurement_protocol`` ("frozen-tiers" or "continuous-dynamic"),
+   ``measurement_canary_rate``, ``measurement_freeze_controller``, and
+   ``final_tiers_per_rank`` (the post-measurement tier vector per TP
+   rank). Lets analysis distinguish drift during measurement from
+   the warmup-end seed.
+3. **Three runs** via ``scripts/08_gsm8k_hard_continuous_dynamic.sh``
+   (~20 min) and ``scripts/09_hotpotqa_ruler_continuous_dynamic.sh``
+   (~10 min): GSM8K-Hard at τ=0.022, HotpotQA at τ=0.022, RULER@128K
+   at τ=0.124 (√L-scaled).
+
+### Results — paired frozen vs continuous-dynamic
+
+| workload | frozen bits / acc | dyn seeded → final consol bits | per-rank bits | drift |
+|:--|--:|--:|--:|:--|
+| GSM8K-Hard (n=500 mns=8) | 5.45 / 0.488 | 6.15 → **4.75** | 4.20–4.42 | 28 down, 0 up |
+| HotpotQA (n=500 mns=8) | 4.55 / 0.682 | 4.65 → 4.90 | 4.30–4.60 | 4 down, 9 up |
+| RULER@128K (n=20 mns=1) | 3.98 / 1.000 | 3.98 → 3.98 | 3.95–3.98 | 0 (steady state) |
+
+Paired McNemar dyn vs frozen, per-prompt outcomes:
+
+| workload | Δ acc | b/c | p |
+|:--|--:|:--:|--:|
+| GSM8K-Hard | −0.002 | 16/15 | 1.000 |
+| HotpotQA | +0.004 | 4/6 | 0.754 |
+| RULER@128K | 0.000 | 0/0 | 1.000 |
+
+**Three workload-coherent drift signatures**:
+
+- **GSM8K-Hard — monotone downgrades**. Warmup over-conservative
+  (43 of 80 layers admitted at INT8); during measurement at
+  ``p_c=1/64`` the EMAs continue to settle and 28 of those layers
+  are correctly admitted at INT4. Consolidated final tier at 4.75
+  bits beats the frozen-mode warmup tier at 5.45 bits.
+- **HotpotQA — net upgrades**. Warmup picks a near-uniform-INT4 vector
+  (4.65 bits, {INT4:67, INT8:13}); production exposes 9 layers that
+  *do* need INT8 — the canary catches what the small warmup batch
+  missed. Consolidated final at 4.90 bits is conservative; per-rank
+  averages stay 4.30–4.60. Accuracy ticks up 0.682 → 0.686
+  (directional, p=0.75).
+- **RULER@128K — zero drift**. With τ=0.124 (√L-scaled) the warmup
+  tier vector is already at steady state. The controller's
+  no-action signal is exactly what the Pinsker derivation predicts
+  at saturating accuracy.
+
+### Per-rank vs consolidated bit-budget reporting
+
+The continuous-dynamic protocol exposes a reporting subtlety: each TP
+rank holds its own KV slice and runs its own controller, so per-rank
+tier vectors can disagree. The natural numbers are:
+
+- **Per-rank bits** (operational): what each TP rank actually serves.
+  GSM8K-Hard ~4.33, HotpotQA ~4.40, RULER@128K ~3.97 bits/element.
+- **Consolidated max** (safe upper bound): per-layer max across ranks.
+  GSM8K-Hard 4.75, HotpotQA 4.90, RULER@128K 3.98.
+
+Both numbers are honest; per-rank is the operational truth and
+consolidated is the conservative summary. Paper §6.5 should report
+both, with per-rank as the headline.
+
+### Why this matters for the paper
+
+The "closed-loop / dynamic KV quantization" framing in the abstract
+and §6.5 was true of the *architecture* but only weakly demonstrated
+by the *measurement protocol*. With Phase-8, all three workloads have
+matched (frozen, dynamic) cells; the dynamic cells show the controller
+genuinely doing work during serving (not just at warmup) on two of
+three workloads, with workload-coherent direction (downgrade where
+warmup over-corrects, upgrade where warmup under-corrects, no-op where
+warmup is already optimal). This makes the closed-loop claim
+empirical, not just structural.
+
+### Files
+
+- ``evaluation/serving/run_session14_70b_gsm8k_hard_echokv.py`` —
+  added ``--continuous-dynamic`` / ``--measurement-canary-rate``;
+  Phase 3 protocol now branches on the flag.
+- ``evaluation/serving/run_session14_70b_hotpotqa_echokv.py`` — same.
+- ``evaluation/serving/run_session14_70b_ruler_echokv.py`` — same.
+- ``scripts/08_gsm8k_hard_continuous_dynamic.sh`` — GSM8K-Hard
+  dynamic cell + paired-McNemar summary.
+- ``scripts/09_hotpotqa_ruler_continuous_dynamic.sh`` — HotpotQA +
+  RULER@128K dynamic cells + three-workload summary.
+- ``results/serving/session14_70b/echokv3c_abscanary_tau022_n500_mns8_continuous_dynamic.json``
+  — GSM8K-Hard dynamic.
+- ``results/serving/session14_70b/hotpotqa_n500_mns8/echokv3c_abscanary_tau022_n500_mns8_continuous_dynamic.json``
+  — HotpotQA dynamic.
+- ``results/serving/session14_70b/echokv3c_abscanary_tau124_ruler128k_n20_mns1_continuous_dynamic.json``
+  — RULER@128K dynamic.
+
+### Invariants affected
+
+- **INV-2 (no in-place rewrite of existing blocks)**: still holds.
+  The continuous-dynamic protocol exercises the architectural
+  invariant directly — tier changes during measurement only affect
+  new block allocations; existing blocks retain whatever tier they
+  were quantized at when first written. Verified by code path: the
+  tier_application hook updates per-layer bit-width metadata that
+  ``allocate_with_precision`` consults; no rewrite of populated
+  blocks anywhere in the call graph.
+
+### Test status
+
+Unchanged from Phase-7. The new flag adds a code branch but no new
+code paths are exercised that ``tests/test_canary_tp.py`` doesn't
+already cover (``canary_rate`` and ``freeze_controller`` are
+existing harness kwargs).
+
+### Caveats
+
+- The seeded warmup tier vectors differ slightly between the
+  frozen and dynamic runs (e.g. GSM8K-Hard frozen-warmup picked 29
+  INT8 upgrades; dynamic-warmup picked 43). This is stochastic
+  divergence in the warmup-phase EMAs (cuBLAS is non-deterministic
+  by default; warmup canary fires at random). Both warmups produce
+  acceptable starting points; the load-bearing claim is the
+  *trajectory during measurement*, not the warmup-end vector.
+- HotpotQA's "directional accuracy bump" (0.682 → 0.686) is
+  p=0.75 and well within paired McNemar noise. The paper should
+  note the direction without claiming significance.

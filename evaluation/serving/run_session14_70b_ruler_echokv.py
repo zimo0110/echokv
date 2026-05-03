@@ -162,6 +162,22 @@ def main(argv: Optional[list[str]] = None) -> int:
         help="K_ref sliding-window size when --absolute-canary is on.",
     )
     p.add_argument(
+        "--continuous-dynamic", action="store_true",
+        help="Phase 3 measurement protocol: keep the canary firing at "
+             "production rate (p_c=1/64) and the controller unfrozen, "
+             "so per-layer tiers can continue adapting during serving. "
+             "INV-2 still holds (existing blocks are never modified; "
+             "tier changes only affect new block allocations). The "
+             "default is the frozen-tier protocol used for paired McNemar "
+             "in the Phase-5/6 headlines.",
+    )
+    p.add_argument(
+        "--measurement-canary-rate", type=float, default=1.0 / 64.0,
+        help="canary rate during the measurement phase when "
+             "--continuous-dynamic is set. Default 1/64 matches the "
+             "production overhead measured in Sessions 8 and 13.",
+    )
+    p.add_argument(
         "--out", type=Path,
         default=Path("results/serving/session14_70b/echokv_3c_n100.json"),
     )
@@ -277,17 +293,34 @@ def main(argv: Optional[list[str]] = None) -> int:
         log.info("wrote %s", a.out)
         return 0
 
-    # Phase 3: measurement with the consolidated tier vector frozen.
-    log.info("=== phase 3: measurement (n=%d, frozen tiers) ===", a.n_prompts)
+    # Phase 3: measurement.
+    # Default: frozen-tier protocol (canary off, controller frozen) — gives
+    # reproducible per-prompt cache config for paired McNemar.
+    # --continuous-dynamic: production protocol (canary at p_c=1/64,
+    # controller unfrozen) — exercises the architecture's actual
+    # closed-loop behaviour. INV-2 still holds: tier changes only affect
+    # new block allocations.
+    if a.continuous_dynamic:
+        meas_canary_rate = a.measurement_canary_rate
+        meas_freeze = False
+        protocol_label = "continuous-dynamic"
+    else:
+        meas_canary_rate = 1e-6
+        meas_freeze = True
+        protocol_label = "frozen-tiers"
+    log.info(
+        "=== phase 3: measurement (n=%d, %s; canary_rate=%.4g freeze=%s) ===",
+        a.n_prompts, protocol_label, meas_canary_rate, meas_freeze,
+    )
     measure_handle = TPCanaryHandle(
         llm,
         harness_kwargs={
-            "canary_rate": 1e-6,                 # essentially never fires
+            "canary_rate": meas_canary_rate,
             "tau": a.tau,
             "tick_interval": a.tick_interval,
             "tier_application": True,
             "tier_application_quant_v": True,
-            "freeze_controller": True,
+            "freeze_controller": meas_freeze,
             "multi_precision": a.multi_precision,
             "tau_budget": a.tau_budget,
             "absolute_canary": a.absolute_canary,
@@ -329,6 +362,12 @@ def main(argv: Optional[list[str]] = None) -> int:
         "warmup_n": a.warmup_n,
         "max_num_seqs": a.max_num_seqs,
         "phase": "measurement_complete",
+        "measurement_protocol": protocol_label,
+        "measurement_canary_rate": meas_canary_rate,
+        "measurement_freeze_controller": meas_freeze,
+        "final_tiers_per_rank": [
+            s["tier_vector"] for s in measure_snapshots
+        ],
         "warmup_tiers_per_rank": [
             s["tier_vector"] for s in warmup_snapshots
         ],

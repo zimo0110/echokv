@@ -1,0 +1,40 @@
+root@c9d6c474e795:/app# cd /app/linux-6.9; tmux wait -S done
+bash: cd: /app/linux-6.9: No such file or directory
+root@c9d6c474e795:/app# make menuconfig
+bash: make: command not found
+root@c9d6c474e795:/app#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

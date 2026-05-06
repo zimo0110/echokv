@@ -1,0 +1,18 @@
+['asciinema rec --stdin /logs/agent.cast', 'Enter']
+['clear', 'Enter']
+'head /app/data.hex\n'
+'xxd -r /app/data.hex > /app/output\n'
+'apt-get update\n'
+'apt-get install -y xxd\n'
+'xxd -r /app/data.hex > /app/output\n'
+'./output\n'
+'chmod +x /app/output\n'
+'./output\n'
+'file /app/output\n'
+'apt-get install -y file\n'
+'file /app/output\n'
+['asciinema rec --stdin /logs/tests.cast', 'Enter']
+['clear', 'Enter']
+['bash ', '/tests/run-tests.sh', 'Enter']
+['C-d']
+['C-d']

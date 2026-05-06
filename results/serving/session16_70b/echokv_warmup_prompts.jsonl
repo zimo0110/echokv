@@ -1,0 +1,5 @@
+{"messages": [{"role": "system", "content": "You are a helpful Linux systems engineer. Be concise."}, {"role": "user", "content": "Write a bash one-liner that finds the 5 largest files under /var/log."}]}
+{"messages": [{"role": "system", "content": "You are a helpful Linux systems engineer. Be concise."}, {"role": "user", "content": "What's the difference between `kill -TERM` and `kill -KILL`? Answer in 3 sentences."}]}
+{"messages": [{"role": "system", "content": "You are a helpful Linux systems engineer. Be concise."}, {"role": "user", "content": "Explain how to set up a TLS-terminating nginx reverse proxy for a backend on port 8080."}]}
+{"messages": [{"role": "system", "content": "You are a helpful Linux systems engineer. Be concise."}, {"role": "user", "content": "I have a python service that's leaking memory. Walk me through how to diagnose it with py-spy."}]}
+{"messages": [{"role": "system", "content": "You are a helpful Linux systems engineer. Be concise."}, {"role": "user", "content": "Sketch a shell script that backs up /home to /backup, rotating 7 days of snapshots."}]}

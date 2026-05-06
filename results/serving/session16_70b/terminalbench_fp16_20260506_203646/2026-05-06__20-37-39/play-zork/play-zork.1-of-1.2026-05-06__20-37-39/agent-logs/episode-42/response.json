@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We are asked what we want to feel",
+    "explanation": "Let's try to feel around the area to see if we can find any objects or surfaces that might help us",
+    "commands": [
+        {
+            "keystrokes": "feel around\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

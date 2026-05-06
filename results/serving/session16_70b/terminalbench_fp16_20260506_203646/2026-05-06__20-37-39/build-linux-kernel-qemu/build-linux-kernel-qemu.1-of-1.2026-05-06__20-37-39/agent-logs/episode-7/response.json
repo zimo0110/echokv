@@ -1,0 +1,12 @@
+{
+    "state_analysis": "The make menuconfig command has finished, and we are back at the shell prompt.",
+    "explanation": "We will build the kernel.",
+    "commands": [
+        {
+            "keystrokes": "make\n",
+            "is_blocking": true,
+            "timeout_sec": 300
+        }
+    ],
+    "is_task_complete": false
+}

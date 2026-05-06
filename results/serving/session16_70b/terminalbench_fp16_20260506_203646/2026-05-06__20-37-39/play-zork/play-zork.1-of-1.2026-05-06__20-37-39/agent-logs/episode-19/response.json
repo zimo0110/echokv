@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We are now at the west side of the house, and we see a small mailbox",
+    "explanation": "Let's open the mailbox to see if we can find any clues or objects",
+    "commands": [
+        {
+            "keystrokes": "open mailbox\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

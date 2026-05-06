@@ -1,0 +1,17 @@
+{
+    "state_analysis": "We are currently in the root directory of a Linux container, with the current working directory being /app.",
+    "explanation": "We will start by navigating to the directory where the Linux kernel source code is located and then configure the kernel build.",
+    "commands": [
+        {
+            "keystrokes": "cd /app/linux-6.9\n",
+            "is_blocking": true,
+            "timeout_sec": 1
+        },
+        {
+            "keystrokes": "make menuconfig\n",
+            "is_blocking": false,
+            "timeout_sec": 1
+        }
+    ],
+    "is_task_complete": false
+}

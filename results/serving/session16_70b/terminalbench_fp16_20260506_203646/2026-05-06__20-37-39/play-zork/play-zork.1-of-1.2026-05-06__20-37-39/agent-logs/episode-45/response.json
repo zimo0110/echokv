@@ -1,0 +1,12 @@
+{
+    "state_analysis": "The game doesn't recognize the word 'more'",
+    "explanation": "Let's try to examine the bottle again without using the word 'more'",
+    "commands": [
+        {
+            "keystrokes": "examine bottle\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

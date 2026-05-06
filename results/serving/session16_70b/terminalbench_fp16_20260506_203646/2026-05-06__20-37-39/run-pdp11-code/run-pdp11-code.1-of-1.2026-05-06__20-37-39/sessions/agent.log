@@ -1,0 +1,88 @@
+[?2004hroot@55a8f0f883c7:/app# asciinema rec --stdin /logs/agent.cast
+[?2004l[0;32masciinema: recording asciicast to /logs/agent.cast[0m
+[0;32masciinema: press <ctrl-d> or type "exit" when you're done[0m
+[?2004hroot@55a8f0f883c7:/app# clear
+[?2004l[H[J[3J[?2004hroot@55a8f0f883c7:/app# head /app/data.hex; tmux wait -S done
+[?2004l0000000 000407 002046 000036 001074 000424 000000 000000 000001
+0000020 170011 010600 011046 005720 010066 000002 004767 000150
+0000040 022626 005000 104401 004567 001354 000002 016500 000004
+0000060 072027 177776 016501 000004 072127 177775 074100 016501
+0000100 000004 072127 177773 074100 016501 000004 074100 042700
+0000120 177776 072027 000017 016501 000004 006201 050100 000400
+0000140 000167 001300 004567 001256 000002 017516 000004 004737
+0000160 000026 010075 000004 010001 005701 006700 071065 000006
+0000200 010100 000400 000167 001234 004567 001212 000006 012765
+0000220 002322 177770 005065 177766 026527 177766 000024 002035
+[?2004hroot@55a8f0f883c7:/app# xxd -r /app/data.hex > /app/output; tmux wait -S done
+[?2004lbash: xxd: command not found
+[?2004hroot@55a8f0f883c7:/app# apt-get update; tmux wait -S done
+[?2004l0% [Working]            Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
+0% [1 InRelease 1444 B/151 kB 1%]                                 0% [Working]            Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+0% [2 InRelease 6517 B/55.4 kB 12%]                                   0% [Working]            Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [48.0 kB]
+0% [3 InRelease 3592 B/48.0 kB 7%]                                  0% [Working]0% [Working]            Get:4 http://deb.debian.org/debian bookworm/main amd64 Packages [8792 kB]
+0% [4 Packages 8192 B/8792 kB 0%]0% [4 Packages 704 kB/8792 kB 8%]81% [4 Packages 7673 kB/8792 kB 87%]                                    91% [Working]91% [4 Packages store 0 B] [Waiting for headers]                                                Get:5 http://deb.debian.org/debian bookworm-updates/main amd64 Packages [6924 B]
+91% [4 Packages store 0 B] [5 Packages 6924 B/6924 B 100%]                                                          91% [4 Packages store 0 B] [Waiting for headers]                                                Get:6 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [299 kB]
+91% [4 Packages store 0 B] [6 Packages 697 B/299 kB 0%]                                                       93% [4 Packages store 0 B]93% [4 Packages store 0 B]                          96% [Working]96% [5 Packages store 0 B]                          98% [Working]98% [6 Packages store 0 B]                          100% [Working]              Fetched 9352 kB in 1s (9833 kB/s)
+Reading package lists... 0%Reading package lists... 0%Reading package lists... 0%Reading package lists... 95%Reading package lists... 95%Reading package lists... 96%Reading package lists... 96%Reading package lists... 99%Reading package lists... 99%Reading package lists... Done
+[?2004hroot@55a8f0f883c7:/app# apt-get install -y xxd; tmux wait -S done
+[?2004lReading package lists... 0%Reading package lists... 0%Reading package lists... 0%Reading package lists... 95%Reading package lists... 95%Reading package lists... 96%Reading package lists... 96%Reading package lists... 99%Reading package lists... 99%Reading package lists... Done
+Building dependency tree... 0%Building dependency tree... 0%Building dependency tree... 50%Building dependency tree... 50%Building dependency tree... Done
+Reading state information... 0% Reading state information... 0%Reading state information... Done
+The following NEW packages will be installed:
+  xxd
+0 upgraded, 1 newly installed, 0 to remove and 44 not upgraded.
+Need to get 84.1 kB of archives.
+After this operation, 138 kB of additional disk space will be used.
+0% [Working]            Get:1 http://deb.debian.org/debian bookworm/main amd64 xxd amd64 2:9.0.1378-2+deb12u2 [84.1 kB]
+13% [1 xxd 13.8 kB/84.1 kB 16%]                               100% [Working]              Fetched 84.1 kB in 0s (1709 kB/s)
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package xxd.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 7590 files and directories currently installed.)
+Preparing to unpack .../xxd_2%3a9.0.1378-2+deb12u2_amd64.deb ...
+Unpacking xxd (2:9.0.1378-2+deb12u2) ...
+Setting up xxd (2:9.0.1378-2+deb12u2) ...
+[?2004hroot@55a8f0f883c7:/app# xxd -r /app/data.hex > /app/output; tmux wait -S done
+[?2004l[?2004hroot@55a8f0f883c7:/app# ./output
+[?2004lbash: ./output: Permission denied
+[?2004hroot@55a8f0f883c7:/app# chmod +x /app/output; tmux wait -S done
+[?2004l[?2004hroot@55a8f0f883c7:/app# ./output
+[?2004lbash: ./output: cannot execute binary file: Exec format error
+[?2004hroot@55a8f0f883c7:/app# file /app/output; tmux wait -S done
+[?2004lbash: file: command not found
+[?2004hroot@55a8f0f883c7:/app# apt-get install -y file; tmux wait -S done
+[?2004lReading package lists... 0%Reading package lists... 0%Reading package lists... 0%Reading package lists... 95%Reading package lists... 95%Reading package lists... 96%Reading package lists... 96%Reading package lists... 99%Reading package lists... 99%Reading package lists... Done
+Building dependency tree... 0%Building dependency tree... 0%Building dependency tree... 50%Building dependency tree... 50%Building dependency tree... Done
+Reading state information... 0% Reading state information... 0%Reading state information... Done
+The following additional packages will be installed:
+  libmagic-mgc libmagic1
+The following NEW packages will be installed:
+  file libmagic-mgc libmagic1
+0 upgraded, 3 newly installed, 0 to remove and 44 not upgraded.
+Need to get 451 kB of archives.
+After this operation, 8644 kB of additional disk space will be used.
+0% [Working]            Get:1 http://deb.debian.org/debian bookworm/main amd64 libmagic-mgc amd64 1:5.44-3 [305 kB]
+0% [1 libmagic-mgc 2202 B/305 kB 1%]                                    61% [Working]             Get:2 http://deb.debian.org/debian bookworm/main amd64 libmagic1 amd64 1:5.44-3 [104 kB]
+61% [2 libmagic1 4096 B/104 kB 4%]                                  86% [Waiting for headers]                         Get:3 http://deb.debian.org/debian bookworm/main amd64 file amd64 1:5.44-3 [42.5 kB]
+86% [3 file 758 B/42.5 kB 2%]                             100% [Working]              Fetched 451 kB in 0s (4751 kB/s)
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package libmagic-mgc.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 7602 files and directories currently installed.)
+Preparing to unpack .../libmagic-mgc_1%3a5.44-3_amd64.deb ...
+Unpacking libmagic-mgc (1:5.44-3) ...
+Selecting previously unselected package libmagic1:amd64.
+Preparing to unpack .../libmagic1_1%3a5.44-3_amd64.deb ...
+Unpacking libmagic1:amd64 (1:5.44-3) ...
+Selecting previously unselected package file.
+Preparing to unpack .../file_1%3a5.44-3_amd64.deb ...
+Unpacking file (1:5.44-3) ...
+Setting up libmagic-mgc (1:5.44-3) ...
+Setting up libmagic1:amd64 (1:5.44-3) ...
+Setting up file (1:5.44-3) ...
+Processing triggers for libc-bin (2.36-9+deb12u9) ...
+[?2004hroot@55a8f0f883c7:/app# file /app/output; tmux wait -S done
+[?2004l/app/output: data
+[?2004hroot@55a8f0f883c7:/app# [?2004l
+exit
+[0;32masciinema: recording finished[0m
+[0;32masciinema: asciicast saved to /logs/agent.cast[0m
+[?2004hroot@55a8f0f883c7:/app# 

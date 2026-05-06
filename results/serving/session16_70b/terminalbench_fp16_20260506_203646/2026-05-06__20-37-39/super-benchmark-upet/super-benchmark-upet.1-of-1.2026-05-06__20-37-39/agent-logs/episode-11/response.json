@@ -1,0 +1,12 @@
+{
+    "state_analysis": "The script failed to run due to an invalid argument '--examples_per_label'. This argument is not recognized by the HfArgumentParser.",
+    "explanation": "Remove the '--examples_per_label' argument and try again.",
+    "commands": [
+        {
+            "keystrokes": "python run.py --model_name roberta-base --task_name glue --dataset_name rte --output_dir /app/UPET/output --num_train_epochs 1 --seed 42\n",
+            "is_blocking": true,
+            "timeout_sec": 3600
+        }
+    ],
+    "is_task_complete": false
+}

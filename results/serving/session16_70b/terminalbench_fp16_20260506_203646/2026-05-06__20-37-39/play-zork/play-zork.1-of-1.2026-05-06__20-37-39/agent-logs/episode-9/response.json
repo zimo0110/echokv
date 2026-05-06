@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We have taken the egg and are still up the tree",
+    "explanation": "Now that we have the egg, let's get down from the tree",
+    "commands": [
+        {
+            "keystrokes": "down\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

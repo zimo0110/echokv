@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We can't see anything, and drinking the water didn't help",
+    "explanation": "Let's try to find another way to light up the area. We can try to feel around and see if we can find any objects or surfaces that might help us",
+    "commands": [
+        {
+            "keystrokes": "feel\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

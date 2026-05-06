@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We are now behind the house, and we see a small window that is slightly ajar",
+    "explanation": "This could be our chance to enter the house. Let's try to open the window and see if we can get inside",
+    "commands": [
+        {
+            "keystrokes": "open window\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

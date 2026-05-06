@@ -1,0 +1,44 @@
+['asciinema rec --stdin /logs/agent.cast', 'Enter']
+['clear', 'Enter']
+'pip install mteb\n'
+'mteb download sts12\n'
+'mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model commit id}}/sts12.json --score cosine_spearman\n'
+'pip install transformers==4.17.0\n'
+'mteb download sts12\n'
+'mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model commit id}}/sts12.json --score cosine_spearman\n'
+'pip install transformers==4.10.0\n'
+'pip install sentence-transformers==2.2.0\n'
+'mteb download sts12\n'
+'mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model commit id}}/sts12.json --score cosine_spearman\n'
+'pip install huggingface_hub==0.10.1\n'
+'pip install sentence-transformers==2.2.0\n'
+'mteb download sts12\n'
+'mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model commit id}}/sts12.json --score cosine_spearman\n'
+'pip install sentence-transformers==1.2.0\n'
+'mteb download sts12\n'
+'mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model commit id}}/sts12.json --score cosine_spearman\n'
+'pip install transformers==4.20.1\n'
+'mteb download sts12\n'
+'mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model commit id}}/sts12.json --score cosine_spearman\n'
+'pip install git+https://github.com/UKPLab/mteb.git@v0.9.0\n'
+'mteb download sts12\n'
+'mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model commit id}}/sts12.json --score cosine_spearman\n'
+"sed -i 's/from transformers import Blip2Processor/from transformers import AutoProcessor as Blip2Processor/' /usr/local/lib/python3.10/site-packages/mteb/models/blip2_models.py\n"
+'mteb download sts12\n'
+'mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model commit id}}/sts12.json --score cosine_spearman\n'
+"sed -i 's/from transformers import BlipForImageTextRetrieval/from transformers import AutoModelForVision2Seq as BlipForImageTextRetrieval/' /usr/local/lib/python3.10/site-packages/mteb/models/blip_models.py\n"
+"sed -i 's/from transformers import BlipProcessor/from transformers import AutoProcessor as BlipProcessor/' /usr/local/lib/python3.10/site-packages/mteb/models/blip_models.py\n"
+'mteb download sts12\n'
+'mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model commit id}}/sts12.json --score cosine_spearman\n'
+"sed -i 's/from transformers import BlipProcessor/from transformers import AutoProcessor as BlipProcessor/' /usr/local/lib/python3.10/site-packages/mteb/models/blip_models.py\n"
+'mteb download sts12\n'
+'mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model commit id}}/sts12.json --score cosine_spearman\n'
+'pip install git+https://github.com/UKPLab/mteb.git@v0.8.0\n'
+'mteb download sts12\n'
+'mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model commit id}}/sts12.json --score cosine_spearman\n'
+'mteb evaluate --task sts12 --model sentence-transformers/all-MiniLM-L6-v2 --results results/sentence-transformers__all-MiniLM-L6-v2/{{model commit id}}/sts12.json --score cosine_spearman\n'
+['asciinema rec --stdin /logs/tests.cast', 'Enter']
+['clear', 'Enter']
+['bash ', '/tests/run-tests.sh', 'Enter']
+['C-d']
+['C-d']

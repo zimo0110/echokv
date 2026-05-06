@@ -1,0 +1,12 @@
+{
+    "state_analysis": "The mteb run command has been documented and the required arguments have been identified.",
+    "explanation": "We need to adjust the mteb run command to match the required arguments. Specifically, we need to specify the model using the --model argument and the task using the --tasks argument.",
+    "commands": [
+        {
+            "keystrokes": "mteb run -m bge-small-en-v1.5 --tasks STS12 --output_folder results --model_revision 5c38ec7c405ec4b44b94cc5a9bb96e735b38267a\n",
+            "is_blocking": true,
+            "timeout_sec": 300
+        }
+    ],
+    "is_task_complete": true
+}

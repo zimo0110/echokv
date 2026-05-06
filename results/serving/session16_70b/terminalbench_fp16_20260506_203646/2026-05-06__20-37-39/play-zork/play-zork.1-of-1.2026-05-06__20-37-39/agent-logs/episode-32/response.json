@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We are now inside the house, in the kitchen, and we see various objects and passageways",
+    "explanation": "Let's examine the bottle and its contents",
+    "commands": [
+        {
+            "keystrokes": "examine bottle\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

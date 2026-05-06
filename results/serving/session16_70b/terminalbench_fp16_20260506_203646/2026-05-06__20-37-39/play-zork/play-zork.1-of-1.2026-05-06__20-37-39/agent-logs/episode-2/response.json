@@ -1,0 +1,12 @@
+{
+    "state_analysis": "The mailbox has been opened, and a leaflet has been found",
+    "explanation": "Take the leaflet to examine it further",
+    "commands": [
+        {
+            "keystrokes": "take leaflet\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

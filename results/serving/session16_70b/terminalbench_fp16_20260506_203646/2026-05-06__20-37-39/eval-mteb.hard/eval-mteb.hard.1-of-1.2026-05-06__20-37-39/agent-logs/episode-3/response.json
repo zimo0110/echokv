@@ -1,0 +1,27 @@
+{
+    "state_analysis": "The issue persists due to another ImportError. The 'cached_download' function is not found in the 'huggingface_hub' library.",
+    "explanation": "It seems like the 'huggingface_hub' library has undergone significant changes, and the functions used by 'sentence_transformers' are no longer available. We need to downgrade the 'huggingface_hub' library to a version that includes the required functions.",
+    "commands": [
+        {
+            "keystrokes": "pip install huggingface_hub==0.10.1\n",
+            "is_blocking": true,
+            "timeout_sec": 300
+        },
+        {
+            "keystrokes": "pip install sentence-transformers==2.2.0\n",
+            "is_blocking": true,
+            "timeout_sec": 300
+        },
+        {
+            "keystrokes": "mteb download sts12\n",
+            "is_blocking": true,
+            "timeout_sec": 300
+        },
+        {
+            "keystrokes": "mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model commit id}}/sts12.json --score cosine_spearman\n",
+            "is_blocking": true,
+            "timeout_sec": 300
+        }
+    ],
+    "is_task_complete": false
+}

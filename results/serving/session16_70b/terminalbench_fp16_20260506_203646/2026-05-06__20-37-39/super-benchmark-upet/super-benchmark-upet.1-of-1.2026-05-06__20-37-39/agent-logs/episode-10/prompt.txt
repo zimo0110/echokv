@@ -1,0 +1,40 @@
+              [--hub_model_id HUB_MODEL_ID] [--hub_strategy {end,every_save,checkpoint,all_checkpoints}] [--hub_token HUB_TOKEN]
+              [--hub_private_repo [HUB_PRIVATE_REPO]] [--hub_always_push [HUB_ALWAYS_PUSH]] [--gradient_checkpointing [GRADIENT_CHECKPOINTING]]
+              [--gradient_checkpointing_kwargs GRADIENT_CHECKPOINTING_KWARGS] [--include_inputs_for_metrics [INCLUDE_INPUTS_FOR_METRICS]]
+              [--eval_do_concat_batches [EVAL_DO_CONCAT_BATCHES]] [--no_eval_do_concat_batches] [--fp16_backend {auto,apex,cpu_amp}]
+              [--push_to_hub_model_id PUSH_TO_HUB_MODEL_ID] [--push_to_hub_organization PUSH_TO_HUB_ORGANIZATION] [--push_to_hub_token PUSH_TO_HUB_TOKEN]
+              [--mp_parameters MP_PARAMETERS] [--auto_find_batch_size [AUTO_FIND_BATCH_SIZE]] [--full_determinism [FULL_DETERMINISM]]
+              [--torchdynamo TORCHDYNAMO] [--ray_scope RAY_SCOPE] [--ddp_timeout DDP_TIMEOUT] [--torch_compile [TORCH_COMPILE]]
+              [--torch_compile_backend TORCH_COMPILE_BACKEND] [--torch_compile_mode TORCH_COMPILE_MODE] [--dispatch_batches DISPATCH_BATCHES]
+              [--split_batches SPLIT_BATCHES] [--include_tokens_per_second [INCLUDE_TOKENS_PER_SECOND]]
+              [--include_num_input_tokens_seen [INCLUDE_NUM_INPUT_TOKENS_SEEN]] [--neftune_noise_alpha NEFTUNE_NOISE_ALPHA]
+              [--optim_target_modules OPTIM_TARGET_MODULES] [--use_semi [USE_SEMI]] [--unlabeled_data_num UNLABELED_DATA_NUM]
+              [--unlabeled_data_batch_size UNLABELED_DATA_BATCH_SIZE] [--pseudo_sample_num_or_ratio PSEUDO_SAMPLE_NUM_OR_RATIO]
+              [--teacher_training_epoch TEACHER_TRAINING_EPOCH] [--teacher_tuning_epoch TEACHER_TUNING_EPOCH]
+              [--student_training_epoch STUDENT_TRAINING_EPOCH] [--student_learning_rate STUDENT_LEARNING_RATE] [--self_training_epoch SELF_TRAINING_EPOCH]
+              [--post_student_train [POST_STUDENT_TRAIN]] [--student_pre_seq_len STUDENT_PRE_SEQ_LEN] [--n_best_size N_BEST_SIZE]
+              [--max_answer_length MAX_ANSWER_LENGTH] [--version_2_with_negative [VERSION_2_WITH_NEGATIVE]]
+              [--null_score_diff_threshold NULL_SCORE_DIFF_THRESHOLD]
+run.py: error: argument --dataset_name: invalid choice: 'glue-rte' (choose from 'cola', 'mnli', 'mrpc', 'qnli', 'qqp', 'rte', 'sst2', 'stsb', 'wnli', 'boolq', '
+cb', 'rte', 'wic', 'wsc', 'copa', 'record', 'multirc', 'conll2003', 'conll2004', 'ontonotes', 'conll2005', 'conll2012', 'squad', 'squad_v2', 'movie_rationales',
+ 'cr', 'snli', 'trec', 'ag_news', 'yelp_polarity')
+root@06103092c99e:/app/UPET# python run.py --model_name roberta-base --task_name glue --dataset_name rte --output_dir /app/UPET/output --num_train_epochs 1 --ex
+amples_per_label 5 --seed 42; tmux wait -S done
+Traceback (most recent call last):
+  File "/app/UPET/run.py", line 71, in <module>
+    args = get_args()
+  File "/app/UPET/arguments.py", line 326, in get_args
+    args = parser.parse_args_into_dataclasses()
+  File "/usr/local/lib/python3.10/site-packages/transformers/hf_argparser.py", line 339, in parse_args_into_dataclasses
+    obj = dtype(**inputs)
+  File "<string>", line 125, in __init__
+  File "/usr/local/lib/python3.10/site-packages/transformers/training_args.py", line 1605, in __post_init__
+    and (self.device.type != "cuda")
+  File "/usr/local/lib/python3.10/site-packages/transformers/training_args.py", line 2094, in device
+    return self._setup_devices
+  File "/usr/local/lib/python3.10/site-packages/transformers/utils/generic.py", line 63, in __get__
+    cached = self.fget(obj)
+  File "/usr/local/lib/python3.10/site-packages/transformers/training_args.py", line 2000, in _setup_devices
+    raise ImportError(
+ImportError: Using the `Trainer` with `PyTorch` requires `accelerate>=0.21.0`: Please run `pip install transformers[torch]` or `pip install accelerate -U`
+root@06103092c99e:/app/UPET#

@@ -1,0 +1,29 @@
+['asciinema rec --stdin /logs/agent.cast', 'Enter']
+['clear', 'Enter']
+'git clone https://github.com/wjn1996/UPET.git\n'
+'cd UPET\n'
+'git checkout 4701c3c62441077cc44a6553bf6ae909d99b8351\n'
+'pip install -r requirements.txt\n'
+'python run.py --model_name roberta-base --task RTE --num_train_epochs 1 --examples_per_label 5 --seed 42\n'
+'pip install datasets\n'
+'python -m pip install -r requirements.txt\n'
+'pip install --upgrade pip\n'
+'python -m pip install torch\n'
+'python -m pip install transformers\n'
+'python run.py --model_name roberta-base --task RTE --num_train_epochs 1 --examples_per_label 5 --seed 42\n'
+'python -m pip install datasets==2.9.0\n'
+'python run.py --model_name roberta-base --task RTE --num_train_epochs 1 --examples_per_label 5 --seed 42\n'
+'python -m pip install pyarrow==10.0.1\n'
+'python run.py --model_name roberta-base --task RTE --num_train_epochs 1 --examples_per_label 5 --seed 42\n'
+'python run.py --model_name roberta-base --task_name glue --num_train_epochs 1 --examples_per_label 5 --seed 42\n'
+'python run.py --model_name roberta-base --task_name glue --dataset_name glue-rte --output_dir /app/UPET/output --num_train_epochs 1 --examples_per_label 5 --seed 42\n'
+'python run.py --model_name roberta-base --task_name glue --dataset_name rte --output_dir /app/UPET/output --num_train_epochs 1 --examples_per_label 5 --seed 42\n'
+'python -m pip install accelerate\n'
+'python run.py --model_name roberta-base --task_name glue --dataset_name rte --output_dir /app/UPET/output --num_train_epochs 1 --examples_per_label 5 --seed 42\n'
+'python run.py --model_name roberta-base --task_name glue --dataset_name rte --output_dir /app/UPET/output --num_train_epochs 1 --seed 42\n'
+'python run.py --model_name roberta-base --task_name glue --dataset_name mnli --output_dir /app/UPET/output --num_train_epochs 1 --seed 42\n'
+['asciinema rec --stdin /logs/tests.cast', 'Enter']
+['clear', 'Enter']
+['bash ', '/tests/run-tests.sh', 'Enter']
+['C-d']
+['C-d']

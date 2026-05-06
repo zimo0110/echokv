@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We have opened the sack and found a lunch and a clove of garlic",
+    "explanation": "Let's examine the lunch to see what it is",
+    "commands": [
+        {
+            "keystrokes": "examine lunch\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

@@ -1,0 +1,50 @@
+Previous command:
+keystrokes='exit()\n' is_blocking=True timeout_sec=10.0
+
+The previous command timed out after 10.0 seconds
+
+It is possible that the command is not yet finished executing. If that is the case, then do nothing. It is also possible that you have entered an interactive shell and should continue sending keystrokes as normal.
+
+Here is the current state of the terminal:
+
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'm' is not defined
+>>> print(separability_matrix(m.Pix2Sky_TAN() & cm)); tmux wait -S done
+  File "<stdin>", line 1
+    print(separability_matrix(m.Pix2Sky_TAN() & cm)); tmux wait -S done
+                                                           ^
+SyntaxError: invalid syntax
+>>> import sys
+>>> sys.exit(); tmux wait -S done
+  File "<stdin>", line 1
+    sys.exit(); tmux wait -S done
+                     ^
+SyntaxError: invalid syntax
+>>> Ctrl+d; tmux wait -S done
+  File "<stdin>", line 1
+    Ctrl+d; tmux wait -S done
+                 ^
+SyntaxError: invalid syntax
+>>> Ctrl+d; tmux wait -S done
+  File "<stdin>", line 1
+    Ctrl+d; tmux wait -S done
+                 ^
+SyntaxError: invalid syntax
+>>> quit(); tmux wait -S done
+  File "<stdin>", line 1
+    quit(); tmux wait -S done
+                 ^
+SyntaxError: invalid syntax
+>>> exit(); tmux wait -S done
+  File "<stdin>", line 1
+    exit(); tmux wait -S done
+                 ^
+SyntaxError: invalid syntax
+>>> exit(); tmux wait -S done
+  File "<stdin>", line 1
+    exit(); tmux wait -S done
+                 ^
+SyntaxError: invalid syntax
+>>>
+ 

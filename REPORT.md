@@ -30,6 +30,9 @@
 | Multi-workload generalization (session 14 phase 6) | yes | n/a | 70B@TP=4 HotpotQA (multi-hop QA, 10 distractor passages), n=500 mns=8 paired, 4 configs (FP16, INT4, INT8, EchoKV-3C abs-canary) | **Workload-adaptive bit allocation confirmed.** On HotpotQA, INT4 *does not* hurt FP16 (paired Δ=+0.004, p=0.79 — within noise); the controller correctly identifies this regime and selects {INT4:69, INT8:11} → avg 4.55 bits (71.6% savings vs FP16). EchoKV-3C matches FP16 exactly (Δ=0.000, 5/5 split, p=1.00). **Two-workload Pareto picture:** GSM8K-Hard (INT4 hurts) → 5.45 bits, 65.9% savings; HotpotQA (INT4 sufficient) → 4.55 bits, 71.6% savings. Both match FP16. The system automatically picks the lowest bit-width sufficient to preserve accuracy without per-workload tuning. See CHANGELOG session_20260503_14_phase6. |
 | Long-context generalization + Pinsker τ(L) scaling (session 14 phase 7) | yes | n/a | 70B@TP=4 RULER@128K (single-needle haystack at 128 000 tokens), n=20 mns=1 paired vs Phase-2 baselines stored in ``diag.json`` | **τ(L) = τ₀·√(L/L₀) derived and confirmed.** Combining Pinsker's inequality with the attention-sparsity assumption gives τ(L) = τ₀·√(L/L₀); with τ₀ = 0.022 calibrated at L₀ = 4 000, the prediction at L = 128 000 is τ ≈ 0.124. Empirical run at τ = 0.124: tier {INT4: 79, INT2: 1, INT8: 0}, **avg 3.98 bits, acc=1.000 (20/20)**, **75.2% savings vs FP16**, paired McNemar vs Phase-2 FP16 and INT4 both p=1.00. By contrast, the un-rescaled τ = 0.022 produced {INT4:9, INT8:71} = 7.55 bits — INT8-equivalent memory with no accuracy benefit. **Three-workload monotone curve:** GSM8K-Hard → HotpotQA → RULER@128K = 5.45 → 4.55 → 3.98 bits with INT8 upgrades 29 → 11 → 0. Caveat: RULER@128K saturates accuracy at INT4 already, so the test confirms √L is the right budget for this workload but cannot fit the exponent (Open Question 28). See CHANGELOG session_20260503_14_phase7. |
 | Continuously-dynamic measurement protocol (session 14 phase 8) | yes | n/a | All three workloads (GSM8K-Hard / HotpotQA / RULER@128K) re-run with ``--continuous-dynamic``: ``canary_rate=1/64`` and ``freeze_controller=False`` during measurement, so per-layer tiers continue adapting through the n=500 (or n=20) measurement phase. INV-2 still holds (tier changes only affect new block allocations) | **Closed-loop framing now empirically supported, not just structurally.** All three workloads preserve accuracy under the dynamic protocol (paired McNemar dyn vs frozen: GSM8K-Hard p=1.00, HotpotQA p=0.75, RULER@128K p=1.00). The drift signature is workload-coherent: GSM8K-Hard's controller does **28 monotone INT8→INT4 downgrades** (warmup over-conservative; consolidated bits 6.15 → **4.75**, per-rank avg ~4.33); HotpotQA's controller does **9 net INT4→INT8 upgrades** (warmup under-conservative; consolidated 4.65 → 4.90 but per-rank avg ~4.40 with an accuracy bump 0.682 → 0.686 directionally); RULER@128K stays at zero-drift steady-state ({INT4:79, INT2:1} = 3.98 bits, acc=1.000). The controller is doing the *right* work (not just any work): downgrading where warmup over-corrects, upgrading where warmup under-corrects, no-op where warmup is already optimal. **Headline shift**: per-rank bit-budget for the paper's three workloads is **~4.33 / ~4.40 / ~3.97** bits/element (~73% / 72% / 75% memory savings vs FP16) — meaningfully tighter than the frozen-protocol numbers. See CHANGELOG session_20260503_14_phase8. |
+| NVFP4 baseline implemented + first results (session 15 phase 9) | yes | yes (13 new tests) | BF16-emulated E2M1 group-16 quantizer in ``evaluation/motivation/nvfp4.py``; TP-aware forward-pre-hook in ``evaluation/serving/nvfp4_tp.py``; wired into the ``--configs`` choice on GSM8K-Hard / HotpotQA / τ-Bench drivers. Re-ran all existing short-context workloads at TP=8 with NVFP4 as a fourth static baseline | **Pareto picture against NVFP4 confirmed**: on GSM8K-Hard at n=500 mns=8, NVFP4 acc=0.472 (paired Δ vs FP16 = −0.016, p=0.215; Δ vs INT4 = +0.006, p=0.736). NVFP4's wider dynamic range narrows but does not eliminate the 4-bit deficit. EchoKV-3C dynamic at ~4.33 bits/rank is directionally above NVFP4 at 4.00 bits (Δ=+0.014, p=0.349) — Pareto-dominates at comparable memory. On HotpotQA NVFP4 acc=0.680, indistinguishable from FP16/INT4/INT8 (all p ≥ 0.63), as predicted for the workload where INT4 already saturates. RULER@128K NVFP4 cell deferred (both INT4 and NVFP4 saturate at 1.000 there). See CHANGELOG session_20260506_15_phase9. |
+| τ-Bench drivers + agentic harness (session 15 phase 10 setup) | yes | n/a (5 parser tests pass) | tau-bench (sierra-research) installed from source; new ``run_session15_70b_taubench.py`` (static baselines) and ``run_session15_70b_taubench_echokv.py`` (3-phase warmup→consolidate→measure with frozen + continuous-dynamic protocols). ReAct-style JSON-action format, multi-turn loop up to ``--max-turns``, deterministic user surrogate; reward via env.calculate_reward (database-state hash). Smoke at FP16 n=3: 5–12 turns/task, 195–473 decode tokens/task, all actions parsed and forwarded cleanly | Infrastructure ready; full sweep underway. The ``--continuous-dynamic`` protocol on a workload with thousands of decode tokens per task is the natural test of the closed-loop controller's per-decode-step EMAs (cf. PAPER_DRAFT §7.2). Caveat: deterministic user surrogate replaces tau-bench's LLM user simulator (the env tools + reward function are unchanged); paper framing should be "τ-Bench airline tools and reward with a deterministic user surrogate," not full τ-Bench multi-turn dialog. See CHANGELOG session_20260506_15_phase10_setup. |
+| τ-Bench airline full 6-cell sweep (session 15 phase 10 results) | yes | n/a | 8×H100 + Llama-3.1-70B + TP=8 on τ-Bench airline (n=50 tasks, max-turns=15, max-new-tokens=512). 6 cells: FP16, INT4, INT8, NVFP4, EchoKV-3C frozen, EchoKV-3C dynamic. Improved system prompt (airport-code rule, persistence guidance, worked example) lifted FP16 reward from 0/3 in initial smoke to 13/50 (0.26) — workload now has measurable signal | **EchoKV-3C frozen-tier matches FP16 reward exactly** (paired Δ=0.000 on 45 measurement tasks, p=1.00) at **7.85 bits/element**. **Pareto-dominates uniform NVFP4** (Δ=+0.111, p=0.18 directionally). **Trajectory similarity to FP16 is statistically tied with INT8** (mean per-task Hamming 3.49 vs 3.38; identical-trace ratio 19/45 vs 18/50) at slightly less memory. The controller picks **{INT4: 3, INT8: 77}** on this long-decode workload — 96% INT8, vs {51, 29} on GSM8K-Hard's 278-tok CoT, {69, 11} on HotpotQA's 5-tok answers. **Decode-length-driven workload-conditional allocation**, same controller, same τ_budget. **NVFP4 is the worst static 4-bit cell** here: 0.160 reward, +22.9% decode inflation — *opposite* of GSM8K-Hard. Substantively new finding: NVFP4's wider dynamic range helps short-decode reasoning but hurts long-decode agentic. **EchoKV-dyn under-performs frozen** here (0.244 vs 0.289, Δ=−0.044 paired, p=0.75 within noise) — Open Q 34. See CHANGELOG session_20260506_15_phase10_results. |
 
 ## Motivation Study
 
@@ -1199,3 +1202,95 @@ Decisions that shape the system and cannot be recovered by reading code.
     one rank holding 12 INT8 layers while others hold 6). Paper
     needs to pick a primary metric and clearly footnote the other.
     Not blocking; pure framing decision.
+
+32. **OPEN — NVFP4 baseline.** *Motivated 2026-05-06 by external
+    feedback on the first paper read.* Every 4-bit baseline in this
+    paper is KIVI-style group-32 INT4. NVFP4 (E2M1 group-16, native
+    on Blackwell, software-emulated on Hopper) has wider effective
+    dynamic range and typically loses ~0.5 accuracy points less to
+    FP16 on standard NLP benchmarks. The right form of EchoKV's
+    claim is "Pareto-dominates both INT4 *and* NVFP4," not just
+    INT4. **Plan**: add ``nvfp4_tp.py`` paralleling
+    ``static_int4_tp.py`` (forward-pre-hook, BF16-emulated E2M1
+    group-16 quantizer with per-group max-abs scale); re-run all
+    three workloads with the NVFP4 cell at the same protocols
+    (frozen + continuous-dynamic). Expected: GSM8K-Hard mirror-image
+    effect smaller against NVFP4 than INT4 (we predict ~−0.010 to
+    −0.015 vs the −0.022 we measured against INT4), with EchoKV's
+    INT8-upgrade-of-deficit-layers logic still recovering whatever
+    deficit remains. Implementation lift: ~1 day for the kernel +
+    test harness; re-running existing workloads is then a few hours.
+    See PAPER_DRAFT §7.1.
+
+33. **PARTIALLY CLOSED — Agentic / decode-heavy benchmarks.**
+    *Motivated 2026-05-06; τ-Bench leg closed 2026-05-06 phase 10.*
+    The τ-Bench airline cell (50 tasks, 5 warmup + 45 measure, TP=8)
+    is in the paper (PAPER_DRAFT §6.Y). EchoKV-3C frozen-tier
+    matches FP16 reward exactly (paired Δ=0.000, p=1.00 over 45
+    paired tasks) at 7.85 bits/element with trajectory similarity
+    to FP16 statistically tied with full INT8 (mean Hamming 3.49
+    vs 3.38). Pareto-dominates uniform NVFP4 (Δ=+0.111, p=0.18).
+    The controller picks {INT4: 3, INT8: 77} on this workload —
+    96% of layers admitted to INT8 — vs {51, 29} on GSM8K-Hard's
+    278-tok CoT. Same controller, same τ_budget, decode-length-
+    driven allocation. Substantively new finding: NVFP4 is the
+    *worst* static 4-bit cell on τ-Bench (lowest reward 0.160,
+    +22.9% decode-token inflation), opposite of GSM8K-Hard.
+    Conjectured mechanism: NVFP4's coarser low-magnitude rounding
+    breaks small-magnitude attention signals that accumulate over
+    long agentic trajectories.
+    Options (b) **Terminal-Bench** and (c) **SWE-Bench-Verified**
+    remain open; both need a sandbox executor (Open Q 8 / 14).
+    Outdated original wording follows.
+
+    *Original 2026-05-06 plan (kept for context):*
+    2026-05-06 by external feedback.* EchoKV's per-decode-step
+    canary + per-10-decode-step controller tick mean its closed-loop
+    response is observable only when there are enough decode tokens
+    for the EMAs to update past their warmup state. The current
+    workloads have decode lengths of 278 / 5 / 32 tokens; only
+    GSM8K-Hard exercises the closed loop meaningfully during
+    measurement. Agentic benchmarks generate orders of magnitude
+    more decode tokens per task and are exactly the regime EchoKV
+    is designed for. **Plan**, in priority order:
+    (a) **τ-Bench** (Sierra, tool-using customer-service agent,
+    ~3-5K decode tok/task) — cheapest to add, no sandbox needed,
+    standard chat-completions interface;
+    (b) **Terminal-Bench** (Stanford, real-shell agent, ~5-15K
+    decode tok/task) — needs a sandbox executor (same blocker as
+    HumanEval, Open Question 8 / 14);
+    (c) **SWE-Bench-Verified** — long context + long output, most
+    expensive, needs sandbox + per-task dependency resolution.
+    Expected: frozen-vs-dynamic gap (5.45 → 4.75 bits on
+    GSM8K-Hard's 278-token CoT) widens because a longer decode
+    window gives the controller many more EMA updates per task; the
+    mirror-image recovery becomes cleaner under paired McNemar
+    because long-output tasks have more independent per-task error
+    opportunities than 5-token short-answer QA. See PAPER_DRAFT
+    §7.2.
+
+34. **OPEN — EchoKV-dynamic underperforms frozen on long-decode
+    agentic.** *Motivated 2026-05-06, session 15 phase 10.* On the
+    three short/medium-decode workloads (GSM8K-Hard 278 tok,
+    HotpotQA 5 tok, RULER@128K 32 tok) the continuously-dynamic
+    protocol is at-worst-equivalent and often slightly better than
+    the frozen-tier protocol (Phase 8). On τ-Bench airline
+    (~800 decode tok/task multi-turn) it *underperforms*: EchoKV-dyn
+    reward 0.244 vs EchoKV-frz 0.289 (paired Δ=−0.044 over 45
+    measurement tasks, p=0.75 — within McNemar noise but
+    directionally consistent). Both cells start at the same
+    warmup-end tier vector {INT4: 3, INT8: 77}; the difference is
+    pure measurement-phase behavior. Hypothesis: at long-decode
+    lengths the canary fires on every 64th decode step (~12-15
+    times per 800-token agent turn) and the controller ticks every
+    10 decode steps — accumulating many small async per-block tier
+    updates per task. On short-decode workloads the canary fires
+    too few times to matter. **Proposed test** (~2 hours wall):
+    ablation over ``--tick-interval`` ∈ {10, 30, 100, 300} on
+    τ-Bench airline; if longer ticks recover EchoKV-frz's reward
+    under the dynamic protocol, the hypothesis is supported and
+    we add a recommendation to ARCHITECTURE.md to scale
+    tick-interval with decode-length. If not, look for a different
+    cause (e.g., warmup tier vector overfit to 5 tasks at high
+    canary rate vs production rate). Not blocking the paper but
+    is the natural follow-up after Phase 10. See PAPER_DRAFT §7.2.

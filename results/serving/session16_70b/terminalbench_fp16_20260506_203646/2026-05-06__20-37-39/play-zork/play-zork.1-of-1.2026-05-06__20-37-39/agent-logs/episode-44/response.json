@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We are back in the kitchen, and we see the bottle and the brown sack",
+    "explanation": "Let's try to find another way to light up the attic. We can try to examine the objects in the kitchen more closely to see if we can find any clues",
+    "commands": [
+        {
+            "keystrokes": "examine bottle more closely\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

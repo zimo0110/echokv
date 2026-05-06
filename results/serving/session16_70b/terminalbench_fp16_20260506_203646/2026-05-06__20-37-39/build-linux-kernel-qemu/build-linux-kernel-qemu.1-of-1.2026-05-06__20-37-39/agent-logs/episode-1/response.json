@@ -1,0 +1,22 @@
+{
+    "state_analysis": "The Linux kernel source code directory does not exist in the current file system, and the make command is not installed.",
+    "explanation": "We need to install the necessary packages to build the Linux kernel, including git to download the kernel source code, and the build-essential package which includes make.",
+    "commands": [
+        {
+            "keystrokes": "apt-get update\n",
+            "is_blocking": true,
+            "timeout_sec": 10
+        },
+        {
+            "keystrokes": "apt-get install -y git build-essential\n",
+            "is_blocking": true,
+            "timeout_sec": 30
+        },
+        {
+            "keystrokes": "git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux-6.9\n",
+            "is_blocking": true,
+            "timeout_sec": 60
+        }
+    ],
+    "is_task_complete": false
+}

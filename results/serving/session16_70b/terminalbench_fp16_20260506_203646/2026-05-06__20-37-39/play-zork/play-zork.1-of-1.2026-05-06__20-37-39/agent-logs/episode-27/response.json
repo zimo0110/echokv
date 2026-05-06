@@ -1,0 +1,12 @@
+{
+    "state_analysis": "The game says there is no door to knock on",
+    "explanation": "Let's try to find another way to enter the house or find a clue. We can try to go around to the west side of the house again",
+    "commands": [
+        {
+            "keystrokes": "go west\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

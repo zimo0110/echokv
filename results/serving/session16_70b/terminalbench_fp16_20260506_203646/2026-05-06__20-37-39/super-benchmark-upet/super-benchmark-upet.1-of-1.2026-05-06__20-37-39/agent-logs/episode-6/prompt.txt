@@ -1,0 +1,40 @@
+Requirement already satisfied: pytz>=2020.1 in /usr/local/lib/python3.10/site-packages (from pandas->datasets==2.9.0) (2026.2)
+Requirement already satisfied: tzdata>=2022.1 in /usr/local/lib/python3.10/site-packages (from pandas->datasets==2.9.0) (2026.2)
+Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.10/site-packages (from python-dateutil>=2.8.2->pandas->datasets==2.9.0) (1.17.0)
+Downloading datasets-2.9.0-py3-none-any.whl (462 kB)
+Downloading dill-0.3.6-py3-none-any.whl (110 kB)
+Downloading responses-0.18.0-py3-none-any.whl (38 kB)
+Downloading multiprocess-0.70.14-py310-none-any.whl (134 kB)
+Installing collected packages: dill, responses, multiprocess, datasets
+  Attempting uninstall: dill
+    Found existing installation: dill 0.4.1
+    Uninstalling dill-0.4.1:
+      Successfully uninstalled dill-0.4.1
+  Attempting uninstall: multiprocess
+    Found existing installation: multiprocess 0.70.19
+    Uninstalling multiprocess-0.70.19:
+      Successfully uninstalled multiprocess-0.70.19
+  Attempting uninstall: datasets
+    Found existing installation: datasets 4.8.5
+    Uninstalling datasets-4.8.5:
+      Successfully uninstalled datasets-4.8.5
+Successfully installed datasets-2.9.0 dill-0.3.6 multiprocess-0.70.14 responses-0.18.0
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your syst
+em unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you a
+re doing and want to suppress this warning.
+root@06103092c99e:/app/UPET# python run.py --model_name roberta-base --task RTE --num_train_epochs 1 --examples_per_label 5 --seed 42; tmux wait -S done
+Traceback (most recent call last):
+  File "/app/UPET/run.py", line 7, in <module>
+    import datasets
+  File "/usr/local/lib/python3.10/site-packages/datasets/__init__.py", line 43, in <module>
+    from .arrow_dataset import Dataset
+  File "/usr/local/lib/python3.10/site-packages/datasets/arrow_dataset.py", line 66, in <module>
+    from .arrow_writer import ArrowWriter, OptimizedTypedSequence
+  File "/usr/local/lib/python3.10/site-packages/datasets/arrow_writer.py", line 27, in <module>
+    from .features import Features, Image, Value
+  File "/usr/local/lib/python3.10/site-packages/datasets/features/__init__.py", line 18, in <module>
+    from .features import Array2D, Array3D, Array4D, Array5D, ClassLabel, Features, Sequence, Value
+  File "/usr/local/lib/python3.10/site-packages/datasets/features/features.py", line 630, in <module>
+    class _ArrayXDExtensionType(pa.PyExtensionType):
+AttributeError: module 'pyarrow' has no attribute 'PyExtensionType'. Did you mean: 'ExtensionType'?
+root@06103092c99e:/app/UPET#

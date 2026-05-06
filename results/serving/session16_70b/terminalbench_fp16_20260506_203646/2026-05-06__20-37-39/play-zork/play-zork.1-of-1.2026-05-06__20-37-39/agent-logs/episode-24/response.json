@@ -1,0 +1,12 @@
+{
+    "state_analysis": "The door is boarded and we can't remove the boards",
+    "explanation": "Let's try to find another way to enter the house. We can try to go around to the north side of the house",
+    "commands": [
+        {
+            "keystrokes": "go north\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We have examined the sack again, and it still contains a lunch and a clove of garlic",
+    "explanation": "Let's try to examine the lunch to see if we can find any clues",
+    "commands": [
+        {
+            "keystrokes": "examine lunch\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

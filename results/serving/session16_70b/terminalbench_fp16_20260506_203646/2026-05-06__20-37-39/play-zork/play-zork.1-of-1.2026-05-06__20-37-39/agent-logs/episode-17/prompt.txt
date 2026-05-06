@@ -1,0 +1,40 @@
+ North of House                                                                                                                   Score: 5        Moves: 16
+>climb tree
+Up a Tree
+You are about 10 feet above the ground nestled among some large branches. The nearest branch above you is above your reach.
+Beside you on the branch is a small bird's nest.
+In the bird's nest is a large egg encrusted with precious jewels, apparently scavenged by a childless songbird. The egg is covered with fine gold inlay, and
+ornamented in lapis lazuli and mother-of-pearl. Unlike most eggs, this one is hinged and closed with a delicate looking clasp. The egg appears extremely
+fragile.
+
+>take egg
+Taken.
+
+>down
+Forest Path
+
+>go north
+Clearing
+You are in a clearing, with a forest surrounding you on all sides. A path leads south.
+On the ground is a pile of leaves.
+
+>examine leaves
+There's nothing special about the pile of leaves.
+
+>go south
+Forest Path
+
+>go north
+Clearing
+On the ground is a pile of leaves.
+
+>open egg
+You have neither the tools nor the expertise.
+
+>go south
+Forest Path
+
+>go south
+North of House
+
+>

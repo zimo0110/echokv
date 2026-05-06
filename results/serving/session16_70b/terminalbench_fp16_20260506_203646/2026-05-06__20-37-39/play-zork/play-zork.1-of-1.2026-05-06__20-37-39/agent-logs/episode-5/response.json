@@ -1,0 +1,12 @@
+{
+    "state_analysis": "The game is asking for a direction to follow the path",
+    "explanation": "Specify the direction to follow the path",
+    "commands": [
+        {
+            "keystrokes": "go north\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

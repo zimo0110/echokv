@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We are back at the north side of the house, and we still need to find a way to open the egg",
+    "explanation": "Let's examine the house more closely to see if we can find any clues or objects that can help us open the egg",
+    "commands": [
+        {
+            "keystrokes": "examine house\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

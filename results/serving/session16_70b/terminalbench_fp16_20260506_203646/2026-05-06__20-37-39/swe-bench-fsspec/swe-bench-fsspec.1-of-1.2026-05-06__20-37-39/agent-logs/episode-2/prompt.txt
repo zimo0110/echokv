@@ -1,0 +1,40 @@
+root@a62ff8798590:/app/filesystem_spec# git status; tmux wait -S done
+On branch master
+nothing to commit, working tree clean
+root@a62ff8798590:/app/filesystem_spec# git checkout -b feature/add-open-async-method; tmux wait -S done
+Switched to a new branch 'feature/add-open-async-method'
+root@a62ff8798590:/app/filesystem_spec# nano fsspec/specs/dir.py
+bash: nano: command not found
+root@a62ff8798590:/app/filesystem_spec#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

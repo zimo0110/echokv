@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We are unable to open the egg without the proper tools or expertise",
+    "explanation": "Let's go back to the forest path and see if we can find anything else to help us open the egg",
+    "commands": [
+        {
+            "keystrokes": "go south\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

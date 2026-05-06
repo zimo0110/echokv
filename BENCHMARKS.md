@@ -61,6 +61,7 @@ Configurations:
 | `fp16` | 16.00 | unquantized KV cache; baseline |
 | `static_int4` | 4.00 | KIVI-style group-32 INT4 across all layers |
 | `static_int8` | 8.00 | KIVI-style group-32 INT8 across all layers |
+| `nvfp4` | 4.00 | E2M1 group-16 (Blackwell native; BF16-emulated on Hopper) |
 | `echokv_3c` | 4.0–8.0 | closed-loop per-layer adaptive (this paper) |
 
 The static cells use forward-pre-hooks installed on every TP rank's
@@ -179,9 +180,56 @@ sequential, so n=500 mns=8 would be ~6 hours per cell.
 | `07_gsm8k_hotpotqa_echokv_tau_sqrtL.sh` | EchoKV-3C frozen at the un-floored √L τ on GSM8K-Hard + HotpotQA (diagnostic) | ~25 min |
 | `08_gsm8k_hard_continuous_dynamic.sh` | **EchoKV-3C continuous-dynamic, GSM8K-Hard n=500 mns=8** | ~20 min |
 | `09_hotpotqa_ruler_continuous_dynamic.sh` | **EchoKV-3C continuous-dynamic, HotpotQA + RULER@128K** | ~10 min |
+| `10_taubench_static_sweep.sh` | **τ-Bench airline static-baseline sweep (FP16/INT4/INT8/NVFP4) n=50 max-turns=15** | ~3.5 h |
 | `run_paper_phase6.sh` | wrapper: 01 then 02 (Phase-6 publication sweep) | ~3.5 h |
 
 Bold = headline-cell scripts the paper depends on.
+
+### NVFP4 baseline (Phase 9, 2026-05-06)
+
+The `nvfp4` config is wired into the GSM8K-Hard / HotpotQA / τ-Bench
+drivers via the same `--configs` flag as INT4/INT8. To run a single
+NVFP4 cell at TP=8 (uses all 8 H100s):
+
+```bash
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
+VLLM_ALLOW_INSECURE_SERIALIZATION=1 FLASHINFER_DISABLE_VERSION_CHECK=1 \
+/opt/conda/envs/scalable/bin/python \
+    -m evaluation.serving.run_session14_70b_gsm8k_hard \
+    --tensor-parallel-size 8 --n-prompts 500 --configs nvfp4 \
+    --max-num-seqs 8 --max-new-tokens 512 --seed 0 \
+    --out results/serving/session14_70b/gsm8k_hard_n500_nvfp4_tp8.json
+```
+
+Hooks are sticky in-process; cannot mix INT4/INT8/NVFP4 in one
+invocation. Use one process per config.
+
+### τ-Bench airline (Phase 10, agentic / decode-heavy)
+
+Multi-turn airline customer-service tasks. Tools and reward come
+from sierra-research/tau-bench (cloned + pip-installed from source);
+user simulator is replaced by a deterministic stub so we don't
+require an OpenAI API key. Reward via env.calculate_reward
+(database-state hash matching the gold trajectory).
+
+Static sweep (FP16/INT4/INT8/NVFP4):
+
+```bash
+tmux new -s taubench 'bash scripts/10_taubench_static_sweep.sh'
+```
+
+EchoKV-3C cell (separate driver with the 3-phase warmup→consolidate
+→measure protocol; supports `--continuous-dynamic`):
+
+```bash
+/opt/conda/envs/scalable/bin/python \
+    -m evaluation.serving.run_session15_70b_taubench_echokv \
+    --tensor-parallel-size 8 --n-tasks 50 --warmup-n 5 \
+    --max-turns 15 --max-new-tokens 512 --multi-precision \
+    --absolute-canary --tau-budget 0.022 \
+    --continuous-dynamic \
+    --out results/serving/session15_70b/taubench_airline_echokv_dyn.json
+```
 
 ---
 
@@ -383,6 +431,8 @@ Multiply by the number of cells you're running.
 
 ## Known gaps
 
+### Cells we don't have at the matching protocol
+
 - **No INT8 cell for GSM8K-Hard at n=500 mns=8** (cosmetic — Open Q 26).
   Trivial fix; ~18 min via `01_int8_gsm8k_hard.sh` adapted from n=200.
 - **n is at the threshold of significance** for the GSM8K-Hard mirror
@@ -391,5 +441,35 @@ Multiply by the number of cells you're running.
 - **The √L exponent in §4.X is confirmed but not fitted** — RULER@128K
   saturates accuracy at INT4 already, so the test cannot distinguish
   L^0.5 from L^0.4 / L^0.6 (Open Q 28).
+
+### Baselines we don't have a kernel for yet
+
+- **NVFP4** (E2M1 group-16; native on Blackwell, software-emulated on
+  Hopper). Open Q 32 — motivated 2026-05-06 by external paper feedback.
+  Plan: add `evaluation/serving/nvfp4_tp.py` paralleling
+  `static_int4_tp.py` with a BF16-emulated E2M1 group-16 quantizer
+  (per-group max-abs scale). Add `nvfp4` to the `--configs` choice on
+  the three workload drivers and re-run at the existing
+  frozen + continuous-dynamic protocols. Implementation lift: ~1 day
+  for kernel + tests; re-running existing workloads is then a few hours.
+  Output JSONs would land at e.g.
+  `results/serving/session14_70b/hotpotqa_n500_mns8/nvfp4_n500_mns8.json`.
+
+### Workload classes we don't load yet
+
+- **Agentic / decode-heavy benchmarks** (Open Q 33; PAPER_DRAFT §7.2).
+  EchoKV's closed-loop response is observable only with enough decode
+  tokens for the EMAs to update past warmup; current workloads have
+  decode lengths of 278 / 5 / 32 tokens, only GSM8K-Hard exercises the
+  closed loop meaningfully. Three planned additions, in priority order:
+  1. **τ-Bench** (Sierra; tool-using customer-service agent) —
+     ~3-5K decode tok/task, standard chat-completions interface, **no
+     sandbox needed**. Cheapest to add: clone the GSM8K-Hard driver,
+     swap the loader, wire in multi-turn generation.
+  2. **Terminal-Bench** (Stanford; real-shell agent) — ~5-15K decode
+     tok/task. **Needs a sandbox executor** (same blocker as HumanEval,
+     Open Q 8/14).
+  3. **SWE-Bench-Verified** — long context + long output, most
+     expensive. Needs sandbox + per-task dependency resolution.
 
 See [REPORT.md §Open Questions](REPORT.md) for the full list.

@@ -1,0 +1,40 @@
+ Attic                                                                                                                            Score: 15       Moves: 36
+>open window
+With great effort, you open the window far enough to allow entry.
+
+>enter house
+Kitchen
+You are in the kitchen of the white house. A table seems to have been used recently for the preparation of food. A passage leads to the west and a dark
+staircase can be seen leading upward. A dark chimney leads down and to the east is a small window which is open.
+On the table is an elongated brown sack, smelling of hot peppers.
+A bottle is sitting on the table.
+The glass bottle contains:
+  A quantity of water
+
+>examine bottle
+The glass bottle contains:
+  A quantity of water
+
+>examine sack
+The brown sack is closed.
+
+>open sack
+Opening the brown sack reveals a lunch, and a clove of garlic.
+
+>examine lunch
+There's nothing special about the lunch.
+
+>examine garlic
+There's nothing special about the clove of garlic.
+
+>go up
+You have moved into a dark place.
+It is pitch black. You are likely to be eaten by a grue.
+
+>light
+What do you want to light?
+
+>light garlic
+It's too dark to see!
+
+>

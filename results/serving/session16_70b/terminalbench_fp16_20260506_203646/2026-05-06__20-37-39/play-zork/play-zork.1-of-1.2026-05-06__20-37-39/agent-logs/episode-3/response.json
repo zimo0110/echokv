@@ -1,0 +1,12 @@
+{
+    "state_analysis": "The leaflet has been taken, and we are still standing west of the house",
+    "explanation": "Go north to the house to examine the boarded front door",
+    "commands": [
+        {
+            "keystrokes": "go north\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

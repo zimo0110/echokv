@@ -1,0 +1,22 @@
+['asciinema rec --stdin /logs/agent.cast', 'Enter']
+['clear', 'Enter']
+'cd /app/linux-6.9\n'
+'make menuconfig\n'
+'apt-get update\n'
+'apt-get install -y git build-essential\n'
+'git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux-6.9\n'
+'cd linux-6.9\n'
+'git checkout v6.9\n'
+'make menuconfig\n'
+'make\n'
+'cd linux-6.9\n'
+'git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux-6.9\n'
+'git clone https://kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux-6.9\n'
+'git clone https://mirrors.edge.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux-6.9\n'
+'git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git linux-6.9\n'
+'wget https://www.kernel.org/pub/linux/kernel/v6.x/linux-6.9.tar.xz\n'
+['asciinema rec --stdin /logs/tests.cast', 'Enter']
+['clear', 'Enter']
+['bash ', '/tests/run-tests.sh', 'Enter']
+['C-d']
+['C-d']

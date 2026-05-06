@@ -1,0 +1,12 @@
+{
+    "state_analysis": "The game doesn't understand the word 'carefully'",
+    "explanation": "Let's try a different approach. We can try to knock on the door to see if anyone answers",
+    "commands": [
+        {
+            "keystrokes": "knock on door\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

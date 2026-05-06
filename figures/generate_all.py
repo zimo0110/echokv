@@ -870,6 +870,11 @@ def fig6_workload_adaptive() -> dict:
         "ech":  gsm_e["measurement"],
         "ech_proj": gsm_e["memory_projection"],
     }
+    # NVFP4 added Phase-9 (2026-05-06); separate file from the Phase-2 baselines
+    gsm_nvfp4_path = ROOT / "results/serving/session14_70b/gsm8k_hard_n500_nvfp4_tp8.json"
+    if gsm_nvfp4_path.exists():
+        gsm_n = json.loads(gsm_nvfp4_path.read_text())
+        gsm["nvfp4"] = next(c for c in gsm_n["cells"] if c["config"] == "nvfp4")
 
     # ----- HotpotQA cells (n=500 mns=8) -----
     hot_dir = ROOT / "results/serving/session14_70b/hotpotqa_n500_mns8"
@@ -878,8 +883,9 @@ def fig6_workload_adaptive() -> dict:
     require_file(hot_dir / "int8_n500_mns8.json", fig_name)
     require_file(hot_dir / "echokv3c_abscanary_tau022_n500_mns8.json", fig_name)
 
-    def _load_baseline(name: str) -> dict:
-        b = json.loads((hot_dir / f"{name}_n500_mns8.json").read_text())
+    def _load_baseline(name: str, file_name: str | None = None) -> dict:
+        fn = file_name or f"{name}_n500_mns8.json"
+        b = json.loads((hot_dir / fn).read_text())
         return b["cells"][0]
 
     hot_e_blob = json.loads((hot_dir / "echokv3c_abscanary_tau022_n500_mns8.json").read_text())
@@ -890,6 +896,9 @@ def fig6_workload_adaptive() -> dict:
         "ech":  hot_e_blob["measurement"],
         "ech_proj": hot_e_blob["memory_projection"],
     }
+    hot_nvfp4_path = hot_dir / "nvfp4_n500_mns8_tp8.json"
+    if hot_nvfp4_path.exists():
+        hot["nvfp4"] = json.loads(hot_nvfp4_path.read_text())["cells"][0]
 
     # ----- RULER@128K cells (n=20 mns=1; long-context regime) -----
     rul_baselines = require_file(
@@ -925,11 +934,12 @@ def fig6_workload_adaptive() -> dict:
         ("FP16",      "0.85", "fp16"),
         ("INT4",      "0.55", "int4"),
         ("INT8",      "0.30", "int8"),
+        ("NVFP4",     "0.15", "nvfp4"),
         ("EchoKV-3C", "black", "ech"),
     ]
     n_groups = len(workloads)
     n_bars = len(bar_specs)
-    width = 0.18
+    width = 0.15
     centers = np.arange(n_groups)
 
     for j, (label, color, key) in enumerate(bar_specs):
@@ -944,13 +954,14 @@ def fig6_workload_adaptive() -> dict:
             ax_a.text(centers[i] + offsets, y + 0.012, f"{y:.3f}",
                       ha="center", va="bottom", fontsize=6, rotation=60)
 
-    # Mark missing INT8 cells
+    # Mark missing baseline cells (INT8 and NVFP4 may be absent on RULER@128K)
     for i, src in enumerate(sources):
-        if "int8" not in src:
-            int8_off = (2 - (n_bars - 1) / 2) * width
-            ax_a.text(centers[i] + int8_off, 0.42,
-                      "INT8\n(n/a)", ha="center", va="bottom",
-                      fontsize=5.5, color="0.5", style="italic")
+        for j_miss, key_miss in [(2, "int8"), (3, "nvfp4")]:
+            if key_miss not in src:
+                miss_off = (j_miss - (n_bars - 1) / 2) * width
+                ax_a.text(centers[i] + miss_off, 0.42,
+                          f"{key_miss.upper()}\n(n/a)", ha="center", va="bottom",
+                          fontsize=5.0, color="0.5", style="italic")
 
     ax_a.set_xticks(centers)
     ax_a.set_xticklabels(["GSM8K\nHard", "HotpotQA", "RULER\n@128K"],

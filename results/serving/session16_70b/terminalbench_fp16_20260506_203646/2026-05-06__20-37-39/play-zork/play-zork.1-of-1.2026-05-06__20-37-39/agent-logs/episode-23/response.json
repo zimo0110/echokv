@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We have examined the egg again, but it's still closed",
+    "explanation": "Let's think about what we need to do next. We might need to find a specific object or location to help us open the egg. Let's try to go around the house to see if we can find anything",
+    "commands": [
+        {
+            "keystrokes": "go east\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

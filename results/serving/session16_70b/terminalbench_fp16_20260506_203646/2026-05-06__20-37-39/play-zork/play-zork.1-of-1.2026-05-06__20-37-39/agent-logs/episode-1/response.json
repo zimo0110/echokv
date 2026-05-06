@@ -1,0 +1,12 @@
+{
+    "state_analysis": "Game has started, and we are standing west of a white house with a boarded front door and a small mailbox",
+    "explanation": "Open the mailbox to see if there's anything inside",
+    "commands": [
+        {
+            "keystrokes": "open mailbox\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

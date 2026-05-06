@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We have managed to open the window and it's now possible to enter the house",
+    "explanation": "Let's enter the house through the window and see what's inside",
+    "commands": [
+        {
+            "keystrokes": "enter house\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We are now on a forest path, and there is a large tree with low branches nearby",
+    "explanation": "Examine the tree to see if there's anything interesting",
+    "commands": [
+        {
+            "keystrokes": "examine tree\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

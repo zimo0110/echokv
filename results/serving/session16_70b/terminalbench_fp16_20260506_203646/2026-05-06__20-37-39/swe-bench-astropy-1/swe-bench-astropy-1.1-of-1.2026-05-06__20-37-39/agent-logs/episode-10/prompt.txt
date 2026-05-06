@@ -1,0 +1,40 @@
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'm' is not defined
+>>> print(separability_matrix(m.Pix2Sky_TAN() & cm)); tmux wait -S done
+  File "<stdin>", line 1
+    print(separability_matrix(m.Pix2Sky_TAN() & cm)); tmux wait -S done
+                                                           ^
+SyntaxError: invalid syntax
+>>> import sys
+>>> sys.exit(); tmux wait -S done
+  File "<stdin>", line 1
+    sys.exit(); tmux wait -S done
+                     ^
+SyntaxError: invalid syntax
+>>> Ctrl+d; tmux wait -S done
+  File "<stdin>", line 1
+    Ctrl+d; tmux wait -S done
+                 ^
+SyntaxError: invalid syntax
+>>> Ctrl+d; tmux wait -S done
+  File "<stdin>", line 1
+    Ctrl+d; tmux wait -S done
+                 ^
+SyntaxError: invalid syntax
+>>> quit(); tmux wait -S done
+  File "<stdin>", line 1
+    quit(); tmux wait -S done
+                 ^
+SyntaxError: invalid syntax
+>>> exit(); tmux wait -S done
+  File "<stdin>", line 1
+    exit(); tmux wait -S done
+                 ^
+SyntaxError: invalid syntax
+>>> exit(); tmux wait -S done
+  File "<stdin>", line 1
+    exit(); tmux wait -S done
+                 ^
+SyntaxError: invalid syntax
+>>> Ctrl+d

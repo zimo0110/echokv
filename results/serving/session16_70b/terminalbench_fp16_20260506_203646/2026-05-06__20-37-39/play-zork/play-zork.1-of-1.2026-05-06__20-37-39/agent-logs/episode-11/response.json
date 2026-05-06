@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We are in a clearing, with a forest surrounding us on all sides, and a path leads south",
+    "explanation": "Examine the pile of leaves to see if there's anything interesting",
+    "commands": [
+        {
+            "keystrokes": "examine leaves\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

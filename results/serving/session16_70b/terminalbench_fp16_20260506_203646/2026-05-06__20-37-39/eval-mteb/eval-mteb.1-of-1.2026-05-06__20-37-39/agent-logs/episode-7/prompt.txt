@@ -1,0 +1,40 @@
+usage: mteb [-h] {run,available_tasks,available_benchmarks,create_meta} ...
+mteb: error: unrecognized arguments: bge-small-en-v1.5 --commit_id 5c38ec7c405ec4b44b94cc5a9bb96e735b38267a --task_name STS12 --output_dir results --result_file
+_name {hf model org}__{hf model name}/{model commit id}/{task name}.json
+root@abcbf3fbda17:/app# mteb run --help; tmux wait -S done
+usage: mteb run [-h] [-m MODEL] [--task_types TASK_TYPES [TASK_TYPES ...]] [--categories CATEGORIES [CATEGORIES ...]] [-t TASKS [TASKS ...]]
+                [-l [LANGUAGES ...]] [-b BENCHMARKS [BENCHMARKS ...]] [--device DEVICE] [--output_folder OUTPUT_FOLDER] [-v VERBOSITY]
+                [--co2_tracker CO2_TRACKER] [--eval_splits EVAL_SPLITS [EVAL_SPLITS ...]] [--model_revision MODEL_REVISION] [--batch_size BATCH_SIZE]
+                [--overwrite] [--save_predictions]
+
+options:
+  -h, --help            show this help message and exit
+  -m MODEL, --model MODEL
+                        Model to use. Will priotize model implementation in MTEB's model registry, but default to loading the model using sentence-
+                        transformers.
+  --task_types TASK_TYPES [TASK_TYPES ...]
+                        List of task types (Clustering, Retrieval..) to be evaluated. If None, the filter is not applied
+  --categories CATEGORIES [CATEGORIES ...]
+                        List of task categories (s2s, p2p..) to be evaluated. If None the filter is not applied
+  -t TASKS [TASKS ...], --tasks TASKS [TASKS ...]
+                        List of tasks to be evaluated. If specified, the other arguments are ignored.
+  -l [LANGUAGES ...], --languages [LANGUAGES ...]
+                        List of languages to be evaluated. if not set, all languages will be evaluated. Specified as ISO 639-3 codes (e.g. eng, deu, fra).
+  -b BENCHMARKS [BENCHMARKS ...], --benchmarks BENCHMARKS [BENCHMARKS ...]
+                        List of benchmark to be evaluated.
+  --device DEVICE       Device to use for computation
+  --output_folder OUTPUT_FOLDER
+                        Output directory for results. Will default to `results` if not set.
+  -v VERBOSITY, --verbosity VERBOSITY
+                        Verbosity level
+  --co2_tracker CO2_TRACKER
+                        Enable CO₂ tracker, disabled by default
+  --eval_splits EVAL_SPLITS [EVAL_SPLITS ...]
+                        Evaluation splits to use (train, dev, test..). If None, all splits will be used
+  --model_revision MODEL_REVISION
+                        Revision of the model to be loaded. Revisions are automatically read if the model is loaded from huggingface.
+  --batch_size BATCH_SIZE
+                        Batch size of the encode. Will be passed to the MTEB as MTEB.evaluate(model, encode_kwargs = {'batch_size': value}).
+  --overwrite           Overwrite the output file if it already exists
+  --save_predictions    For retrieval tasks. Saves the predictions file in output_folder.
+root@abcbf3fbda17:/app#

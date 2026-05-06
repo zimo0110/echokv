@@ -1,0 +1,40 @@
+0000040 022626 005000 104401 004567 001354 000002 016500 000004
+0000060 072027 177776 016501 000004 072127 177775 074100 016501
+0000100 000004 072127 177773 074100 016501 000004 074100 042700
+0000120 177776 072027 000017 016501 000004 006201 050100 000400
+0000140 000167 001300 004567 001256 000002 017516 000004 004737
+0000160 000026 010075 000004 010001 005701 006700 071065 000006
+0000200 010100 000400 000167 001234 004567 001212 000006 012765
+0000220 002322 177770 005065 177766 026527 177766 000024 002035
+root@55a8f0f883c7:/app# xxd -r /app/data.hex > /app/output; tmux wait -S done
+bash: xxd: command not found
+root@55a8f0f883c7:/app# apt-get update; tmux wait -S done
+Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
+Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [48.0 kB]
+Get:4 http://deb.debian.org/debian bookworm/main amd64 Packages [8792 kB]
+Get:5 http://deb.debian.org/debian bookworm-updates/main amd64 Packages [6924 B]
+Get:6 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [299 kB]
+Fetched 9352 kB in 1s (9833 kB/s)
+Reading package lists... Done
+root@55a8f0f883c7:/app# apt-get install -y xxd; tmux wait -S done
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  xxd
+0 upgraded, 1 newly installed, 0 to remove and 44 not upgraded.
+Need to get 84.1 kB of archives.
+After this operation, 138 kB of additional disk space will be used.
+Get:1 http://deb.debian.org/debian bookworm/main amd64 xxd amd64 2:9.0.1378-2+deb12u2 [84.1 kB]
+Fetched 84.1 kB in 0s (1709 kB/s)
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package xxd.
+(Reading database ... 7590 files and directories currently installed.)
+Preparing to unpack .../xxd_2%3a9.0.1378-2+deb12u2_amd64.deb ...
+Unpacking xxd (2:9.0.1378-2+deb12u2) ...
+Setting up xxd (2:9.0.1378-2+deb12u2) ...
+root@55a8f0f883c7:/app# xxd -r /app/data.hex > /app/output; tmux wait -S done
+root@55a8f0f883c7:/app# ./output
+bash: ./output: Permission denied
+root@55a8f0f883c7:/app#

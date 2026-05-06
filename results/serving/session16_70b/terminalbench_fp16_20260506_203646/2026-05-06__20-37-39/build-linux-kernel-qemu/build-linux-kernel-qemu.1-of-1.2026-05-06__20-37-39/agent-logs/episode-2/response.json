@@ -1,0 +1,6 @@
+{
+    "state_analysis": "The installation of necessary packages has finished, and the git clone command is still running.",
+    "explanation": "We will do nothing and wait for the git clone command to finish.",
+    "commands": [],
+    "is_task_complete": false
+}

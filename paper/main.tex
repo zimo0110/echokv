@@ -128,9 +128,9 @@ KV blocks produced during prefill are stored at the cache's global dtype
         $\tau(L) = \tau_0 \sqrt{L/L_0}$ extends the system to long context.
   \item \textbf{Empirical evaluation} on four workloads
         (\S\ref{sec:experiments}): GSM8K-Hard, HotpotQA, RULER@128K, and
-        $\tau$-Bench airline. EchoKV preserves FP16 accuracy while saving
-        $51$--$75\%$ of KV memory and Pareto-dominates both KIVI-INT4 and
-        NVFP4 on workloads where 4-bit deviates from FP16.
+        $\tau$-Bench airline+retail. EchoKV preserves FP16 accuracy while
+        saving $59$--$75\%$ of KV memory and Pareto-dominates both
+        KIVI-INT4 and NVFP4 on workloads where 4-bit deviates from FP16.
 \end{enumerate}
 
 %% ─────────────────────────────────────────────────────────────────────────────
@@ -391,10 +391,11 @@ $n{=}500$. \textbf{HotpotQA} is multi-hop QA over $10$ paragraphs with short
 ($\sim$$5$-token) answers, $n{=}500$. \textbf{RULER@128K}~\cite{hsieh2024ruler}
 is single-needle retrieval at $128$K context, $n{=}20$ ($n{=}500$ requires
 $5$--$6$ GPU-hours/cell at $128$K and both INT4 and FP16 saturate
-accuracy at $1.000$). \textbf{$\tau$-Bench airline}~\cite{yao2024taubench}
+accuracy at $1.000$). \textbf{$\tau$-Bench airline+retail}~\cite{yao2024taubench}
 is a tool-using customer-service agent, multi-turn dialogs averaging
-$\sim$$800$ decode tokens/task, $n{=}50$. Headline numbers in
-Table~\ref{tab:headline}.
+$\sim$$800$ decode tokens/task, $n{=}50$ per split ($n{=}90$ paired tasks
+after merging the two splits, since EchoKV's first $5$ tasks per split are
+used for warmup). Headline numbers in Table~\ref{tab:headline}.
 
 \begin{table}[h]
 \centering
@@ -483,8 +484,9 @@ no per-workload tuning.
   live throughout serving. (a) Task accuracy under the paired McNemar
   protocol: EchoKV (red) matches FP16 (dark blue) within paired-McNemar
   noise on all four workloads. KIVI-INT4 shows a measurable $4$-bit
-  deficit on GSM8K-Hard ($p{=}0.052$) and on $\tau$-Bench
-  ($\Delta{=}{-}0.040$). (b) Cache memory cost: EchoKV's per-rank average
+  deficit on GSM8K-Hard ($\Delta{=}{-}0.022$, $p{=}0.052$) and a
+  non-significant trend in the same direction on $\tau$-Bench
+  ($\Delta{=}{-}0.040$, $p{=}0.48$). (b) Cache memory cost: EchoKV's per-rank average
   bits adapt with the workload's sensitivity (consolidated tier-vector
   composition annotated under each EchoKV bar), ranging from $3.97$ on
   RULER@128K to $6.54$ on $\tau$-Bench (airline + retail).}
@@ -727,11 +729,6 @@ C.-P. Hsieh, S.~Sun, S.~Kriman, S.~Acharya, D.~Rekesh, F.~Jia, Y.~Zhang, and
 \newblock {RULER: What's the real context size of your long-context language
   models?}
 \newblock In {\em COLM}, 2024.
-
-\bibitem{sun2024retrieval}
-M.~Sun, X.~Liu, A.~Bair, and J.~Z. Kolter.
-\newblock {A simple and effective pruning approach for large language models}.
-\newblock In {\em ICLR}, 2024.
 
 \bibitem{chen2023longlora}
 Y.~Chen, S.~Qian, H.~Tang, X.~Lai, Z.~Liu, S.~Han, and J.~Jia.

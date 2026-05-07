@@ -325,14 +325,6 @@ def fig_cross_workload():
             if cfg == "EchoKV":
                 for bar, m in zip(bars, mask):
                     if m: bar.set_edgecolor("#7F1D1D"); bar.set_linewidth(0.8)
-        # mark missing INT8/NVFP4 cells
-        for i in range(len(workloads)):
-            for j_miss, key_miss in [(2, "INT8"), (3, "NVFP4")]:
-                if accs[key_miss][i] is None:
-                    miss_off = (j_miss - (n_cfg - 1)/2) * width
-                    ax_a.text(i + miss_off, 0.05,
-                              f"{key_miss}\n(n/a)", ha="center", va="bottom",
-                              fontsize=5.5, color="0.55", style="italic")
         ax_a.set_xticks(x); ax_a.set_xticklabels(workloads)
         ax_a.set_ylabel("Accuracy")
         ax_a.set_ylim(0, 1.18)
@@ -363,8 +355,7 @@ def fig_cross_workload():
             if cfg == "EchoKV":
                 for bar, m in zip(bars, mask):
                     if m: bar.set_edgecolor("#7F1D1D"); bar.set_linewidth(0.8)
-        # tier-vector annotation under each EchoKV bar
-        ech_off = (4 - (n_cfg - 1)/2) * width
+        # tier-vector annotation centered above each workload's tick label
         for i, t in enumerate(tiers):
             tc = {int(k): v for k, v in t.items()}
             parts = []
@@ -372,13 +363,13 @@ def fig_cross_workload():
                 if k in tc and tc[k] > 0:
                     parts.append(f"{tc[k]}×INT{k}")
             label = ",  ".join(parts)
-            ax_b.text(i + ech_off, -2.0, label,
+            ax_b.text(i, -2.0, label,
                       ha="center", va="top",
                       fontsize=6.0, color=COLORS["EchoKV"])
         ax_b.set_xticks(x); ax_b.set_xticklabels(workloads)
         ax_b.set_ylabel("Bits per element")
         ax_b.set_ylim(-3.0, 19)
-        ax_b.set_title("(b)  Cache memory cost; tier-vector composition annotated under EchoKV bars",
+        ax_b.set_title("(b)  Cache memory cost; EchoKV tier-vector composition annotated below each workload",
                        loc="left")
         ax_b.grid(axis="y", linestyle=":", color=C_GRID, zorder=1)
         ax_b.set_axisbelow(True)

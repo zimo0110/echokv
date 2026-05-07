@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2026.3.18)  7 MAY 2026 05:36
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2026.3.18)  7 MAY 2026 07:14
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -584,83 +584,83 @@ Package microtype Info: Loading generic protrusion settings for font family
 
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2]
-<figures/architecture.pdf, id=123, 417.7206pt x 203.65686pt>
+<figures/architecture.pdf, id=131, 417.7206pt x 203.65686pt>
 File: figures/architecture.pdf Graphic file (type pdf)
 <use figures/architecture.pdf>
-Package pdftex.def Info: figures/architecture.pdf  used on input line 189.
+Package pdftex.def Info: figures/architecture.pdf  used on input line 190.
 (pdftex.def)             Requested size: 377.60951pt x 184.10054pt.
  [3 <./figures/architecture.pdf>] [4]
-<figures/sensor_validation.pdf, id=255, 559.53745pt x 128.08353pt>
+<figures/sensor_validation.pdf, id=264, 559.53745pt x 128.08353pt>
 File: figures/sensor_validation.pdf Graphic file (type pdf)
 <use figures/sensor_validation.pdf>
-Package pdftex.def Info: figures/sensor_validation.pdf  used on input line 373.
+Package pdftex.def Info: figures/sensor_validation.pdf  used on input line 412.
 
 (pdftex.def)             Requested size: 397.48499pt x 90.98878pt.
 
-[5 <./figures/sensor_validation.pdf>]
-Overfull \hbox (68.41156pt too wide) in paragraph at lines 410--428
+[5]
+Overfull \hbox (68.41156pt too wide) in paragraph at lines 449--467
  [][] 
  []
 
-<figures/cross_workload.pdf, id=347, 450.0815pt x 354.78323pt>
+[6 <./figures/sensor_validation.pdf>]
+<figures/cross_workload.pdf, id=367, 450.0815pt x 354.78323pt>
 File: figures/cross_workload.pdf Graphic file (type pdf)
 <use figures/cross_workload.pdf>
-Package pdftex.def Info: figures/cross_workload.pdf  used on input line 482.
+Package pdftex.def Info: figures/cross_workload.pdf  used on input line 521.
 (pdftex.def)             Requested size: 397.48499pt x 313.33081pt.
 
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 496.
-
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\tau' on input line 496.
+(hyperref)                removing `math shift' on input line 535.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 496.
+(hyperref)                removing `\tau' on input line 535.
 
-[6]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 535.
+
+[7 <./figures/cross_workload.pdf>] [8]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [7 <./figures/cross_workload.pdf>]
-Underfull \vbox (badness 3503) has occurred while \output is active []
-
- [8]
-[9] [10] (./main.aux)
+ [9]
+[10] (./main.aux)
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: A494D298F06BFA8FF59366A34B2AB423;1079.
+(rerunfilecheck)             Checksum: CC0F1936013A682E43BF93EF11D8EA63;1233.
  ) 
 Here is how much of TeX's memory you used:
- 10438 strings out of 481176
- 157432 string characters out of 5914226
- 521443 words of memory out of 5000000
- 26839 multiletter control sequences out of 15000+600000
- 457242 words of font info for 251 fonts, out of 8000000 for 9000
+ 10459 strings out of 481176
+ 157685 string characters out of 5914226
+ 519544 words of memory out of 5000000
+ 26847 multiletter control sequences out of 15000+600000
+ 460299 words of font info for 257 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 83i,11n,88p,877b,467s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 83i,11n,88p,877b,394s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc} </home/nazar/.tex
 live2020/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk></usr/share/texli
 ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist
 /fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts
 /type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist/fonts/type1/
-public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
-amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
-s/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
-r5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb><
-/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/sha
-re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/tex
-live/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texlive/te
-xmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dis
-t/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/share/texlive/texmf-dist/fonts
-/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texlive/texmf-dist/fonts/
-type1/urw/helvetic/uhvr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ti
-mes/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb>
-</usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on main.pdf (10 pages, 312336 bytes).
+public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+r10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb>
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/sh
+are/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texl
+ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/te
+xmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texlive/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts
+/type1/public/amsfonts/cm/cmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/
+public/amsfonts/symbols/msbm10.pfb></usr/share/texlive/texmf-dist/fonts/type1/u
+rw/helvetic/uhvr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utm
+b8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/s
+hare/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on main.pdf (10 pages, 324494 bytes).
 PDF statistics:
- 564 PDF objects out of 1000 (max. 8388607)
- 306 compressed objects within 4 object streams
- 56 named destinations out of 1000 (max. 500000)
- 50840 words of extra memory for PDF output out of 51595 (max. 10000000)
+ 583 PDF objects out of 1000 (max. 8388607)
+ 324 compressed objects within 4 object streams
+ 60 named destinations out of 1000 (max. 500000)
+ 54952 words of extra memory for PDF output out of 61914 (max. 10000000)
 

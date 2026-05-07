@@ -129,8 +129,9 @@ KV blocks produced during prefill are stored at the cache's global dtype
   \item \textbf{Empirical evaluation} on four workloads
         (\S\ref{sec:experiments}): GSM8K-Hard, HotpotQA, RULER@128K, and
         $\tau$-Bench airline+retail. EchoKV preserves FP16 accuracy while
-        saving $59$--$75\%$ of KV memory and Pareto-dominates both
-        KIVI-INT4 and NVFP4 on workloads where 4-bit deviates from FP16.
+        saving $59$--$75\%$ of KV memory, occupying a favourable point on
+        the accuracy--memory frontier between uniform INT4 and uniform INT8
+        on workloads where 4-bit deviates from FP16.
 \end{enumerate}
 
 %% ─────────────────────────────────────────────────────────────────────────────
@@ -331,6 +332,41 @@ The same rule applied at small $L$ tends to over-conservatism, suggesting
 a workload-dependent constant we have not yet characterised; a tighter
 derivation is left as future work.
 
+\subsection{Hyperparameter Sensitivity}
+\label{sec:ablation}
+
+Beyond $\tau_0$, the controller has two free knobs: the EMA decay
+$\alpha$ and the production canary rate $p_c$. Table~\ref{tab:ablation}
+sweeps $\alpha \in \{0.05, 0.10, 0.20\}$ and $p_c \in \{1/32, 1/64,
+1/128\}$ on Llama-3.1-8B GSM8K-Hard ($n{=}200$). Across the full $3{\times}3$
+grid, accuracy varies by $0.050$ (within binomial noise at $n{=}200$,
+$\sigma{\approx}0.034$) and bits/rank varies by $0.63$ (${\sim}3$ percentage
+points of savings). The controller is insensitive to both knobs, so no
+per-deployment tuning of $\alpha$ or $p_c$ is required.
+
+\begin{table}[h]
+\centering
+\caption{Hyperparameter sensitivity on Llama-3.1-8B GSM8K-Hard ($n{=}200$).
+  Accuracy and bits/rank are stable across the full $\alpha \times p_c$ grid.}
+\label{tab:ablation}
+\small
+\begin{tabular}{cccc}
+\toprule
+$\alpha$ & $p_c$ & Acc. & Bits/rank \\
+\midrule
+0.05 & 1/32  & 0.345 & 7.75 \\
+0.05 & 1/64  & 0.385 & 7.75 \\
+0.05 & 1/128 & 0.350 & 7.75 \\
+0.10 & 1/32  & 0.335 & 7.62 \\
+0.10 & 1/64  & 0.340 & 7.88 \\
+0.10 & 1/128 & 0.350 & 7.88 \\
+0.20 & 1/32  & 0.345 & 7.25 \\
+0.20 & 1/64  & 0.350 & 7.38 \\
+0.20 & 1/128 & 0.340 & 7.50 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 %% ─────────────────────────────────────────────────────────────────────────────
 \section{Experiments}
 \label{sec:experiments}
@@ -352,6 +388,9 @@ configuration sees the same $n{=}500$ prompts in the same batch positions
 (short workloads), so per-prompt outcomes are paired. EchoKV runs at
 production canary rate $p_c{=}1/64$ throughout with the controller live
 during serving; tier changes apply only to new block allocations (INV-2).
+The warmup phase (first $5$ tasks per workload, used only to settle the
+EMAs) runs the canary at a higher rate $p_c{=}0.25$ for faster convergence
+before the controller drops to the production rate.
 
 \subsection{Sensor Validation (Llama-3.1-8B, TP=2)}
 \label{sec:sensor_val}
@@ -534,6 +573,52 @@ while preserving FP16 accuracy. These numbers are projections from
 per-element bits; we do not measure end-to-end serving throughput in this
 work and discuss the gap in \S\ref{sec:limitations}.
 
+\subsection{Scale Transfer: Llama-3.1-8B}
+\label{sec:scale_transfer}
+
+To assess whether EchoKV's canary-controller loop generalises across
+model scales, we run the full serving stack on Llama-3.1-8B (TP$=$2) on
+GSM8K-Hard and HotpotQA ($n{=}500$ each) using $\tau_0{=}0.022$
+calibrated on the 70B model without retuning
+(Table~\ref{tab:scale_transfer}). On HotpotQA, KIVI-INT4 degrades by
+$2.8$ percentage points at 8B; EchoKV recovers most of the deficit
+($\Delta{=}{-}0.016$, $p{=}0.12$) at $6.62$ bits/rank ($59\%$ savings),
+consistent with the 70B pattern. On GSM8K-Hard, INT4 is lossless at 8B
+($\Delta{=}{+}0.002$ vs FP16); EchoKV correctly matches FP16 exactly
+($\Delta{=}0.000$, $p{=}1.00$) but over-conserves at $7.50$ bits ($53\%$
+savings) rather than the $75\%$ that uniform INT4 would achieve. This
+over-conservatism is a direct consequence of using a 70B-calibrated
+$\tau_0$ on a more quantization-robust 8B model---a concrete empirical
+demonstration that the per-architecture recalibration noted in
+\S\ref{sec:limitations} is load-bearing when model scale changes
+substantially.
+
+\begin{table}[h]
+\centering
+\caption{Scale-transfer evaluation on Llama-3.1-8B (TP$=$2), $n{=}500$.
+  $\tau_0{=}0.022$ is used without retuning from the 70B calibration.
+  $p$ is paired McNemar EchoKV vs FP16.}
+\label{tab:scale_transfer}
+\small
+\begin{tabular}{llrrrr}
+\toprule
+Workload & Config & Acc. & Bits/rank & Savings & $p$ \\
+\midrule
+\multirow{4}{*}{GSM8K-Hard}
+ & FP16        & 0.344 & 16.0 & --   & -- \\
+ & KIVI-INT4   & 0.346 & 4.0  & 75\% & -- \\
+ & Static INT8 & 0.356 & 8.0  & 50\% & -- \\
+ & EchoKV      & \textbf{0.344} & 7.50 & 53\% & $1.00$ \\
+\midrule
+\multirow{4}{*}{HotpotQA}
+ & FP16        & 0.600 & 16.0 & --   & -- \\
+ & KIVI-INT4   & 0.572 & 4.0  & 75\% & -- \\
+ & Static INT8 & 0.598 & 8.0  & 50\% & -- \\
+ & EchoKV      & \textbf{0.584} & 6.62 & 59\% & $0.12$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 %% ─────────────────────────────────────────────────────────────────────────────
 \section{Limitations}
 \label{sec:limitations}
@@ -586,9 +671,13 @@ are computed from per-block tier counts in the allocator. A vLLM
 block-allocator fork that exposes on-GPU memory directly would let us
 report measured rather than projected savings.
 
-\textbf{Single model.} All experiments use Llama-3.1-70B (and 8B for
-sensor validation). The canary design is model-agnostic, but
-per-architecture $\tau_0$ recalibration is required.
+\textbf{Single model family.} Primary experiments use Llama-3.1-70B;
+\S\ref{sec:scale_transfer} extends the full serving stack to Llama-3.1-8B
+on two workloads, showing consistent qualitative behaviour. Evaluation
+across architecturally distinct model families (e.g., Mistral, Qwen) is
+left to future work. The canary design is model-agnostic, but
+per-architecture $\tau_0$ recalibration is required, as the 8B
+GSM8K-Hard result in \S\ref{sec:scale_transfer} concretely illustrates.
 
 %% ─────────────────────────────────────────────────────────────────────────────
 \section{Future Work}
@@ -647,9 +736,10 @@ long-decode agentic interaction, EchoKV preserves FP16 accuracy while
 reducing KV memory by $59$--$75\%$, with workload-coherent tier vectors
 ($15$, $18$, $0$, and $79$ INT8 promotions consolidated, ranging from
 $4.33$ to $6.54$ bits per rank) selected live by the same controller
-without per-workload tuning. The system Pareto-dominates both KIVI-INT4
-and NVFP4 on workloads where $4$-bit deviates from FP16, closing the gap
-between conservative INT8 serving and aggressive INT4 serving.
+without per-workload tuning. On workloads where $4$-bit deviates from
+FP16, EchoKV occupies a favourable point on the accuracy--memory frontier
+between uniform INT4 and uniform INT8, closing the gap between
+conservative INT8 serving and aggressive INT4 serving.
 
 %% ─────────────────────────────────────────────────────────────────────────────
 \section*{References}

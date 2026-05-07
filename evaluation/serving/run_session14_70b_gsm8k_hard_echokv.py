@@ -178,6 +178,11 @@ def main(argv: Optional[list[str]] = None) -> int:
              "production overhead measured in Sessions 8 and 13.",
     )
     p.add_argument(
+        "--ema-alpha", type=float, default=0.1,
+        help="EMA decay for the canary estimator. Default 0.1 (paper). "
+             "Lower = smoother / slower to react; higher = noisier / faster.",
+    )
+    p.add_argument(
         "--out", type=Path,
         default=Path("results/serving/session14_70b/echokv_3c_n100.json"),
     )
@@ -233,6 +238,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             "tau_budget": a.tau_budget,
             "absolute_canary": a.absolute_canary,
             "kref_window_size": a.kref_window_size,
+            "ema_alpha": a.ema_alpha,
             "seed": a.seed,
         },
     )
@@ -321,6 +327,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             "tau_budget": a.tau_budget,
             "absolute_canary": a.absolute_canary,
             "kref_window_size": a.kref_window_size,
+            "ema_alpha": a.ema_alpha,
             "seed": a.seed + 1,
         },
     )

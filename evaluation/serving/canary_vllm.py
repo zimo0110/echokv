@@ -345,6 +345,7 @@ class CanaryHarness:
         monotonicity_check: bool = True,
         absolute_canary: bool = False,
         kref_window_size: int = 64,
+        ema_alpha: float = 0.1,
         seed: int = 0,
     ) -> None:
         self.llm = llm
@@ -476,11 +477,13 @@ class CanaryHarness:
 
         self.estimator = CanaryEstimator(
             num_layers=self.num_layers,
+            ema_alpha=ema_alpha,
             canary_rate=canary_rate,
         )
         if self.multi_precision:
             self._mp_estimator = MultiPrecisionEstimator(
                 num_layers=self.num_layers,
+                ema_alpha=ema_alpha,
                 canary_rate=canary_rate,
             )
         ctrl_kwargs = dict(

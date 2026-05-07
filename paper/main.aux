@@ -53,31 +53,39 @@
 \citation{gsmhard}
 \citation{hsieh2024ruler}
 \citation{yao2024taubench}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Canary sensor validation on Llama-3.1-8B (TP=$2$). (a)\nobreakspace  {}Signal magnitude (log scale): max $\hat  {\delta }_4$ vs the cache-relative canary's warmup reading, $\sim 550\times $ larger. (b)\nobreakspace  {}Batch-size invariance: mns=$1$ vs mns=$8$ max ratio is $1.21\times $. (c)\nobreakspace  {}Cross-tier monotonicity: $\hat  {\delta }_2 \geq \hat  {\delta }_4$ holds for every layer (no points below the dashed identity line). (d)\nobreakspace  {}Cross-seed stability: $\rho {=}0.876$ between per-layer rankings at seeds $0$ and $7$.}}{5}{figure.2}\protected@file@percent }
-\newlabel{fig:sensor}{{2}{5}{Canary sensor validation on Llama-3.1-8B (TP=$2$). (a)~Signal magnitude (log scale): max $\hat {\delta }_4$ vs the cache-relative canary's warmup reading, $\sim 550\times $ larger. (b)~Batch-size invariance: mns=$1$ vs mns=$8$ max ratio is $1.21\times $. (c)~Cross-tier monotonicity: $\hat {\delta }_2 \geq \hat {\delta }_4$ holds for every layer (no points below the dashed identity line). (d)~Cross-seed stability: $\rho {=}0.876$ between per-layer rankings at seeds $0$ and $7$}{figure.2}{}}
 \newlabel{eq:tau_scaling}{{4}{5}{Calibration and Context-Aware Budget}{equation.3.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Hyperparameter Sensitivity}{5}{subsection.3.5}\protected@file@percent }
+\newlabel{sec:ablation}{{3.5}{5}{Hyperparameter Sensitivity}{subsection.3.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Hyperparameter sensitivity on Llama-3.1-8B GSM8K-Hard ($n{=}200$). Accuracy and bits/rank are stable across the full $\alpha \times p_c$ grid.}}{5}{table.1}\protected@file@percent }
+\newlabel{tab:ablation}{{1}{5}{Hyperparameter sensitivity on Llama-3.1-8B GSM8K-Hard ($n{=}200$). Accuracy and bits/rank are stable across the full $\alpha \times p_c$ grid}{table.1}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {4}Experiments}{5}{section.4}\protected@file@percent }
 \newlabel{sec:experiments}{{4}{5}{Experiments}{section.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Setup}{5}{subsection.4.1}\protected@file@percent }
 \newlabel{sec:setup}{{4.1}{5}{Setup}{subsection.4.1}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Sensor Validation (Llama-3.1-8B, TP=2)}{5}{subsection.4.2}\protected@file@percent }
 \newlabel{sec:sensor_val}{{4.2}{5}{Sensor Validation (Llama-3.1-8B, TP=2)}{subsection.4.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Per-Workload Results}{5}{subsection.4.3}\protected@file@percent }
-\newlabel{sec:per_workload}{{4.3}{5}{Per-Workload Results}{subsection.4.3}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces EchoKV preserves FP16 accuracy while reducing KV memory by $59$--$75\%$ across four workloads. \emph  {Bits/rank} = per-TP-rank average at end of run with the controller live; \emph  {Consolidated} = per-layer max across ranks. $\Delta $ is paired vs FP16 with McNemar exact $p$. $\tau $-Bench numbers merge airline ($n{=}50$) and retail ($n{=}50$) splits.}}{6}{table.1}\protected@file@percent }
-\newlabel{tab:headline}{{1}{6}{EchoKV preserves FP16 accuracy while reducing KV memory by $59$--$75\%$ across four workloads. \emph {Bits/rank} = per-TP-rank average at end of run with the controller live; \emph {Consolidated} = per-layer max across ranks. $\Delta $ is paired vs FP16 with McNemar exact $p$. $\tau $-Bench numbers merge airline ($n{=}50$) and retail ($n{=}50$) splits}{table.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Cross-Workload Pareto and Workload-Coherence}{6}{subsection.4.4}\protected@file@percent }
-\newlabel{sec:cross_workload}{{4.4}{6}{Cross-Workload Pareto and Workload-Coherence}{subsection.4.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Trajectory Behaviour on $\tau $-Bench}{6}{subsection.4.5}\protected@file@percent }
-\newlabel{sec:trajectory}{{4.5}{6}{Trajectory Behaviour on $\tau $-Bench}{subsection.4.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Canary sensor validation on Llama-3.1-8B (TP=$2$). (a)\nobreakspace  {}Signal magnitude (log scale): max $\hat  {\delta }_4$ vs the cache-relative canary's warmup reading, $\sim 550\times $ larger. (b)\nobreakspace  {}Batch-size invariance: mns=$1$ vs mns=$8$ max ratio is $1.21\times $. (c)\nobreakspace  {}Cross-tier monotonicity: $\hat  {\delta }_2 \geq \hat  {\delta }_4$ holds for every layer (no points below the dashed identity line). (d)\nobreakspace  {}Cross-seed stability: $\rho {=}0.876$ between per-layer rankings at seeds $0$ and $7$.}}{6}{figure.2}\protected@file@percent }
+\newlabel{fig:sensor}{{2}{6}{Canary sensor validation on Llama-3.1-8B (TP=$2$). (a)~Signal magnitude (log scale): max $\hat {\delta }_4$ vs the cache-relative canary's warmup reading, $\sim 550\times $ larger. (b)~Batch-size invariance: mns=$1$ vs mns=$8$ max ratio is $1.21\times $. (c)~Cross-tier monotonicity: $\hat {\delta }_2 \geq \hat {\delta }_4$ holds for every layer (no points below the dashed identity line). (d)~Cross-seed stability: $\rho {=}0.876$ between per-layer rankings at seeds $0$ and $7$}{figure.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Per-Workload Results}{6}{subsection.4.3}\protected@file@percent }
+\newlabel{sec:per_workload}{{4.3}{6}{Per-Workload Results}{subsection.4.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces EchoKV preserves FP16 accuracy while reducing KV memory by $59$--$75\%$ across four workloads. \emph  {Bits/rank} = per-TP-rank average at end of run with the controller live; \emph  {Consolidated} = per-layer max across ranks. $\Delta $ is paired vs FP16 with McNemar exact $p$. $\tau $-Bench numbers merge airline ($n{=}50$) and retail ($n{=}50$) splits.}}{6}{table.2}\protected@file@percent }
+\newlabel{tab:headline}{{2}{6}{EchoKV preserves FP16 accuracy while reducing KV memory by $59$--$75\%$ across four workloads. \emph {Bits/rank} = per-TP-rank average at end of run with the controller live; \emph {Consolidated} = per-layer max across ranks. $\Delta $ is paired vs FP16 with McNemar exact $p$. $\tau $-Bench numbers merge airline ($n{=}50$) and retail ($n{=}50$) splits}{table.2}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Cross-workload comparison on Llama-3.1-70B with the controller live throughout serving. (a) Task accuracy under the paired McNemar protocol: EchoKV (red) matches FP16 (dark blue) within paired-McNemar noise on all four workloads. KIVI-INT4 shows a measurable $4$-bit deficit on GSM8K-Hard ($\Delta {=}{-}0.022$, $p{=}0.052$) and a non-significant trend in the same direction on $\tau $-Bench ($\Delta {=}{-}0.040$, $p{=}0.48$). (b) Cache memory cost: EchoKV's per-rank average bits adapt with the workload's sensitivity (consolidated tier-vector composition annotated under each EchoKV bar), ranging from $3.97$ on RULER@128K to $6.54$ on $\tau $-Bench (airline + retail).}}{7}{figure.3}\protected@file@percent }
 \newlabel{fig:cross_workload}{{3}{7}{Cross-workload comparison on Llama-3.1-70B with the controller live throughout serving. (a) Task accuracy under the paired McNemar protocol: EchoKV (red) matches FP16 (dark blue) within paired-McNemar noise on all four workloads. KIVI-INT4 shows a measurable $4$-bit deficit on GSM8K-Hard ($\Delta {=}{-}0.022$, $p{=}0.052$) and a non-significant trend in the same direction on $\tau $-Bench ($\Delta {=}{-}0.040$, $p{=}0.48$). (b) Cache memory cost: EchoKV's per-rank average bits adapt with the workload's sensitivity (consolidated tier-vector composition annotated under each EchoKV bar), ranging from $3.97$ on RULER@128K to $6.54$ on $\tau $-Bench (airline + retail)}{figure.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Overhead and Projected Concurrency}{7}{subsection.4.6}\protected@file@percent }
-\newlabel{sec:overhead}{{4.6}{7}{Overhead and Projected Concurrency}{subsection.4.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Cross-Workload Pareto and Workload-Coherence}{7}{subsection.4.4}\protected@file@percent }
+\newlabel{sec:cross_workload}{{4.4}{7}{Cross-Workload Pareto and Workload-Coherence}{subsection.4.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Trajectory Behaviour on $\tau $-Bench}{7}{subsection.4.5}\protected@file@percent }
+\newlabel{sec:trajectory}{{4.5}{7}{Trajectory Behaviour on $\tau $-Bench}{subsection.4.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Overhead and Projected Concurrency}{8}{subsection.4.6}\protected@file@percent }
+\newlabel{sec:overhead}{{4.6}{8}{Overhead and Projected Concurrency}{subsection.4.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}Scale Transfer: Llama-3.1-8B}{8}{subsection.4.7}\protected@file@percent }
+\newlabel{sec:scale_transfer}{{4.7}{8}{Scale Transfer: Llama-3.1-8B}{subsection.4.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Scale-transfer evaluation on Llama-3.1-8B (TP$=$2), $n{=}500$. $\tau _0{=}0.022$ is used without retuning from the 70B calibration. $p$ is paired McNemar EchoKV vs FP16.}}{8}{table.3}\protected@file@percent }
+\newlabel{tab:scale_transfer}{{3}{8}{Scale-transfer evaluation on Llama-3.1-8B (TP$=$2), $n{=}500$. $\tau _0{=}0.022$ is used without retuning from the 70B calibration. $p$ is paired McNemar EchoKV vs FP16}{table.3}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {5}Limitations}{8}{section.5}\protected@file@percent }
 \newlabel{sec:limitations}{{5}{8}{Limitations}{section.5}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Future Work}{8}{section.6}\protected@file@percent }
-\newlabel{sec:future}{{6}{8}{Future Work}{section.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Future Work}{9}{section.6}\protected@file@percent }
+\newlabel{sec:future}{{6}{9}{Future Work}{section.6}{}}
 \bibcite{liu2024kivi}{1}
 \bibcite{hooper2024kvquant}{2}
 \bibcite{xiao2023streamingllm}{3}
@@ -92,7 +100,7 @@
 \bibcite{chen2023longlora}{12}
 \bibcite{han2024lm}{13}
 \bibcite{he2024magicpig}{14}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{9}{section.7}\protected@file@percent }
-\newlabel{sec:conclusion}{{7}{9}{Conclusion}{section.7}{}}
 \bibcite{yao2024taubench}{15}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{10}{section.7}\protected@file@percent }
+\newlabel{sec:conclusion}{{7}{10}{Conclusion}{section.7}{}}
 \gdef \@abspage@last{10}

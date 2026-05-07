@@ -584,9 +584,11 @@ calibrated on the 70B model without retuning
 $2.8$ percentage points at 8B; EchoKV recovers most of the deficit
 ($\Delta{=}{-}0.016$, $p{=}0.12$) at $6.62$ bits/rank ($59\%$ savings),
 consistent with the 70B pattern. On GSM8K-Hard, INT4 is lossless at 8B
-($\Delta{=}{+}0.002$ vs FP16); EchoKV correctly matches FP16 exactly
-($\Delta{=}0.000$, $p{=}1.00$) but over-conserves at $7.50$ bits ($53\%$
-savings) rather than the $75\%$ that uniform INT4 would achieve. This
+($\Delta{=}{+}0.002$ vs FP16) and the Static INT8 point ($0.356$) exceeds
+FP16 by $1.2$ percentage points, within single-$\sigma$ binomial noise
+at $n{=}500$ ($\sigma{\approx}0.021$); EchoKV correctly matches FP16
+exactly ($\Delta{=}0.000$, $p{=}1.00$) but over-conserves at $7.50$ bits
+($53\%$ savings) rather than the $75\%$ that uniform INT4 would achieve. This
 over-conservatism is a direct consequence of using a 70B-calibrated
 $\tau_0$ on a more quantization-robust 8B model---a concrete empirical
 demonstration that the per-architecture recalibration noted in

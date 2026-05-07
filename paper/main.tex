@@ -831,4 +831,92 @@ S.~Yao, N.~Shinn, P.~Razavi, and K.~Narasimhan.
 \end{thebibliography}
 \endgroup
 
+%% ─────────────────────────────────────────────────────────────────────────────
+\newpage
+\section*{NeurIPS Paper Checklist}
+%% ─────────────────────────────────────────────────────────────────────────────
+
+\begin{enumerate}
+
+\item {\bf Claims}
+\item[] Question: Do the main claims made in the abstract and introduction accurately reflect the paper's contributions and scope?
+\item[] Answer: \answerYes{}
+\item[] Justification: The abstract claims (\S Abstract) and introduction (\S\ref{sec:intro}) match the experimental results in \S\ref{sec:experiments}: $59$--$75\%$ KV-memory savings while preserving FP16 accuracy under paired McNemar across four workloads, $+0.09\%$ TPOT overhead (\S\ref{sec:overhead}), and workload-coherent tier vectors (\S\ref{sec:cross_workload}). Limitations are explicitly delineated in \S\ref{sec:limitations}.
+
+\item {\bf Limitations}
+\item[] Question: Does the paper discuss the limitations of the work performed by the authors?
+\item[] Answer: \answerYes{}
+\item[] Justification: \S\ref{sec:limitations} discusses seven limitations: prefill is not quantized; sample-size and saturation limits ($p{=}0.052$ on GSM8K-Hard, $n{=}90$ on $\tau$-Bench, RULER@128K saturated at $1.000$); no pruning baselines; no measured end-to-end serving throughput (only projections); three tiers, decode-only; memory measurement is projected, not on-GPU; single model family (Llama-3.1, with 8B scale-transfer in \S\ref{sec:scale_transfer}).
+
+\item {\bf Theory, Assumptions and Proofs}
+\item[] Question: For each theoretical result, does the paper provide the full set of assumptions and a complete (and correct) proof?
+\item[] Answer: \answerNA{}
+\item[] Justification: The paper presents a systems contribution (a closed-loop runtime controller) and an empirical evaluation. We do not state formal theorems. The Pinsker-style $\sqrt{L}$ heuristic (\S\ref{sec:tau}) is motivated empirically and explicitly noted as an ``approximate guide'' rather than a tight bound.
+
+\item {\bf Experimental Result Reproducibility}
+\item[] Question: Does the paper fully disclose all the information needed to reproduce the main experimental results of the paper to the extent that it affects the main claims and/or conclusions of the paper (regardless of whether the code and data are provided or not)?
+\item[] Answer: \answerYes{}
+\item[] Justification: \S\ref{sec:method} fully specifies the canary sensor (FP16 K-reference buffer, $N{=}64$, KL measurement), controller (EMA decay $\alpha{=}0.1$, threshold $\tau$, hysteresis), and allocator (three free pools, $2$-bit tier tag). \S\ref{sec:tau} gives the calibration recipe ($\tau_0{=}0.022$ from layer-averaged $\widehat{E}_{\ell,4}$ under static-INT4 hook). \S\ref{sec:setup} specifies hardware (Llama-3.1-70B, TP=$4$/$8$ on $\tau$-Bench), inference engine (vLLM~0.16), workload sizes ($n{=}500$ short-context, $n{=}20$ RULER, $n{=}50$/split $\tau$-Bench), evaluation protocol (paired McNemar). \S\ref{sec:ablation} verifies the controller is insensitive to $\alpha$ and $p_c$ across a $3{\times}3$ grid.
+
+\item {\bf Open access to data and code}
+\item[] Answer: \answerNo{}
+\item[] Justification: Code release is pending camera-ready (anonymity-preserving). The method is described in sufficient detail (\S\ref{sec:method}) to reimplement, and all benchmarks (GSM8K-Hard, HotpotQA, RULER@128K, $\tau$-Bench) are publicly available with cited references and standard licenses. Hyperparameter values are listed in \S\ref{sec:setup} and \S\ref{sec:ablation}.
+
+\item {\bf Experimental Setting/Details}
+\item[] Question: Does the paper specify all the training and test details (e.g., data splits, hyperparameters, how they were chosen, type of optimizer, etc.) necessary to understand the results?
+\item[] Answer: \answerYes{}
+\item[] Justification: All hyperparameters are specified: canary rate $p_c{=}1/64$ (production), $0.25$ (warmup); EMA decay $\alpha{=}0.1$; threshold $\tau_0{=}0.022$ at $L_0{=}4$K with $\tau(L){=}\tau_0\sqrt{L/L_0}$; tick interval $10$ decode steps; hysteresis $\pm 10\%$; min dwell $2$ ticks. Calibration recipe in \S\ref{sec:tau}; sensitivity analysis in \S\ref{sec:ablation}. Data splits: $n{=}500$ short, $n{=}20$ RULER, $n{=}50$/split $\tau$-Bench (\S\ref{sec:setup}); the same prompt batches are used for every configuration to enable paired comparisons.
+
+\item {\bf Experiment Statistical Significance}
+\item[] Question: Does the paper report error bars suitably and correctly defined or other appropriate information about the statistical significance of the experiments?
+\item[] Answer: \answerYes{}
+\item[] Justification: All accuracy comparisons use \emph{paired McNemar's exact test} on per-prompt outcomes. $p$-values are reported in Table~\ref{tab:headline} for each cell. \S\ref{sec:limitations} explicitly notes that the GSM8K-Hard $p{=}0.052$ result is at the threshold of conventional significance and that the $\tau$-Bench cell ($n{=}90$) is borderline. Sensor-validation also includes Spearman~$\rho$ for cross-seed stability (\S\ref{sec:sensor_val}). Binomial noise is acknowledged for the 8B scale-transfer Static-INT8 cell (\S\ref{sec:scale_transfer}).
+
+\item {\bf Experiments Compute Resources}
+\item[] Question: For each experiment, does the paper provide sufficient information on the computer resources (type of compute workers, memory, time of execution) needed to reproduce the experiments?
+\item[] Answer: \answerYes{}
+\item[] Justification: \S\ref{sec:setup} specifies $4{\times}$H100-SXM5 with TP=$4$ on Llama-3.1-70B, TP=$8$ on $\tau$-Bench, vLLM~0.16. \S\ref{sec:limitations} notes that RULER@128K costs $5$--$6$ GPU-hours per cell at $n{=}500$, motivating the $n{=}20$ choice. The full $4$-workload sweep (FP16, INT4, INT8, NVFP4, EchoKV) plus 8B scale-transfer plus $9$-config ablation completed in ${\sim}30$ minutes wall-clock when run in parallel across $8$ GPUs.
+
+\item {\bf Code Of Ethics}
+\item[] Question: Does the research conducted in the paper conform, in every respect, with the NeurIPS Code of Ethics?
+\item[] Answer: \answerYes{}
+\item[] Justification: We have reviewed the NeurIPS Code of Ethics. The work uses publicly released model weights (Llama-3.1, under the Llama Community License), public benchmarks, and reports honest negative results (e.g., the 8B GSM8K-Hard over-conservatism in \S\ref{sec:scale_transfer}). No human subjects are involved. No new datasets are released.
+
+\item {\bf Broader Impacts}
+\item[] Question: Does the paper discuss both potential positive societal impacts and negative societal impacts of the work performed?
+\item[] Answer: \answerNA{}
+\item[] Justification: This is a serving-efficiency paper: it lowers KV-cache memory cost so existing LLMs can serve more concurrent users at lower hardware cost. It does not produce a new model, dataset, or capability. Positive impact (lower carbon footprint of LLM serving) and negative impacts (faster/cheaper inference makes any underlying-model misuse marginally cheaper) are both indirect and not specific to this work.
+
+\item {\bf Safeguards}
+\item[] Question: Does the paper describe safeguards that have been put in place for responsible release of data or models that have a high risk for misuse (e.g., pretrained language models, image generators, or scraped datasets)?
+\item[] Answer: \answerNA{}
+\item[] Justification: The paper does not release any pretrained models, image generators, or scraped datasets. The contribution is a runtime controller for KV-cache precision; safeguards are not applicable.
+
+\item {\bf Licenses for existing assets}
+\item[] Question: Are the creators or original owners of assets (e.g., code, data, models) used in the paper, properly credited and are the license and terms of use explicitly mentioned and properly respected?
+\item[] Answer: \answerYes{}
+\item[] Justification: All assets used are publicly released: Llama-3.1-70B/8B-Instruct (Llama 3.1 Community License); vLLM (Apache~$2.0$, \cite{kwon2023vllm}); FlashInfer (Apache~$2.0$, \cite{ye2025flashinfer}); GSM8K-Hard (\cite{gsmhard}); HotpotQA (CC-BY-SA~$4.0$); RULER (\cite{hsieh2024ruler}, Apache~$2.0$); $\tau$-Bench (MIT, \cite{yao2024taubench}). All are credited via citation in \S\ref{sec:per_workload} and \S\ref{sec:related}.
+
+\item {\bf New Assets}
+\item[] Question: Are new assets introduced in the paper well documented and is the documentation provided alongside the assets?
+\item[] Answer: \answerNA{}
+\item[] Justification: The paper does not release new datasets or models. The runtime controller and Triton kernels will be released alongside the camera-ready as a separate code artefact.
+
+\item {\bf Crowdsourcing and Research with Human Subjects}
+\item[] Question: For crowdsourcing experiments and research with human subjects, does the paper include the full text of instructions given to participants and screenshots, if applicable, as well as details about compensation (if any)?
+\item[] Answer: \answerNA{}
+\item[] Justification: No crowdsourcing or human-subjects research was conducted.
+
+\item {\bf Institutional Review Board (IRB) Approvals or Equivalent for Research with Human Subjects}
+\item[] Question: Does the paper describe potential risks incurred by study participants, whether such risks were disclosed to the subjects, and whether Institutional Review Board (IRB) approvals (or an equivalent approval/review based on the requirements of your country or institution) were obtained?
+\item[] Answer: \answerNA{}
+\item[] Justification: No human subjects research; IRB review is not applicable.
+
+\item {\bf Declaration of LLM usage}
+\item[] Question: Does the paper describe the usage of LLMs if it is an important, original, or non-standard component of the core methods in this research?
+\item[] Answer: \answerNA{}
+\item[] Justification: LLMs are the \emph{subject} of evaluation in this work, not a methodological component. The core method (canary sensor, threshold-EMA controller, precision-aware allocator) does not use LLMs as part of its algorithm. LLMs were used only for incidental writing assistance.
+
+\end{enumerate}
+
 \end{document}

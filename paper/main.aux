@@ -26,14 +26,14 @@
 \citation{li2024snapkv}
 \citation{zhao2024atom}
 \citation{sheng2023flexgen}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}\protected@file@percent }
+\newlabel{sec:related}{{2}{2}{Related Work}{section.2}{}}
 \citation{kwon2023vllm}
 \citation{ye2025flashinfer}
 \citation{chen2023longlora}
 \citation{han2024lm}
 \citation{he2024magicpig}
 \citation{sun2024retrieval}
-\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}\protected@file@percent }
-\newlabel{sec:related}{{2}{2}{Related Work}{section.2}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces EchoKV's two-phase architecture. \textsc  {Offline}: a calibration run measures the per-layer canary signal under static-INT4 quantization on a sample workload, fixing the budget $\tau _0$; a brief warmup populates the controller's per-(layer, tier) EMAs. \textsc  {Online}: a closed feedback loop --- canary measures FP16-vs-quantized attention divergence per layer, the controller selects each layer's lowest acceptable bit-width, and the precision-aware allocator serves new K/V blocks from the matching free pool. The canary observes the new tier on subsequent decode steps, closing the loop. Three invariants ensure no per-block auxiliary state (INV-1), no retroactive rewrites (INV-2), and TP-consistent tier broadcasts (INV-3).}}{3}{figure.1}\protected@file@percent }
 \newlabel{fig:architecture}{{1}{3}{EchoKV's two-phase architecture. \textsc {Offline}: a calibration run measures the per-layer canary signal under static-INT4 quantization on a sample workload, fixing the budget $\tau _0$; a brief warmup populates the controller's per-(layer, tier) EMAs. \textsc {Online}: a closed feedback loop --- canary measures FP16-vs-quantized attention divergence per layer, the controller selects each layer's lowest acceptable bit-width, and the precision-aware allocator serves new K/V blocks from the matching free pool. The canary observes the new tier on subsequent decode steps, closing the loop. Three invariants ensure no per-block auxiliary state (INV-1), no retroactive rewrites (INV-2), and TP-consistent tier broadcasts (INV-3)}{figure.1}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {3}Method}{3}{section.3}\protected@file@percent }
@@ -41,17 +41,15 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Canary Sensor}{3}{subsection.3.1}\protected@file@percent }
 \newlabel{sec:canary}{{3.1}{3}{Canary Sensor}{subsection.3.1}{}}
 \newlabel{eq:canary}{{1}{3}{Canary Sensor}{equation.3.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}PID Controller}{4}{subsection.3.2}\protected@file@percent }
-\newlabel{sec:controller}{{3.2}{4}{PID Controller}{subsection.3.2}{}}
-\newlabel{eq:ema}{{2}{4}{PID Controller}{equation.3.2}{}}
-\newlabel{eq:argmin}{{3}{4}{PID Controller}{equation.3.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Controller}{4}{subsection.3.2}\protected@file@percent }
+\newlabel{sec:controller}{{3.2}{4}{Controller}{subsection.3.2}{}}
+\newlabel{eq:ema}{{2}{4}{Controller}{equation.3.2}{}}
+\newlabel{eq:argmin}{{3}{4}{Controller}{equation.3.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Precision-Aware Block Allocator}{4}{subsection.3.3}\protected@file@percent }
 \newlabel{sec:allocator}{{3.3}{4}{Precision-Aware Block Allocator}{subsection.3.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Calibration and Context-Aware Budget}{4}{subsection.3.4}\protected@file@percent }
 \newlabel{sec:tau}{{3.4}{4}{Calibration and Context-Aware Budget}{subsection.3.4}{}}
 \newlabel{eq:tau_scaling}{{4}{4}{Calibration and Context-Aware Budget}{equation.3.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Future Architectural Components}{4}{subsection.3.5}\protected@file@percent }
-\newlabel{sec:future_arch}{{3.5}{4}{Future Architectural Components}{subsection.3.5}{}}
 \citation{gsmhard}
 \citation{hsieh2024ruler}
 \citation{yao2024taubench}
@@ -65,20 +63,22 @@
 \newlabel{sec:sensor_val}{{4.2}{5}{Sensor Validation (Llama-3.1-8B, TP=2)}{subsection.4.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Per-Workload Results}{5}{subsection.4.3}\protected@file@percent }
 \newlabel{sec:per_workload}{{4.3}{5}{Per-Workload Results}{subsection.4.3}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces EchoKV preserves FP16 accuracy while reducing KV memory by $51$--$75\%$ across four workloads. \emph  {INT8 layers} = number of layers the controller promotes to INT8 in the converged tier vector; \emph  {Bits/elem} = average across the $80$ layers; $\Delta $ is paired vs FP16 with McNemar exact $p$. EchoKV column reflects the controller's selection on each workload at $\tau $ from \S  \ref  {sec:tau}.}}{6}{table.1}\protected@file@percent }
-\newlabel{tab:headline}{{1}{6}{EchoKV preserves FP16 accuracy while reducing KV memory by $51$--$75\%$ across four workloads. \emph {INT8 layers} = number of layers the controller promotes to INT8 in the converged tier vector; \emph {Bits/elem} = average across the $80$ layers; $\Delta $ is paired vs FP16 with McNemar exact $p$. EchoKV column reflects the controller's selection on each workload at $\tau $ from \S \ref {sec:tau}}{table.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces EchoKV preserves FP16 accuracy while reducing KV memory by $59$--$75\%$ across four workloads. \emph  {Bits/rank} = per-TP-rank average at end of run with the controller live; \emph  {Consolidated} = per-layer max across ranks. $\Delta $ is paired vs FP16 with McNemar exact $p$. $\tau $-Bench numbers merge airline ($n{=}50$) and retail ($n{=}50$) splits.}}{6}{table.1}\protected@file@percent }
+\newlabel{tab:headline}{{1}{6}{EchoKV preserves FP16 accuracy while reducing KV memory by $59$--$75\%$ across four workloads. \emph {Bits/rank} = per-TP-rank average at end of run with the controller live; \emph {Consolidated} = per-layer max across ranks. $\Delta $ is paired vs FP16 with McNemar exact $p$. $\tau $-Bench numbers merge airline ($n{=}50$) and retail ($n{=}50$) splits}{table.1}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Cross-Workload Pareto and Workload-Coherence}{6}{subsection.4.4}\protected@file@percent }
 \newlabel{sec:cross_workload}{{4.4}{6}{Cross-Workload Pareto and Workload-Coherence}{subsection.4.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Trajectory Similarity on $\tau $-Bench}{6}{subsection.4.5}\protected@file@percent }
-\newlabel{sec:trajectory}{{4.5}{6}{Trajectory Similarity on $\tau $-Bench}{subsection.4.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Overhead}{6}{subsection.4.6}\protected@file@percent }
-\newlabel{sec:overhead}{{4.6}{6}{Overhead}{subsection.4.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Limitations}{6}{section.5}\protected@file@percent }
-\newlabel{sec:limitations}{{5}{6}{Limitations}{section.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Cross-workload comparison on Llama-3.1-70B. (a) Task accuracy: EchoKV (red) matches FP16 (dark blue) on three of four workloads under paired McNemar; on $\tau $-Bench it exceeds FP16 numerically. KIVI-INT4 shows a measurable $4$-bit deficit on GSM8K-Hard and $\tau $-Bench; NVFP4 underperforms KIVI-INT4 on $\tau $-Bench despite the wider dynamic range. (b) Cache memory cost: EchoKV's per-element bits adapt with the workload's sensitivity (annotated tier-vector composition under each EchoKV bar), ranging from $3.98$ on RULER@128K to $7.85$ on $\tau $-Bench airline.}}{7}{figure.3}\protected@file@percent }
-\newlabel{fig:cross_workload}{{3}{7}{Cross-workload comparison on Llama-3.1-70B. (a) Task accuracy: EchoKV (red) matches FP16 (dark blue) on three of four workloads under paired McNemar; on $\tau $-Bench it exceeds FP16 numerically. KIVI-INT4 shows a measurable $4$-bit deficit on GSM8K-Hard and $\tau $-Bench; NVFP4 underperforms KIVI-INT4 on $\tau $-Bench despite the wider dynamic range. (b) Cache memory cost: EchoKV's per-element bits adapt with the workload's sensitivity (annotated tier-vector composition under each EchoKV bar), ranging from $3.98$ on RULER@128K to $7.85$ on $\tau $-Bench airline}{figure.3}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Future Work}{7}{section.6}\protected@file@percent }
-\newlabel{sec:future}{{6}{7}{Future Work}{section.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Trajectory Behaviour on $\tau $-Bench}{6}{subsection.4.5}\protected@file@percent }
+\newlabel{sec:trajectory}{{4.5}{6}{Trajectory Behaviour on $\tau $-Bench}{subsection.4.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Overhead and Projected Concurrency}{6}{subsection.4.6}\protected@file@percent }
+\newlabel{sec:overhead}{{4.6}{6}{Overhead and Projected Concurrency}{subsection.4.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Cross-workload comparison on Llama-3.1-70B with the controller live throughout serving. (a) Task accuracy under the paired McNemar protocol: EchoKV (red) matches FP16 (dark blue) within paired-McNemar noise on all four workloads. KIVI-INT4 shows a measurable $4$-bit deficit on GSM8K-Hard ($p{=}0.052$) and on $\tau $-Bench ($\Delta {=}{-}0.040$). (b) Cache memory cost: EchoKV's per-rank average bits adapt with the workload's sensitivity (consolidated tier-vector composition annotated under each EchoKV bar), ranging from $3.97$ on RULER@128K to $6.54$ on $\tau $-Bench (airline + retail).}}{7}{figure.3}\protected@file@percent }
+\newlabel{fig:cross_workload}{{3}{7}{Cross-workload comparison on Llama-3.1-70B with the controller live throughout serving. (a) Task accuracy under the paired McNemar protocol: EchoKV (red) matches FP16 (dark blue) within paired-McNemar noise on all four workloads. KIVI-INT4 shows a measurable $4$-bit deficit on GSM8K-Hard ($p{=}0.052$) and on $\tau $-Bench ($\Delta {=}{-}0.040$). (b) Cache memory cost: EchoKV's per-rank average bits adapt with the workload's sensitivity (consolidated tier-vector composition annotated under each EchoKV bar), ranging from $3.97$ on RULER@128K to $6.54$ on $\tau $-Bench (airline + retail)}{figure.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Limitations}{7}{section.5}\protected@file@percent }
+\newlabel{sec:limitations}{{5}{7}{Limitations}{section.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Future Work}{8}{section.6}\protected@file@percent }
+\newlabel{sec:future}{{6}{8}{Future Work}{section.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{8}{section.7}\protected@file@percent }
+\newlabel{sec:conclusion}{{7}{8}{Conclusion}{section.7}{}}
 \bibcite{liu2024kivi}{1}
 \bibcite{hooper2024kvquant}{2}
 \bibcite{xiao2023streamingllm}{3}
@@ -90,8 +90,6 @@
 \bibcite{ye2025flashinfer}{9}
 \bibcite{gsmhard}{10}
 \bibcite{hsieh2024ruler}{11}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{8}{section.7}\protected@file@percent }
-\newlabel{sec:conclusion}{{7}{8}{Conclusion}{section.7}{}}
 \bibcite{sun2024retrieval}{12}
 \bibcite{chen2023longlora}{13}
 \bibcite{han2024lm}{14}

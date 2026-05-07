@@ -68,8 +68,8 @@ def fig_architecture():
     """Two-phase loop: offline (calibration → warmup) flows into the
     online closed loop (canary → controller → allocator/quant → canary)."""
     with plt.rc_context(PAPER_STYLE):
-        fig, ax = plt.subplots(figsize=(6.5, 3.2))
-        ax.set_xlim(0, 12)
+        fig, ax = plt.subplots(figsize=(7.2, 3.4))
+        ax.set_xlim(0, 14)
         ax.set_ylim(0, 5.6)
         ax.axis("off")
 
@@ -80,68 +80,68 @@ def fig_architecture():
                 linewidth=1.4, edgecolor=edge, facecolor=fill, zorder=2,
             )
             ax.add_patch(r)
-            ax.text(x + w/2, y + h*0.62, label,
+            ax.text(x + w/2, y + h*0.66, label,
                     ha="center", va="center",
                     fontsize=10, fontweight="bold", color=C_TEXT, zorder=3)
-            ax.text(x + w/2, y + h*0.22, sub,
+            ax.text(x + w/2, y + h*0.28, sub,
                     ha="center", va="center",
                     fontsize=7.2, style="italic", color="#4B5563", zorder=3)
 
         # ─── offline row (top) ───
-        BOX_W, BOX_H = 2.4, 1.0
+        BOX_W, BOX_H = 3.4, 1.05
         OFFLINE_Y = 4.0
         # Calibration
         box(0.6, OFFLINE_Y, BOX_W, BOX_H,
             "Calibration",
-            r"per-layer  $\hat{\delta}_4 \to \tau_0$",
+            r"$\tau_0 = \mathrm{mean}(\widehat{E}_{\ell,4})$",
             C_OFFLINE, C_OFFLINE_E)
         # Warmup
-        box(3.6, OFFLINE_Y, BOX_W, BOX_H,
+        box(4.6, OFFLINE_Y, BOX_W, BOX_H,
             "Warmup",
-            r"controller settles  $\widehat{E}_{\ell,b}$",
+            r"EMAs settle",
             C_OFFLINE, C_OFFLINE_E)
         # Arrow: calibration → warmup
         ax.add_patch(FancyArrowPatch(
             (0.6 + BOX_W, OFFLINE_Y + BOX_H/2),
-            (3.6, OFFLINE_Y + BOX_H/2),
+            (4.6, OFFLINE_Y + BOX_H/2),
             arrowstyle="-|>", mutation_scale=12,
             linewidth=1.5, color=C_OFFLINE_E, zorder=2,
         ))
         # Arrow: warmup → online (down to first online box)
         ax.add_patch(FancyArrowPatch(
-            (3.6 + BOX_W/2, OFFLINE_Y),
-            (1.8 + BOX_W/2, 2.45),  # land at canary's top-center
+            (4.6 + BOX_W/2, OFFLINE_Y),
+            (0.6 + BOX_W/2, 2.45),
             arrowstyle="-|>", mutation_scale=12, linewidth=1.5,
             color=C_OFFLINE_E,
-            connectionstyle="arc3,rad=-0.2",
+            connectionstyle="arc3,rad=-0.22",
             zorder=2,
         ))
 
         # offline-phase label
-        ax.text(0.5, OFFLINE_Y + BOX_H + 0.15,
+        ax.text(0.5, OFFLINE_Y + BOX_H + 0.18,
                 "OFFLINE",
-                fontsize=8, fontweight="bold", color=C_OFFLINE_E)
+                fontsize=8.5, fontweight="bold", color=C_OFFLINE_E)
 
         # ─── online row (bottom): closed loop ───
         ONLINE_Y = 1.4
         # Canary
         box(0.6, ONLINE_Y, BOX_W, BOX_H,
             "Canary",
-            r"$\hat{\delta}_{\ell,b}$ vs FP16 ref",
+            r"$\hat{\delta}_{\ell,b}$ vs FP16",
             C_ONLINE, C_ONLINE_E)
         # Controller
-        box(4.8, ONLINE_Y, BOX_W, BOX_H,
+        box(5.3, ONLINE_Y, BOX_W, BOX_H,
             "Controller",
-            r"argmin $\widehat{E}_{\ell,b} \leq \tau$",
+            r"EMA + threshold",
             C_ONLINE, C_ONLINE_E)
         # Allocator / quant
-        box(9.0, ONLINE_Y, BOX_W, BOX_H,
+        box(10.0, ONLINE_Y, BOX_W, BOX_H,
             "Quantization",
             r"per-tier free pools",
             C_ONLINE, C_ONLINE_E)
 
         # forward arrows (online)
-        for x_from, x_to in [(0.6 + BOX_W, 4.8), (4.8 + BOX_W, 9.0)]:
+        for x_from, x_to in [(0.6 + BOX_W, 5.3), (5.3 + BOX_W, 10.0)]:
             ax.add_patch(FancyArrowPatch(
                 (x_from, ONLINE_Y + BOX_H/2),
                 (x_to, ONLINE_Y + BOX_H/2),
@@ -150,33 +150,29 @@ def fig_architecture():
             ))
 
         # feedback arrow: quantization → canary (curved below)
-        feedback_y = ONLINE_Y - 0.6
         ax.add_patch(FancyArrowPatch(
-            (9.0 + BOX_W/2, ONLINE_Y),
+            (10.0 + BOX_W/2, ONLINE_Y),
             (0.6 + BOX_W/2, ONLINE_Y),
             arrowstyle="-|>", mutation_scale=14,
             linewidth=1.8, color=C_ONLINE_E,
-            connectionstyle=f"arc3,rad=-0.18",
+            connectionstyle=f"arc3,rad=-0.16",
             zorder=1,
         ))
-        # feedback label, centered below the loop
-        ax.text(6.0, 0.45,
-                "feedback: K/V from new blocks → canary observes the new tier",
+        # feedback label
+        ax.text(6.7, 0.42,
+                "feedback: new K/V blocks observed by canary",
                 ha="center", va="center",
                 fontsize=8, style="italic", color=C_ONLINE_E)
 
         # online-phase label
-        ax.text(0.5, ONLINE_Y + BOX_H + 0.15,
+        ax.text(0.5, ONLINE_Y + BOX_H + 0.18,
                 "ONLINE  (per decode step)",
-                fontsize=8, fontweight="bold", color=C_ONLINE_E)
+                fontsize=8.5, fontweight="bold", color=C_ONLINE_E)
 
         # τ_0 label on the warmup → online arrow
-        ax.text(5.7, 3.55, r"$\tau_0$",
+        ax.text(3.0, 3.55, r"$\tau_0$",
                 fontsize=10, color=C_OFFLINE_E,
                 fontweight="bold")
-
-        # invariants pseudo-legend at the right edge
-        # (kept small so it doesn't crowd the diagram)
 
         out = OUT / "architecture.pdf"
         fig.savefig(out)
@@ -204,9 +200,24 @@ def fig_cross_workload():
     """Stacked-vertical 2-panel figure:
        (a) accuracy across 4 workloads × 5 configs
        (b) bits/elem across the same.
-    Tier-vector composition annotated above the EchoKV bar in panel (b)."""
+    EchoKV runs in continuous-dynamic mode (controller live during serving).
+    Bits are per-rank averages; tier-vector composition (consolidated
+    max-across-ranks) annotated under EchoKV bars in panel (b)."""
     base = ROOT / "results/serving/session14_70b"
     base15 = ROOT / "results/serving/session15_70b"
+    from collections import Counter
+
+    def per_rank_bits(blob):
+        pr = blob.get("final_tiers_per_rank")
+        if not pr: return blob["memory_projection"]["avg_bits"]
+        return sum(sum(r)/len(r) for r in pr) / len(pr)
+
+    def consol(blob):
+        pr = blob.get("final_tiers_per_rank")
+        if not pr: return blob["memory_projection"]["tier_counts"]
+        L = len(pr[0])
+        cm = [max(pr[r][li] for r in range(len(pr))) for li in range(L)]
+        return dict(Counter(cm))
 
     # ─── pull data ───
     # GSM8K-Hard
@@ -214,10 +225,10 @@ def fig_cross_workload():
     fp16_g = next(c for c in gsm["cells"] if c["config"] == "fp16")
     int4_g = next(c for c in gsm["cells"] if c["config"] == "static_int4")
     nv_g = json.load(open(base / "gsm8k_hard_n500_nvfp4_tp8.json"))["cells"][0]
-    ech_g = json.load(open(base / "echokv3c_abscanary_tau022_n500_mns8.json"))
-    ech_g_acc = ech_g["measurement"]["accuracy"]
-    ech_g_bits = ech_g["memory_projection"]["avg_bits"]
-    ech_g_tiers = ech_g["memory_projection"]["tier_counts"]
+    ech_g_blob = json.load(open(base / "echokv3c_abscanary_tau022_n500_mns8_continuous_dynamic.json"))
+    ech_g_acc = ech_g_blob["measurement"]["accuracy"]
+    ech_g_bits = per_rank_bits(ech_g_blob)
+    ech_g_tiers = consol(ech_g_blob)
 
     # HotpotQA
     hot_dir = base / "hotpotqa_n500_mns8"
@@ -225,29 +236,49 @@ def fig_cross_workload():
     int4_h = json.load(open(hot_dir / "int4_n500_mns8.json"))["cells"][0]
     int8_h = json.load(open(hot_dir / "int8_n500_mns8.json"))["cells"][0]
     nv_h = json.load(open(hot_dir / "nvfp4_n500_mns8_tp8.json"))["cells"][0]
-    ech_h = json.load(open(hot_dir / "echokv3c_abscanary_tau022_n500_mns8.json"))
-    ech_h_acc = ech_h["measurement"]["accuracy"]
-    ech_h_bits = ech_h["memory_projection"]["avg_bits"]
-    ech_h_tiers = ech_h["memory_projection"]["tier_counts"]
+    ech_h_blob = json.load(open(hot_dir / "echokv3c_abscanary_tau022_n500_mns8_continuous_dynamic.json"))
+    ech_h_acc = ech_h_blob["measurement"]["accuracy"]
+    ech_h_bits = per_rank_bits(ech_h_blob)
+    ech_h_tiers = consol(ech_h_blob)
 
     # RULER@128K
     rul = json.load(open(base / "diag.json"))
     fp16_r = next(c for c in rul["cells"] if c["config"] == "fp16")
     int4_r = next(c for c in rul["cells"] if c["config"] == "static_int4")
-    ech_r = json.load(open(base / "echokv3c_abscanary_tau124_ruler128k_n20_mns1.json"))
-    ech_r_acc = ech_r["measurement"]["accuracy"]
-    ech_r_bits = ech_r["memory_projection"]["avg_bits"]
-    ech_r_tiers = ech_r["memory_projection"]["tier_counts"]
+    ech_r_blob = json.load(open(base / "echokv3c_abscanary_tau124_ruler128k_n20_mns1_continuous_dynamic.json"))
+    ech_r_acc = ech_r_blob["measurement"]["accuracy"]
+    ech_r_bits = per_rank_bits(ech_r_blob)
+    ech_r_tiers = consol(ech_r_blob)
 
-    # τ-Bench airline (frozen-tier protocol)
-    fp16_t = json.load(open(base15 / "taubench_airline_fp16_n50.json"))["cells"][0]
-    int4_t = json.load(open(base15 / "taubench_airline_int4_n50.json"))["cells"][0]
-    int8_t = json.load(open(base15 / "taubench_airline_int8_n50.json"))["cells"][0]
-    nv_t = json.load(open(base15 / "taubench_airline_nvfp4_n50.json"))["cells"][0]
-    ech_t = json.load(open(base15 / "taubench_airline_echokv_frozen_n50.json"))
-    ech_t_acc = ech_t["measurement"]["accuracy"]
-    ech_t_bits = ech_t["memory_projection"]["avg_bits"]
-    ech_t_tiers = ech_t["memory_projection"]["tier_counts"]
+    # τ-Bench (airline + retail, dynamic). Use merged accuracy + averaged
+    # per-rank bits across the two splits.
+    def _per_req(c): return [r["correct"] for r in c["per_request"]]
+    fp16_ta = json.load(open(base15 / "taubench_airline_fp16_n50.json"))["cells"][0]
+    fp16_tr = json.load(open(base15 / "taubench_retail_fp16_n50.json"))["cells"][0]
+    int4_ta = json.load(open(base15 / "taubench_airline_int4_n50.json"))["cells"][0]
+    int4_tr = json.load(open(base15 / "taubench_retail_int4_n50.json"))["cells"][0]
+    int8_ta = json.load(open(base15 / "taubench_airline_int8_n50.json"))["cells"][0]
+    int8_tr = json.load(open(base15 / "taubench_retail_int8_n50.json"))["cells"][0]
+    nv_ta = json.load(open(base15 / "taubench_airline_nvfp4_n50.json"))["cells"][0]
+    nv_tr = json.load(open(base15 / "taubench_retail_nvfp4_n50.json"))["cells"][0]
+    ech_ta_blob = json.load(open(base15 / "taubench_airline_echokv_dynamic_n50.json"))
+    ech_tr_blob = json.load(open(base15 / "taubench_retail_echokv_dynamic_n50.json"))
+
+    def merge_acc(a, b):
+        n = len(a["per_request"]) + len(b["per_request"])
+        c = sum(_per_req(a)) + sum(_per_req(b))
+        return c / max(n, 1)
+    fp16_t = {"accuracy": merge_acc(fp16_ta, fp16_tr)}
+    int4_t = {"accuracy": merge_acc(int4_ta, int4_tr)}
+    int8_t = {"accuracy": merge_acc(int8_ta, int8_tr)}
+    nv_t   = {"accuracy": merge_acc(nv_ta, nv_tr)}
+    # EchoKV dynamic: average per-rank bits across the two domains
+    ech_t_acc = (ech_ta_blob["measurement"]["accuracy"] * len(ech_ta_blob["measurement"]["per_request"])
+                  + ech_tr_blob["measurement"]["accuracy"] * len(ech_tr_blob["measurement"]["per_request"])) / \
+                 max(len(ech_ta_blob["measurement"]["per_request"]) + len(ech_tr_blob["measurement"]["per_request"]), 1)
+    ech_t_bits = (per_rank_bits(ech_ta_blob) + per_rank_bits(ech_tr_blob)) / 2
+    # Use airline tier counts for the annotation (retail is identical {INT4:1, INT8:79})
+    ech_t_tiers = consol(ech_ta_blob)
 
     workloads = ["GSM8K-Hard", "HotpotQA", "RULER@128K", r"$\tau$-Bench"]
     accs = {

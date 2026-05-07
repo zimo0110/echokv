@@ -55,9 +55,11 @@ FP16 exceeds the model weights themselves, forcing operators to trade off
 context length, batch size, and concurrent users. Static integer
 quantization---applying a fixed bit-width uniformly across all KV cache
 entries---offers a direct trade: reduce precision, recover memory, accept
-some accuracy loss. KIVI~\cite{liu2024kivi} and similar methods apply group-$32$
-INT4 across all layers, recovering ${\sim}75\%$ of KV memory at modest
-accuracy cost.
+some accuracy loss. KIVI~\cite{liu2024kivi} (published as a $2$-bit method
+but supporting INT4 in the same per-channel/per-token framework) and
+similar approaches apply a fixed group-$32$ bit-width across all layers;
+in this work we use KIVI in its INT4 configuration as our $4$-bit baseline,
+recovering ${\sim}75\%$ of KV memory at modest accuracy cost.
 
 The uniformity assumption is the problem. Attention layers vary substantially
 in their sensitivity to quantization: some layers tolerate INT2 with no
@@ -131,8 +133,8 @@ adapt to workload or layer sensitivity at runtime.
 \textbf{Attention-aware KV pruning.} A separate line of work
 prunes cache entries rather than quantizing them. StreamingLLM~\cite{xiao2023streamingllm}
 and $H_2O$~\cite{zhang2023h2o} retain only ``heavy hitter'' tokens;
-SnapKV~\cite{li2024snapkv} and PyramidKV apply non-uniform retention across
-layers. Because pruning discards information while quantization preserves
+SnapKV~\cite{li2024snapkv} and PyramidKV~\cite{cai2024pyramidkv} apply
+non-uniform retention across layers. Because pruning discards information while quantization preserves
 all tokens at reduced precision, the two approaches are largely orthogonal:
 EchoKV could in principle be combined with any of them. We do not include
 pruning baselines in our experimental tables and leave a combined
@@ -811,7 +813,14 @@ C.~Han, Q.~Wang, H.~Peng, W.~Xiong, Y.~Chen, H.~Ji, and S.~Wang.
 Z.~Chen, R.~Sadhukhan, Z.~Ye, Y.~Zhou, J.~Zhang, N.~Nolte, Y.~Tian, M.~Douze,
   L.~Bottou, Z.~Jia, and B.~Chen.
 \newblock {MagicPIG: LSH sampling for efficient LLM generation}.
-\newblock {arXiv:2410.16179}, 2024.
+\newblock In {\em ICLR}, 2025. Spotlight.
+
+\bibitem{cai2024pyramidkv}
+Z.~Cai, Y.~Zhang, B.~Gao, Y.~Liu, T.~Liu, K.~Lu, W.~Xiong, Y.~Dong,
+  B.~Chang, J.~Hu, and W.~Xiao.
+\newblock {PyramidKV: Dynamic KV cache compression based on pyramidal
+  information funneling}.
+\newblock In {\em COLM}, 2025.
 
 \bibitem{yao2024taubench}
 S.~Yao, N.~Shinn, P.~Razavi, and K.~Narasimhan.

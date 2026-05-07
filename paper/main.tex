@@ -26,43 +26,22 @@
 \maketitle
 
 \begin{abstract}
-KV cache memory has become a primary bottleneck in long-context LLM serving:
-at $128$K tokens, the KV cache of a $70$B-parameter model can exceed the
-memory footprint of the model weights themselves, limiting batch size, context
-length, and deployment efficiency. Existing KV-cache compression methods
-typically apply a fixed precision uniformly across layers, but we find that
-quantization sensitivity is highly non-uniform: across workloads, layers
-differ by up to ${\sim}50\times$ in their tolerance to low-bit KV
-representations. Uniform precision is therefore either unnecessarily
-conservative for robust layers or accuracy-damaging for fragile ones.
-
-We present \textbf{EchoKV}, a runtime controller that adapts each layer's
-KV-cache precision over $\{\text{INT2}, \text{INT4}, \text{INT8}\}$. EchoKV
-uses a lightweight per-layer \emph{canary} that compares quantized attention
-against a stable FP16 reference buffer, producing a direct estimate of
-quantization-induced attention drift. The controller smooths this signal over
-time and assigns each layer the lowest precision satisfying a global error
-budget, with neighbours-only updates that prevent precision flapping.
-Precision selection is responsive to the current model, workload, and context
-state without per-workload manual tuning.
-
-On Llama-3.1-70B with tensor parallelism, EchoKV runs the controller live
-during serving (canary at $p_c{=}1/64$, controller updates every 10 decode
-steps) and preserves FP16-equivalent accuracy while reducing KV-cache memory
-by $73\%$, $72\%$, $75\%$, and $59\%$ on GSM8K-Hard, HotpotQA, RULER@128K, and
-$\tau$-Bench (airline\,+\,retail) respectively. At matched accuracy, EchoKV
-uses $46\%$ less KV memory than uniform INT8 on hard reasoning, while uniform
-INT4 suffers a $2.2$ percentage-point accuracy drop on the same.
-Runtime overhead is $+0.09\%$
-TPOT. EchoKV's adaptation is workload-coherent: on GSM8K-Hard the controller
-progressively downgrades 28 layers from INT8 to INT4 during serving as the
-EMAs settle (final per-rank average $4.33$~bits, 15 of 80 layers consolidated
-at INT8); on RULER@128K it demotes a single layer to INT2 and stays at INT4
-elsewhere; on the long-decode agentic $\tau$-Bench it keeps nearly all layers
-at INT8 throughout serving across both airline and retail domains. These
-results show that closed-loop, layer-wise KV precision control can recover
-accuracy where needed while aggressively compressing memory elsewhere,
-enabling more efficient long-context LLM serving without sacrificing quality.
+KV cache memory is a primary bottleneck in long-context LLM serving, yet
+existing compression methods apply a fixed precision uniformly across
+layers despite layer sensitivity differing by up to ${\sim}50\times$
+across workloads. We present \textbf{EchoKV}, a runtime controller that
+adapts each layer's KV-cache precision over $\{\text{INT2}, \text{INT4},
+\text{INT8}\}$ using a lightweight \emph{canary} that compares quantized
+attention against a stable FP16 reference buffer; the controller assigns
+each layer the lowest precision satisfying a global error budget. On
+Llama-3.1-70B, EchoKV runs the controller live during serving and
+preserves FP16-equivalent accuracy while reducing KV-cache memory by
+$59$--$75\%$ across GSM8K-Hard, HotpotQA, RULER@128K, and $\tau$-Bench
+(airline\,+\,retail) at $+0.09\%$ TPOT overhead. The same controller
+produces workload-coherent tier vectors --- mostly INT4 with $15$/$18$
+INT8 promotions on the reasoning workloads, near-uniform INT4 on
+RULER@128K (one layer demoted to INT2), and near-uniform INT8 on
+$\tau$-Bench --- without per-workload tuning.
 \end{abstract}
 
 %% ─────────────────────────────────────────────────────────────────────────────
@@ -119,8 +98,9 @@ KV blocks produced during prefill are stored at the cache's global dtype
         and reproducible across seeds.
   \item A \textbf{three-component closed-loop architecture}
         (\S\ref{sec:method}): canary + controller + precision-aware block
-        allocator with three formal invariants (no per-block auxiliary state,
-        no retroactive rewrites, TP-consistent broadcasts). The controller
+        allocator. The implementation is lightweight: a $2$-bit tier tag
+        per block, no retroactive rewrites of existing blocks, and a
+        TP-consistent broadcast of the tier vector each decode step. The controller
         runs live during serving at $+0.09\%$ TPOT overhead.
   \item A \textbf{calibration recipe and context-length scaling rule}
         (\S\ref{sec:tau}): $\tau_0$ is the layer-averaged canary signal under
@@ -196,9 +176,7 @@ $\sqrt{L}$ budget-scaling rule (\S\ref{sec:tau}).
   the controller selects each layer's lowest acceptable bit-width, and the
   precision-aware allocator serves new K/V blocks from the matching free
   pool. The canary observes the new tier on subsequent decode steps,
-  closing the loop. Three invariants ensure no per-block auxiliary state
-  (INV-1), no retroactive rewrites (INV-2), and TP-consistent tier
-  broadcasts (INV-3).}
+  closing the loop.}
 \label{fig:architecture}
 \end{figure}
 
@@ -206,19 +184,12 @@ EchoKV has three components in a closed loop around the decode step
 (Figure~\ref{fig:architecture}): a \textbf{canary sensor}
 (\S\ref{sec:canary}), a \textbf{controller} (\S\ref{sec:controller}),
 and a \textbf{precision-aware block allocator} (\S\ref{sec:allocator}).
-Three invariants govern correctness:
-
-\begin{description}[leftmargin=2.2em]
-  \item[\textbf{INV-1}] (Zero per-block auxiliary state.) Each block carries
-        only a $2$-bit tier tag; no per-block running mean, refresh history,
-        or auxiliary buffer is maintained.
-  \item[\textbf{INV-2}] (No retroactive rewrites.) Tier changes affect only
-        \emph{new} block allocations; existing quantized blocks are never
-        rewritten or repaired.
-  \item[\textbf{INV-3}] (TP consistency.) The tier vector $\{b_\ell^*\}$ is
-        broadcast synchronously to all tensor-parallel ranks before each
-        decode step.
-\end{description}
+Three properties keep the design lightweight: each block carries only a
+$2$-bit tier tag (no per-block running mean or auxiliary buffer); tier
+changes affect \emph{new} block allocations only, so existing quantized
+blocks are never rewritten or repaired; and the tier vector
+$\{b_\ell^*\}$ is broadcast synchronously to all tensor-parallel ranks
+before each decode step.
 
 \subsection{Canary Sensor}
 \label{sec:canary}
@@ -277,8 +248,8 @@ lowest-precision tier whose EMA is within budget---aggressively
 compressing by default, upgrading only when the signal demands it. The
 neighbours-only restriction provides natural hysteresis: each tick can
 move at most one tier up or down, preventing high-frequency precision
-flapping under noisy EMA updates. By INV-2, tier changes take effect on
-new block allocations only; existing cached tokens are never rewritten.
+flapping under noisy EMA updates. Tier changes take effect on new block
+allocations only; existing cached tokens are never rewritten.
 
 \subsection{Precision-Aware Block Allocator}
 \label{sec:allocator}
@@ -286,9 +257,9 @@ new block allocations only; existing cached tokens are never rewritten.
 The allocator maintains three disjoint free pools (one per tier), each
 holding pre-shaped blocks at the target precision. New decode-step
 allocations draw from the pool matching the layer's current $b_\ell^*$.
-By INV-1, the only per-block state is a $2$-bit tag. After each control
+The only per-block state is a $2$-bit tag. After each control
 tick, $\{b_\ell^*\}$ is broadcast synchronously to all TP ranks via the
-vLLM~V1 scheduler barrier (INV-3); per-rank tier vectors are consolidated
+vLLM~V1 scheduler barrier; per-rank tier vectors are consolidated
 by the per-layer maximum across ranks before broadcast, so the most
 sensitive rank's signal is never discarded.
 
@@ -387,7 +358,7 @@ For accuracy evaluation we use \textbf{paired McNemar's exact test}: every
 configuration sees the same $n{=}500$ prompts in the same batch positions
 (short workloads), so per-prompt outcomes are paired. EchoKV runs at
 production canary rate $p_c{=}1/64$ throughout with the controller live
-during serving; tier changes apply only to new block allocations (INV-2).
+during serving; tier changes apply only to new block allocations.
 The warmup phase (first $5$ tasks per workload, used only to settle the
 EMAs) runs the canary at a higher rate $p_c{=}0.25$ for faster convergence
 before the controller drops to the production rate.
@@ -432,25 +403,20 @@ used for warmup). Headline numbers in Table~\ref{tab:headline}.
   exact $p$. $\tau$-Bench numbers merge airline ($n{=}50$) and retail
   ($n{=}50$) splits.}
 \label{tab:headline}
-\small
+\footnotesize
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lrrrrrr}
 \toprule
-Workload  & FP16 acc. & KIVI-INT4 acc. & EchoKV acc. & EchoKV bits/rank & Savings & Consolidated \\
+Workload     & FP16    & KIVI-INT4         & EchoKV                     & Bits & Sav. & Tiers \\
 \midrule
-GSM8K-Hard          & $0.488$ & $0.466$ ($p{=}0.052$)
-                    & $\mathbf{0.486}$ ($p{=}1.00$)
-                    & $4.33$ & $73\%$ & 65$\!\times$INT4, 15$\!\times$INT8 \\
-HotpotQA            & $0.682$ & $0.686$ ($p{=}0.79$)
-                    & $\mathbf{0.686}$ ($p{=}0.75$)
-                    & $4.40$ & $72\%$ & 62$\!\times$INT4, 18$\!\times$INT8 \\
-RULER@128K          & $1.000$ & $1.000$ ($p{=}1.00$)
-                    & $\mathbf{1.000}$ ($p{=}1.00$)
-                    & $3.97$ & $75\%$ & 1$\!\times$INT2, 79$\!\times$INT4 \\
-$\tau$-Bench        & $0.240$ & $0.200$ ($p{=}0.48$)
-                    & $\mathbf{0.233}$ ($p{=}0.63$)
-                    & $6.54$ & $59\%$ & 1$\!\times$INT4, 79$\!\times$INT8 \\
+GSM8K-Hard   & $0.488$ & $0.466_{p=0.052}$ & $\mathbf{0.486}_{p=1.00}$  & $4.33$ & $73\%$ & 65/15/0 \\
+HotpotQA     & $0.682$ & $0.686_{p=0.79}$  & $\mathbf{0.686}_{p=0.75}$  & $4.40$ & $72\%$ & 62/18/0 \\
+RULER@128K   & $1.000$ & $1.000_{p=1.00}$  & $\mathbf{1.000}_{p=1.00}$  & $3.97$ & $75\%$ & 79/0/1$^{\dagger}$ \\
+$\tau$-Bench & $0.240$ & $0.200_{p=0.48}$  & $\mathbf{0.233}_{p=0.63}$  & $6.54$ & $59\%$ & 1/79/0 \\
 \bottomrule
 \end{tabular}
+\par\smallskip
+{\footnotesize Tiers column shows consolidated INT4/INT8/INT2 layer counts (out of $80$); $^{\dagger}$RULER@128K demotes one layer to INT2.\par}
 \end{table}
 
 \textbf{Short reasoning + multi-hop QA.} On GSM8K-Hard, KIVI-INT4 measurably
@@ -507,7 +473,7 @@ no per-workload tuning.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\linewidth]{figures/cross_workload.pdf}
+\includegraphics[width=0.9\linewidth]{figures/cross_workload.pdf}
 \caption{Cross-workload comparison on Llama-3.1-70B with the controller
   live throughout serving. (a) Task accuracy under the paired McNemar
   protocol: EchoKV (red) matches FP16 (dark blue) within paired-McNemar
@@ -739,7 +705,7 @@ resulting signal is ${\sim}550\times$ larger than cache-relative canaries,
 batch-size invariant, and stable across seeds. A three-component
 closed-loop architecture---canary, controller, precision-aware block
 allocator---adapts per-layer bit-widths live during serving at $+0.09\%$
-TPOT overhead, governed by three formal invariants. Across four workloads
+TPOT overhead. Across four workloads
 spanning short reasoning, multi-hop QA, $128$K-token retrieval, and
 long-decode agentic interaction, EchoKV preserves FP16 accuracy while
 reducing KV memory by $59$--$75\%$, with workload-coherent tier vectors

@@ -52,7 +52,8 @@ steps) and preserves FP16-equivalent accuracy while reducing KV-cache memory
 by $73\%$, $72\%$, $75\%$, and $59\%$ on GSM8K-Hard, HotpotQA, RULER@128K, and
 $\tau$-Bench (airline\,+\,retail) respectively. At matched accuracy, EchoKV
 uses $46\%$ less KV memory than uniform INT8 on hard reasoning, while uniform
-INT4 suffers a $4.5\%$ accuracy drop on the same. Runtime overhead is $+0.09\%$
+INT4 suffers a $2.2$ percentage-point accuracy drop on the same.
+Runtime overhead is $+0.09\%$
 TPOT. EchoKV's adaptation is workload-coherent: on GSM8K-Hard the controller
 progressively downgrades 28 layers from INT8 to INT4 during serving as the
 EMAs settle (final per-rank average $4.33$~bits, 15 of 80 layers consolidated
@@ -158,8 +159,7 @@ pruning baselines in our experimental tables and leave a combined
 
 \textbf{Adaptive and closed-loop quantization.} Atom~\cite{zhao2024atom}
 applies mixed-precision quantization calibrated offline with task-specific
-data. FlexGen~\cite{sheng2023flexgen} uses a policy-based offloading
-strategy. To our knowledge, EchoKV is the first system to perform
+data. To our knowledge, EchoKV is the first system to perform
 \emph{online, closed-loop} per-layer bit-width selection during serving based
 on a runtime divergence signal, with the controller actively updating tier
 assignments across decode steps.
@@ -168,14 +168,16 @@ assignments across decode steps.
 paged attention and block allocators for efficient KV cache management.
 EchoKV extends vLLM's block allocator with per-tier free pools, building on
 vLLM~V1's scheduler and FlashInfer~\cite{ye2025flashinfer} for production
-attention kernels.
+attention kernels. Memory-offloading approaches such as
+FlexGen~\cite{sheng2023flexgen} trade latency for capacity on commodity
+hardware and are orthogonal to the quantization angle we pursue.
 
 \textbf{Long-context attention sparsity.}
 LongLoRA~\cite{chen2023longlora}, LM-Infinite~\cite{han2024lm}, and
 MagicPIG~\cite{he2024magicpig} exploit attention sparsity at long context.
-Empirical findings that effective attention support grows sublinearly with
-context length~\cite{sun2024retrieval} motivate our $\sqrt{L}$ budget-scaling
-rule (\S\ref{sec:tau}).
+Empirical findings that long-context attention concentrates on a small
+fraction of keys~\cite{xiao2023streamingllm,he2024magicpig} motivate our
+$\sqrt{L}$ budget-scaling rule (\S\ref{sec:tau}).
 
 %% ─────────────────────────────────────────────────────────────────────────────
 \section{Method}
@@ -302,7 +304,11 @@ is, by definition, more sensitive than average and is promoted to INT8 by
 the controller; a layer whose $\widehat{E}_{\ell,4}$ is below $\tau_0$ is
 admitted at INT4 (or, if $\widehat{E}_{\ell,2} \le \tau_0$, demoted further
 to INT2). For Llama-3.1-8B + RULER@4K we obtain $\tau_0 = 0.022$, which is
-the value used throughout this paper.
+the value used throughout this paper. The canary signal is a KL divergence
+normalised by the attention distribution, and we find the per-layer
+amplitude is stable across the 8B and 70B models in the same family,
+consistent with the signal being governed by quantization noise relative
+to attention entropy rather than absolute model scale.
 
 \textbf{Context-length scaling.} As context $L$ grows, the controller's
 per-step budget must scale with $L$ to prevent silent reversion to
@@ -450,21 +456,25 @@ domains---$99\%$ INT8, the opposite signature from RULER@128K. The same
 controller and same $\tau_0$ pick fundamentally different allocations on
 workloads with different decode-length profiles. EchoKV reaches per-rank
 average $6.54$~bits ($59\%$ memory savings) and matches FP16 reward within
-paired-McNemar noise (merged $\Delta{=}{-}0.011$ vs FP16 over $90$ paired
-tasks, $p{=}1.00$ for the frozen consolidated tier and
-$\Delta{=}{-}0.033$, $p{=}0.63$ for the fully-dynamic protocol used here).
+paired-McNemar noise (merged $\Delta{=}{-}0.033$ vs FP16 over $90$ paired
+tasks, $p{=}0.63$).
 
 \subsection{Cross-Workload Pareto and Workload-Coherence}
 \label{sec:cross_workload}
 
 Figure~\ref{fig:cross_workload} compiles the four workloads into a single
 view. Across $300\times$ context-length range ($400$ to $128$K) and
-$160\times$ decode-length range ($5$ to ${\sim}800$ decode tokens),
-the consolidated INT8 layer count varies monotonically with the workload's
-true sensitivity to $4$-bit: $0$ on RULER@128K (one layer demoted to INT2
-instead), $15$ on GSM8K-Hard, $18$ on HotpotQA, $79$ on $\tau$-Bench across
-both airline and retail. The same controller, same $\tau$ rule, no
-per-workload tuning.
+$160\times$ decode-length range ($5$ to ${\sim}800$ decode tokens), the
+consolidated INT8 layer count is workload-coherent: near-zero on
+RULER@128K (one layer demoted to INT2 instead), moderate on the reasoning
+workloads ($15$ on GSM8K-Hard, $18$ on HotpotQA), and near-total on the
+long-decode agentic regime ($79$ on $\tau$-Bench across both airline and
+retail). The GSM8K-Hard $\to$ HotpotQA inversion---more INT8 layers on
+HotpotQA despite KIVI-INT4 not measurably hurting FP16 accuracy
+($\Delta{=}{+}0.004$, $p{=}0.79$)---reflects the canary responding to
+infrequent but high-KL edge cases during multi-hop QA serving rather than
+an averaged sensitivity ranking. The same controller, same $\tau$ rule,
+no per-workload tuning.
 
 \begin{figure}[t]
 \centering
@@ -597,7 +607,7 @@ the workload-dependent constant would unify the calibration and scaling
 recipes.
 
 \textbf{Larger agentic evaluation.} The merged airline+retail
-$\tau$-Bench cell ($n{=}100$) keeps the EchoKV/FP16 comparison within
+$\tau$-Bench cell ($n{=}90$ paired) keeps the EchoKV/FP16 comparison within
 paired-McNemar noise but does not cross conventional significance
 thresholds. A third $\tau$-Bench domain or SWE-Bench Verified would
 tighten the agentic-regime numbers further.

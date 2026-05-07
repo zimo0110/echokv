@@ -396,7 +396,7 @@ before the controller drops to the production rate.
 \label{sec:sensor_val}
 
 Before committing 70B compute we verified the canary's behaviour on
-Llama-3.1-8B with four checks (Figure~\ref{fig:sensor}):
+Llama-3.1-8B with four checks:
 (a)~\emph{magnitude} --- max $\hat{\delta}_4$ reaches $0.031$--$0.042$
 across runs, ${\sim}550\times$ larger than the cache-relative canary's
 warmup readings; (b)~\emph{batch-size invariance} --- mns=$1$ vs mns=$8$
@@ -406,19 +406,6 @@ $\hat{\delta}_2 \ge \hat{\delta}_4 \ge \hat{\delta}_8$ across $32$ layers
 $\times 4$ runs; (d)~\emph{cross-seed stability} --- Spearman $\rho{=}0.876$
 between per-layer rankings at seeds $0$ and $7$. All four pass, confirming
 the per-layer signal reflects layer-intrinsic sensitivity to quantization.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{figures/sensor_validation.pdf}
-\caption{Canary sensor validation on Llama-3.1-8B (TP=$2$). (a)~Signal
-  magnitude (log scale): max $\hat{\delta}_4$ vs the cache-relative canary's
-  warmup reading, $\sim 550\times$ larger. (b)~Batch-size invariance: mns=$1$
-  vs mns=$8$ max ratio is $1.21\times$. (c)~Cross-tier monotonicity:
-  $\hat{\delta}_2 \geq \hat{\delta}_4$ holds for every layer (no points
-  below the dashed identity line). (d)~Cross-seed stability:
-  $\rho{=}0.876$ between per-layer rankings at seeds $0$ and $7$.}
-\label{fig:sensor}
-\end{figure}
 
 \subsection{Per-Workload Results}
 \label{sec:per_workload}
@@ -502,14 +489,16 @@ tasks, $p{=}0.63$).
 \subsection{Cross-Workload Pareto and Workload-Coherence}
 \label{sec:cross_workload}
 
-Figure~\ref{fig:cross_workload} compiles the four workloads into a single
-view. Across $300\times$ context-length range ($400$ to $128$K) and
-$160\times$ decode-length range ($5$ to ${\sim}800$ decode tokens), the
-consolidated INT8 layer count is workload-coherent: near-zero on
-RULER@128K (one layer demoted to INT2 instead), moderate on the reasoning
-workloads ($15$ on GSM8K-Hard, $18$ on HotpotQA), and near-total on the
-long-decode agentic regime ($79$ on $\tau$-Bench across both airline and
-retail). The GSM8K-Hard $\to$ HotpotQA inversion---more INT8 layers on
+Figure~\ref{fig:cross_workload} compiles the four workloads into a
+single view, and Figure~\ref{fig:per_layer_stress} shows the per-layer
+canary signal that drove each workload's tier vector together with the
+controller's resulting bit-width assignment. Across $300\times$ context-length
+range ($400$ to $128$K) and $160\times$ decode-length range ($5$ to
+${\sim}800$ decode tokens), the consolidated INT8 layer count is
+workload-coherent: near-zero on RULER@128K (one layer demoted to INT2
+instead), moderate on the reasoning workloads ($15$ on GSM8K-Hard, $18$
+on HotpotQA), and near-total on the long-decode agentic regime ($79$ on
+$\tau$-Bench across both airline and retail). The GSM8K-Hard $\to$ HotpotQA inversion---more INT8 layers on
 HotpotQA despite KIVI-INT4 not measurably hurting FP16 accuracy
 ($\Delta{=}{+}0.004$, $p{=}0.79$)---reflects the canary responding to
 infrequent but high-KL edge cases during multi-hop QA serving rather than
@@ -530,6 +519,24 @@ no per-workload tuning.
   composition annotated under each EchoKV bar), ranging from $3.97$ on
   RULER@128K to $6.54$ on $\tau$-Bench (airline + retail).}
 \label{fig:cross_workload}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/per_layer_stress.pdf}
+\caption{Per-layer canary divergence $\hat{\delta}_4$ at end of warmup,
+  bar colour shows the bit-width the controller assigned that layer
+  (light blue: INT4 default; medium blue: INT8 upgrade; pink: INT2
+  demotion), red dashed line is the per-workload threshold $\tau$. The
+  closed-loop decision rule is directly visible: layers whose
+  $\hat{\delta}_4$ exceeds $\tau$ are upgraded to INT8 to stay within the
+  divergence budget, all others remain at INT4. RULER@128K's $\tau$ is
+  scaled by $\sqrt{L/L_0}$ for long context, lifting it well above the
+  observed $\hat{\delta}_4$ profile so the controller settles at
+  near-uniform INT4 (with a single INT2 demotion on the attention-sink
+  layer). $\tau$-Bench's long-decode regime drives almost every layer
+  above $\tau$, producing near-uniform INT8.}
+\label{fig:per_layer_stress}
 \end{figure}
 
 \subsection{Trajectory Behaviour on $\tau$-Bench}

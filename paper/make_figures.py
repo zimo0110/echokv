@@ -505,12 +505,307 @@ def fig_sensor_validation():
 
 
 # ───────────────────────────────────────────────────────────────────────────
+# Figure 4: method comparison (4-panel side-by-side)
+# ───────────────────────────────────────────────────────────────────────────
+
+# Bit-tier colour map (matches cross_workload bar colours)
+BIT_COLOR = {
+    2:  "#FECACA",   # very light red — INT2
+    4:  "#93C5FD",   # light blue — INT4
+    8:  "#3B82F6",   # medium blue — INT8
+    16: "#1E3A8A",   # deep navy — FP16
+}
+
+
+def fig_method_comparison():
+    """4-panel side-by-side: how EchoKV's bit-allocation strategy differs
+    from related KV-cache compression methods. Each panel shows one column
+    of L=80 layers stacked vertically, coloured by the assigned bit-width
+    under that strategy. Only the rightmost panel (EchoKV) carries a
+    feedback arrow, signalling that its allocation is determined online."""
+    from matplotlib.colors import ListedColormap
+    from matplotlib.patches import FancyArrowPatch
+    from collections import Counter
+
+    L = 80  # Llama-3.1-70B
+    # Static cells
+    uniform_int4 = [4] * L
+    uniform_int8 = [8] * L
+    # Static mixed-precision: deterministic offline schedule. As a
+    # representative example we use a 50/50 split (low-half INT8,
+    # high-half INT4) — the kind of fixed schedule offline methods
+    # produce. Exact schedule not load-bearing; the panel is illustrative.
+    static_mixed = [8 if i < L // 2 else 4 for i in range(L)]
+    # EchoKV: actual HotpotQA tier vector (consolidated, dynamic).
+    hot_blob = json.load(open(
+        ROOT / "results/serving/session14_70b" /
+        "hotpotqa_n500_mns8" /
+        "echokv3c_abscanary_tau022_n500_mns8_continuous_dynamic.json"))
+    pr = hot_blob["final_tiers_per_rank"]
+    echokv = [max(pr[r][li] for r in range(len(pr))) for li in range(L)]
+
+    panels = [
+        ("(a) Uniform INT4",  "static; every layer 4 bits",   uniform_int4),
+        ("(b) Uniform INT8",  "static; every layer 8 bits",   uniform_int8),
+        ("(c) Static mixed",  "fixed offline schedule",       static_mixed),
+        ("(d) EchoKV",        "online, canary-driven",        echokv),
+    ]
+
+    with plt.rc_context(PAPER_STYLE):
+        fig, axes = plt.subplots(1, 4, figsize=(7.2, 3.0),
+                                  gridspec_kw={"wspace": 0.5})
+        for ax, (title, sub, tv) in zip(axes, panels):
+            arr = np.array(tv).reshape(-1, 1)
+            cmap = ListedColormap([BIT_COLOR[2], BIT_COLOR[4], BIT_COLOR[8]])
+            # Map bits → discrete level for imshow (0=INT2, 1=INT4, 2=INT8)
+            level = np.where(arr == 2, 0, np.where(arr == 4, 1, 2))
+            ax.imshow(level, aspect="auto", cmap=cmap, vmin=0, vmax=2,
+                      origin="lower", interpolation="nearest")
+            ax.set_xticks([])
+            ax.set_yticks([0, L // 2, L - 1])
+            ax.set_yticklabels(["0", f"{L//2}", f"{L-1}"], fontsize=7)
+            ax.set_ylabel("layer index" if title.startswith("(a)") else "")
+            ax.set_title(title, fontsize=9, loc="center", pad=14)
+            # Tier composition counts (one line under the title, above strip)
+            tc = Counter(tv)
+            comp = ", ".join(f"{tc[k]}×INT{k}" for k in (2, 4, 8) if tc.get(k))
+            ax.text(0.5, 1.015, comp, transform=ax.transAxes,
+                    ha="center", va="bottom",
+                    fontsize=6.8, color="#374151")
+            # Sub-caption under panel
+            ax.text(0.5, -0.07, sub, transform=ax.transAxes,
+                    ha="center", va="top", fontsize=7,
+                    style="italic", color="#4B5563")
+
+        # Feedback arrow on panel (d): a curved loop on the right side
+        ax_d = axes[3]
+        ax_d.annotate("", xy=(1.18, 0.05), xycoords="axes fraction",
+                      xytext=(1.18, 0.95), textcoords="axes fraction",
+                      arrowprops=dict(arrowstyle="-|>",
+                                      color=C_ONLINE_E,
+                                      connectionstyle="arc3,rad=0.45",
+                                      linewidth=1.3))
+        ax_d.text(1.32, 0.5, "canary\nfeedback",
+                  transform=ax_d.transAxes,
+                  ha="left", va="center",
+                  fontsize=7, style="italic",
+                  color=C_ONLINE_E)
+
+        # Discrete legend at bottom
+        from matplotlib.patches import Patch
+        handles = [
+            Patch(facecolor=BIT_COLOR[2], edgecolor="white", label="INT2"),
+            Patch(facecolor=BIT_COLOR[4], edgecolor="white", label="INT4"),
+            Patch(facecolor=BIT_COLOR[8], edgecolor="white", label="INT8"),
+        ]
+        fig.legend(handles=handles, loc="lower center", ncol=3,
+                   bbox_to_anchor=(0.5, -0.12), frameon=False, fontsize=8,
+                   handlelength=1.2)
+        fig.subplots_adjust(bottom=0.18)
+
+        out = OUT / "method_comparison.pdf"
+        fig.savefig(out)
+        plt.close(fig)
+        print(f"  wrote {out.relative_to(ROOT)}")
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# Figure 5: per-layer tier heatmap across workloads
+# ───────────────────────────────────────────────────────────────────────────
+
+def fig_tier_heatmap():
+    """Per-layer chosen bit-width across workloads. Rows are workloads;
+    columns are layers; colour is the consolidated (max-across-ranks) tier
+    selected by the canary controller during continuous-dynamic serving.
+    Reveals the workload-coherence claim visually: short reasoning workloads
+    bias INT4, retrieval workloads bias INT8, RULER drops to INT2 on a
+    single attention-sink layer."""
+    from matplotlib.colors import ListedColormap
+
+    base = ROOT / "results/serving/session14_70b"
+    base15 = ROOT / "results/serving/session15_70b"
+
+    def consol(blob):
+        pr = blob["final_tiers_per_rank"]
+        L = len(pr[0])
+        return [max(pr[r][li] for r in range(len(pr))) for li in range(L)]
+
+    rows = [
+        ("GSM8K-Hard",
+         json.load(open(base / "echokv3c_abscanary_tau022_n500_mns8_continuous_dynamic.json"))),
+        ("HotpotQA",
+         json.load(open(base / "hotpotqa_n500_mns8" /
+                        "echokv3c_abscanary_tau022_n500_mns8_continuous_dynamic.json"))),
+        ("RULER@128K",
+         json.load(open(base / "echokv3c_abscanary_tau124_ruler128k_n20_mns1_continuous_dynamic.json"))),
+        (r"$\tau$-Bench",
+         json.load(open(base15 / "taubench_airline_echokv_dynamic_n50.json"))),
+    ]
+    L = len(consol(rows[0][1]))
+    mat_levels = np.zeros((len(rows), L), dtype=int)
+    for i, (_, blob) in enumerate(rows):
+        tv = consol(blob)
+        mat_levels[i] = [(0 if b == 2 else (1 if b == 4 else 2)) for b in tv]
+
+    cmap = ListedColormap([BIT_COLOR[2], BIT_COLOR[4], BIT_COLOR[8]])
+
+    with plt.rc_context(PAPER_STYLE):
+        fig, ax = plt.subplots(figsize=(7.0, 1.9))
+        im = ax.imshow(mat_levels, aspect="auto", cmap=cmap, vmin=0, vmax=2,
+                       interpolation="nearest")
+        ax.set_yticks(range(len(rows)))
+        ax.set_yticklabels([r[0] for r in rows])
+        ax.set_xticks([0, L // 4, L // 2, 3 * L // 4, L - 1])
+        ax.set_xticklabels(["0", f"{L//4}", f"{L//2}", f"{3*L//4}", f"{L-1}"])
+        ax.set_xlabel("Layer index")
+
+        # Per-row composition (right margin)
+        from collections import Counter
+        for i, (_, blob) in enumerate(rows):
+            tv = consol(blob)
+            tc = Counter(tv)
+            parts = [f"{tc[k]}×INT{k}" for k in (2, 4, 8) if tc.get(k)]
+            avg = sum(tv) / len(tv)
+            ax.text(L + 1.2, i, f"{', '.join(parts)} ({avg:.2f} bits)",
+                    ha="left", va="center", fontsize=7.2, color="#374151")
+
+        # Colour-bar legend at bottom
+        from matplotlib.patches import Patch
+        handles = [
+            Patch(facecolor=BIT_COLOR[2], edgecolor="white", label="INT2"),
+            Patch(facecolor=BIT_COLOR[4], edgecolor="white", label="INT4"),
+            Patch(facecolor=BIT_COLOR[8], edgecolor="white", label="INT8"),
+        ]
+        ax.legend(handles=handles, loc="upper center",
+                  bbox_to_anchor=(0.5, -0.35), ncol=3,
+                  frameon=False, fontsize=8, handlelength=1.2)
+
+        out = OUT / "tier_heatmap.pdf"
+        fig.savefig(out)
+        plt.close(fig)
+        print(f"  wrote {out.relative_to(ROOT)}")
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# Figure 6: per-layer canary stress + tier selection
+# ───────────────────────────────────────────────────────────────────────────
+
+def fig_per_layer_stress():
+    """Per-layer canary divergence \\hat{\\delta}_4 with the controller's
+    chosen tier overlaid as colour. Inspired by PyramidKV's per-layer
+    attention plots, but the y-axis here is the canary's quantization-error
+    signal (the input the controller sees), and the bar colour is the
+    bit-width the controller assigned that layer. Layers whose error
+    exceeds the threshold $\\tau$ (dashed line) are upgraded from INT4 to
+    INT8 — the closed-loop decision rule made visible."""
+    base = ROOT / "results/serving/session14_70b"
+    base15 = ROOT / "results/serving/session15_70b"
+
+    def per_layer_delta_4(blob):
+        ptd = blob["warmup_per_tier_delta_per_rank"]
+        L = len(ptd[0]["4"])
+        return [sum(r["4"][li] for r in ptd) / len(ptd) for li in range(L)]
+
+    def consol(blob):
+        pr = blob["final_tiers_per_rank"]
+        L = len(pr[0])
+        return [max(pr[r][li] for r in range(len(pr))) for li in range(L)]
+
+    rows = [
+        ("GSM8K-Hard", 0.022,
+         json.load(open(base / "echokv3c_abscanary_tau022_n500_mns8_continuous_dynamic.json"))),
+        ("HotpotQA", 0.022,
+         json.load(open(base / "hotpotqa_n500_mns8" /
+                        "echokv3c_abscanary_tau022_n500_mns8_continuous_dynamic.json"))),
+        ("RULER@128K", 0.124,
+         json.load(open(base / "echokv3c_abscanary_tau124_ruler128k_n20_mns1_continuous_dynamic.json"))),
+        (r"$\tau$-Bench (airline)", 0.022,
+         json.load(open(base15 / "taubench_airline_echokv_dynamic_n50.json"))),
+    ]
+
+    L = 80
+    with plt.rc_context(PAPER_STYLE):
+        fig, axes = plt.subplots(len(rows), 1, figsize=(7.0, 3.6),
+                                  sharex=True,
+                                  gridspec_kw={"hspace": 0.65})
+        for ax, (name, tau, blob) in zip(axes, rows):
+            d4 = per_layer_delta_4(blob)
+            # Use seed (warmup-end) consolidated tiers — these are the
+            # tiers the canary signal in d4 actually drove the controller
+            # to pick. final_tiers_per_rank is end-of-measurement (after
+            # dynamic drift), which would mismatch the warmup-end signal.
+            tiers = blob["consolidated_tiers"]
+            acc = blob["measurement"]["accuracy"]
+            # Bar colours from chosen tier
+            colors = [BIT_COLOR.get(t, "#888") for t in tiers]
+            x = np.arange(L)
+            ax.bar(x, d4, width=0.95, color=colors,
+                   edgecolor="white", linewidth=0.2, zorder=3)
+            # τ threshold line
+            ax.axhline(tau, color=C_ONLINE_E, linestyle="--",
+                       linewidth=1.0, alpha=0.85, zorder=2)
+            # ymax: max of (data, 1.4×τ) so the τ line is visible
+            ymax = max(max(d4) * 1.15, tau * 1.5)
+            ax.set_ylim(0, ymax)
+            ax.set_xlim(-0.5, L - 0.5)
+            ax.set_ylabel(r"$\hat{\delta}_4$", fontsize=8)
+            # workload + acc + bits annotation in upper-right of the panel
+            from collections import Counter
+            tc = Counter(tiers)
+            avg = sum(tiers) / len(tiers)
+            promotions = sum(v for k, v in tc.items() if k > 4)
+            demotions = sum(v for k, v in tc.items() if k < 4)
+            label = (
+                f"{name}   "
+                f"acc={acc:.3f}   "
+                f"{avg:.2f} bits   "
+                + (f"{promotions} INT8↑   " if promotions else "")
+                + (f"{demotions} INT2↓   " if demotions else "")
+            )
+            ax.text(0.0, 1.05, label, transform=ax.transAxes,
+                    ha="left", va="bottom", fontsize=8.5,
+                    fontweight="bold", color=C_TEXT)
+            # τ label on the line (right side)
+            ax.text(L - 1, tau, fr" $\tau{{=}}{tau:.3f}$",
+                    ha="right", va="bottom", fontsize=7,
+                    color=C_ONLINE_E, fontweight="bold")
+            ax.grid(axis="y", linestyle=":", color=C_GRID, alpha=0.6, zorder=1)
+            ax.set_axisbelow(True)
+            ax.tick_params(axis="y", labelsize=7)
+
+        axes[-1].set_xlabel("Layer index", fontsize=9)
+        axes[-1].tick_params(axis="x", labelsize=8)
+
+        # Shared discrete legend at top
+        from matplotlib.patches import Patch
+        from matplotlib.lines import Line2D
+        handles = [
+            Patch(facecolor=BIT_COLOR[2], edgecolor="white", label="INT2 (demoted)"),
+            Patch(facecolor=BIT_COLOR[4], edgecolor="white", label="INT4 (default)"),
+            Patch(facecolor=BIT_COLOR[8], edgecolor="white", label="INT8 (upgraded)"),
+            Line2D([0], [0], color=C_ONLINE_E, linestyle="--",
+                   linewidth=1.0, label=r"$\tau$ threshold"),
+        ]
+        fig.legend(handles=handles, loc="upper center",
+                   bbox_to_anchor=(0.5, 1.005), ncol=4,
+                   frameon=False, fontsize=8, handlelength=1.4,
+                   columnspacing=1.4)
+        out = OUT / "per_layer_stress.pdf"
+        fig.savefig(out)
+        plt.close(fig)
+        print(f"  wrote {out.relative_to(ROOT)}")
+
+
+# ───────────────────────────────────────────────────────────────────────────
 
 def main():
     print(f"Generating paper figures into {OUT.relative_to(ROOT)}/")
     fig_architecture()
     fig_cross_workload()
     fig_sensor_validation()
+    fig_method_comparison()
+    fig_tier_heatmap()
+    fig_per_layer_stress()
 
 
 if __name__ == "__main__":

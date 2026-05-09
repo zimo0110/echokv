@@ -307,13 +307,32 @@ quant codes for E2M1 floats and the zero-point semantics aren't
 implemented. The paper's NVFP4 baseline plan (PAPER_DRAFT.md §7.1) calls
 for this kernel.
 
-### 8.4 Closed-loop controller not yet wired against the fork
+### 8.4 F.3.1 — runtime tier swapping within one engine
 
-The EchoKV `CanaryHarness` ([evaluation/serving/canary_vllm.py](evaluation/serving/canary_vllm.py))
-currently runs in *shadow mode* against upstream vLLM (FP16 KV cache,
-quantize K/V before attention). Wiring it to drive
-`apply_tier_vector_to_model` against the fork's *real* KIVI cache is
-the natural next stage (Phase F.3 candidate).
+Phase F.3.0 demonstrates the warmup-then-freeze pattern across two
+engine boots:
+
+  * Phase 1 — install ``CanaryHarness`` against the fork (observation
+    only — the cache is already KIVI INTb downstream of the hook,
+    shadow-quantizing K/V would double-apply noise). Run warmup
+    prompts; the controller ticks per-layer δ̂ EMAs and converges to
+    a tier vector. (See ``run_phaseF3_canary_fork.py``.)
+
+  * Phase 2 — boot a fresh engine with
+    ``LLM(kivi_bits_per_layer=<warmup tier>)`` so each layer's KV
+    cache is allocated at the controller-chosen bits from the very
+    first measurement token. (See ``run_phaseF3_two_phase.py``.)
+
+True per-layer dynamic tier swapping inside one engine still requires
+F.3.1 work: each layer's paged data buffer is sized for one
+bit-width at engine init via the spec; ``apply_per_layer_kivi_precision``
+mutates ``impl.kivi_bits`` in place but the next
+``slice_kivi_cache`` asserts the buffer matches
+``page_bytes(active_bits)`` exactly. Resolving this needs either
+(a) allocate-at-max-bits + a tolerant slice that accepts
+``buffer_size >= num_blocks * page_bytes(active_bits)``, or
+(b) per-tier dedicated buffers with the impl swapping which buffer
+is active.
 
 ## 9. Performance characteristics (current snapshot, no perf tuning)
 
@@ -392,6 +411,34 @@ def _push(model):
 
 llm.apply_model(_push)   # broadcast across TP ranks
 ```
+
+### 10.4 Warmup-then-freeze with the controller (Phase F.3.0)
+
+Wire the EchoKV ``CanaryHarness`` against the fork to converge a tier
+vector, then boot a fresh engine with that vector pinned via
+``kivi_bits_per_layer``. End-to-end the loop is: canary observes Q/K
+via forward-pre-hooks → controller ticks per-layer δ̂ EMAs → resulting
+tier vector seeds ``LLM(kivi_bits_per_layer=...)`` for measurement.
+
+```bash
+# Single-pass canary observation (warmup only):
+CUDA_VISIBLE_DEVICES=4 \
+VLLM_ALLOW_INSECURE_SERIALIZATION=1 \
+FLASHINFER_DISABLE_VERSION_CHECK=1 \
+python evaluation/serving/run_phaseF3_canary_fork.py --tp 1
+
+# Full warmup-then-freeze across two engine boots:
+CUDA_VISIBLE_DEVICES=4 \
+python evaluation/serving/run_phaseF3_two_phase.py --tp 1
+```
+
+The two-phase driver runs each engine in its own subprocess so the
+second engine starts with a clean GPU state (NCCL groups, vLLM's pool,
+and per-layer scale/zp side buffers from the first engine all linger
+past ``del llm``). Use observation-only mode on the fork
+(``CanaryHarness(tier_application=False)``) — the cache is already
+quantised at write time, so shadow-quantizing K/V before attention
+would double-apply noise.
 
 ## 11. Testing
 

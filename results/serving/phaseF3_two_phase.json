@@ -1,0 +1,192 @@
+{
+  "config": {
+    "cache_dtype_warmup": "int4_kivi",
+    "tp": 1,
+    "canary_rate": 0.125,
+    "tau": 1.0,
+    "tick_interval": 10,
+    "warmup_max_tokens": 32,
+    "measure_max_tokens": 24,
+    "model": "/mnt/nvme_tmp/nazar_hf/hub/models--NousResearch--Meta-Llama-3.1-8B-Instruct/snapshots/d10aef7999a2b5ba950ab3974312feeedbfe0b77"
+  },
+  "tier_vector_after_warmup": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+  ],
+  "tier_counts_after_warmup": {
+    "2": 32
+  },
+  "phase1": {
+    "tier_vector": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "stats": {
+      "attention_calls": 2112,
+      "canary_fires": 266,
+      "tier_applications": 0
+    },
+    "num_layers": 32,
+    "outputs": [
+      {
+        "prompt": "Q: What is 2 + 3?  A:",
+        "output": " 5\nQ: What is 5 - 2?  A: 3\nQ: What is 7 - 1?  A:"
+      },
+      {
+        "prompt": "Q: What is 7 - 4?  A:",
+        "output": " 3\nQ: What is 7 - 3?  A: 4\nQ: What is 7 - 2?  A:"
+      },
+      {
+        "prompt": "Q: What is 6 * 9?  A:",
+        "output": " 54\nQ: What is 7 * 8?  A: 56\nQ: What is 5 * 3?  A:"
+      },
+      {
+        "prompt": "The capital of France is",
+        "output": " a city of romance, art, fashion, and cuisine. Paris is a must-visit destination for anyone who loves history, architecture, and culture. From the"
+      },
+      {
+        "prompt": "The capital of Germany is",
+        "output": " Berlin, and the country is divided into 16 states. Germany is a federal republic with a parliamentary system of government. The country has a population of over "
+      },
+      {
+        "prompt": "Once upon a time, in a kingdom far away,",
+        "output": " there was a beautiful princess named Sophia. She was kind, gentle, and had a heart full of love for all living things. Sophia lived in a magnificent castle"
+      },
+      {
+        "prompt": "Explain photosynthesis in one sentence:",
+        "output": " Photosynthesis is the process by which plants, algae, and some bacteria convert light energy from the sun into chemical energy in the form of glucose, releasing oxygen as"
+      },
+      {
+        "prompt": "List three primary colors:",
+        "output": " red, blue, and yellow.\nList three secondary colors: green, orange, and purple.\nList three tertiary colors: blue-green, yellow-green, and red"
+      }
+    ]
+  },
+  "phase2": {
+    "engine_dtype": "int2_kivi",
+    "gpu_memory_utilization": 0.3,
+    "rank_read_back_matches": true,
+    "rank_vectors": [
+      [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    ],
+    "outputs": [
+      {
+        "prompt": "Q: What is 12 + 15?  A:",
+        "output": " 27\nQ: What is the value of 12 + 15 + 9 + 17 + 19"
+      },
+      {
+        "prompt": "Q: What is 100 - 37?  A:",
+        "output": " 63\nB: 63\nC: 63\nD: 63\nThe correct answer is: "
+      },
+      {
+        "prompt": "The capital of Japan is",
+        "output": " Tokyo, but the capital of Japan is actually Tokyo. The capital of Japan is Tokyo, but the capital of Japan is"
+      },
+      {
+        "prompt": "Who wrote Romeo and Juliet?",
+        "output": " - Essay Example\nThe author of Romeo and Juliet is William Shakespeare, but the author of Romeo and Juliet is not known"
+      },
+      {
+        "prompt": "Name the largest ocean on Earth:",
+        "output": " Pacific Ocean\nThe largest ocean on Earth is the Pacific Ocean. It covers an area of approximately 155.6 million"
+      },
+      {
+        "prompt": "List three states of matter:",
+        "output": " solid, liquid, and gas. Then, describe the characteristics of each state.\nList three states of matter: solid,"
+      }
+    ]
+  }
+}

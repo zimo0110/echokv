@@ -14,6 +14,84 @@ Commit hashes refer to the fork branch unless prefixed `host:`.
 
 ---
 
+## Phase F.3.0 — closed-loop controller against the fork
+
+**Host:** `evaluation/serving/run_phaseF3_canary_fork.py` (single-pass canary observation), `evaluation/serving/run_phaseF3_two_phase.py` (warmup-then-freeze across two engine boots).
+
+### What changed
+
+Two host-side drivers that wire the EchoKV CanaryHarness to the
+fork's real KIVI cache, completing the loop: canary observes Q/K via
+forward-pre-hooks → controller ticks per-layer δ̂ EMAs → resulting
+tier vector seeds a fresh engine init via
+``LLM(kivi_bits_per_layer=...)``.
+
+  * ``run_phaseF3_canary_fork.py`` — single-pass observation. Boots
+    the fork at uniform bits, installs ``CanaryHarness`` in
+    ``tier_application=False`` mode (the fork already does the real
+    KIVI quant downstream of the hook; shadow-quantizing K/V before
+    attention would double-apply the noise), runs warmup prompts,
+    snapshots the per-rank tier vector + per-layer δ̂.
+
+  * ``run_phaseF3_two_phase.py`` — warmup-then-freeze in two
+    subprocesses. Phase 1 mirrors the single-pass driver and emits
+    the converged tier vector; phase 2 boots a fresh engine with
+    ``kivi_bits_per_layer=<warmup tier>`` so every layer's KV cache
+    is allocated at the controller-chosen bits from the very first
+    measurement token. Subprocess isolation is required because
+    NCCL groups, vLLM's pool, and per-layer scale/zp side buffers
+    linger past ``del llm`` and OOM the second engine if both run
+    in the same process.
+
+### Why observation-only on the fork
+
+``CanaryHarness.tier_application=True`` was the upstream-vLLM
+workaround for "controller decisions actually affect outputs without
+a source fork". With the fork, the cache IS quantised at the
+controller's chosen bits at write time; shadow-quantizing K/V before
+attention would double-apply the noise.
+
+### Why this driver doesn't update tiers within a running engine
+
+Phase F.2 sizes each layer's paged data buffer for the bits the spec
+was constructed with. ``apply_per_layer_kivi_precision`` mutates
+``impl.kivi_bits`` in place, but the next ``slice_kivi_cache`` asserts
+the buffer matches ``page_bytes(active_bits)`` exactly — runtime tier
+*upgrades* fail (buffer too small) and *downgrades* fail too (slice
+asserts exact match, not "at least"). True per-layer dynamic tier
+swapping inside one engine requires Phase F.3.1 (allocate-at-max-bits
++ tolerant slice, or per-tier dedicated buffers).
+
+### Verification
+
+  * Single-pass (``run_phaseF3_canary_fork.py``, Llama-3.1-8B, 8
+    warmup prompts, ``canary_rate=1/8``, ``tau=0.01``):
+    266 canary fires across 2112 attention calls; all 32 layers
+    accumulate non-zero δ̂; converged tier vector mostly INT2 with
+    INT4/INT8 outliers; generation matches FP16 quality on the
+    standard arithmetic + capital-cities prompts.
+
+  * Two-phase (``run_phaseF3_two_phase.py``, ``tau=1.0`` for a
+    conservative warmup + ``initial_level=Precision.INT4``):
+    phase 1 converges to uniform INT2; phase 2 boots a fresh engine
+    at ``int2_kivi`` with ``kivi_bits_per_layer={...: 2 for 32 layers}``,
+    all 32 layers report INT2 via ``llm.apply_model``, generation
+    correctly answers ``12 + 15 = 27``, ``100 - 37 = 63``, "capital
+    of Japan" → "Tokyo", "Romeo and Juliet" → "William Shakespeare",
+    "largest ocean" → "Pacific Ocean", "three states of matter" →
+    "solid, liquid, and gas".
+
+### Caveat
+
+Phase 2 uses ``gpu_memory_utilization=0.30`` and ``max_model_len=1024``
+because of the F.2 profile-accounting limitation: vLLM's profiler
+doesn't subtract the per-layer scale/zp side buffer cost from the
+cache budget. With 32 layers the side buffers are 6× the data buffer
+at INT4 and 12× at INT2; full-scale settings (0.85 / 4096) require
+the profiler fix listed in F.2's outstanding follow-ups.
+
+---
+
 ## Phase F.2 — heterogeneous bits (split-buffer layout)
 
 **Fork:** `780cbcc` echokv phase F.2: real heterogeneous KIVI bits via split-buffer layout
@@ -504,19 +582,27 @@ Ten end-to-end smoke drivers under `/tmp/`:
 1. **Profiler accounting for the per-layer scale/zp side buffer.**
    `gpu_memory_utilization` should subtract side-buffer cost upfront so
    `0.85` works at heterogeneous bits without OOM. Currently the
-   workaround is `0.65`. Small fix in `CacheConfig` profiling.
+   workaround is `0.30–0.65` depending on the tier mix. This blocks the
+   F.3.0 two-phase demo from scaling to full ``max_model_len``. Small
+   fix in `CacheConfig` profiling.
 
-2. **Sliding window + KIVI.** `Attention.get_kv_cache_spec` falls
+2. **F.3.1 — runtime tier swapping within a single engine.** Phase
+   F.3.0 demonstrated the warmup-then-freeze pattern across two
+   engine boots. True closed-loop tier adjustment inside one engine
+   needs the buffer-size constraint resolved: each layer's spec is
+   sized for one bit-width, but ``apply_per_layer_kivi_precision``
+   mutates the active bit-width to a value the buffer wasn't sized
+   for, so the next ``slice_kivi_cache`` asserts. Two design options:
+   allocate-at-max-bits with a tolerant slice (memory wasteful for
+   downgrade-heavy tier vectors), or per-tier dedicated buffers
+   (3× memory, no waste).
+
+3. **Sliding window + KIVI.** `Attention.get_kv_cache_spec` falls
    through to `SlidingWindowSpec` when `self.sliding_window` is set.
    The kernel already supports `SLIDING_WINDOW` (Phase D.3); only the
    spec/backend/cache-manager wiring is missing.
 
-3. **NVFP4 actual kernel.** `nvfp4_e2m1` is layout-only today
+4. **NVFP4 actual kernel.** `nvfp4_e2m1` is layout-only today
    (shares INT4 storage shape). The paper's NVFP4 baseline plan
    (PAPER_DRAFT.md §7.1) calls for E2M1 quant codes + matching
    pack/unpack and dequant paths.
-
-4. **Closed-loop controller against the fork.** The
-   `CanaryHarness` runs in shadow mode against upstream vLLM today.
-   Wiring it to drive `apply_tier_vector_to_model` against the fork's
-   real KIVI cache is the natural Phase F.3.

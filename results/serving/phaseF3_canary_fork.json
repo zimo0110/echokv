@@ -1,0 +1,97 @@
+{
+  "config": {
+    "cache_dtype": "int4_kivi",
+    "tp": 1,
+    "canary_rate": 0.125,
+    "tau": 0.01,
+    "tick_interval": 10,
+    "max_tokens": 32,
+    "model": "/mnt/nvme_tmp/nazar_hf/hub/models--NousResearch--Meta-Llama-3.1-8B-Instruct/snapshots/d10aef7999a2b5ba950ab3974312feeedbfe0b77"
+  },
+  "per_rank": [
+    {
+      "rank": 0,
+      "tier_vector": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        8,
+        4,
+        2,
+        8
+      ],
+      "tier_counts": {
+        "2": 29,
+        "4": 1,
+        "8": 2
+      },
+      "stats": {
+        "attention_calls": 2112,
+        "canary_fires": 266,
+        "tier_applications": 0
+      },
+      "max_per_layer_delta": 0.02449974612342194,
+      "num_nonzero_deltas": 32,
+      "num_layers": 32
+    }
+  ],
+  "warmup_outputs": [
+    {
+      "prompt": "Q: What is 2 + 3?  A:",
+      "output": " 5\nQ: What is 5 - 2?  A: 3\nQ: What is 7 - 1?  A:"
+    },
+    {
+      "prompt": "Q: What is 7 - 4?  A:",
+      "output": " 3\nQ: What is 7 - 3?  A: 4\nQ: What is 7 - 2?  A:"
+    },
+    {
+      "prompt": "Q: What is 6 * 9?  A:",
+      "output": " 54\nQ: What is 7 * 8?  A: 56\nQ: What is 5 * 3?  A:"
+    },
+    {
+      "prompt": "The capital of France is",
+      "output": " a city of romance, art, fashion, and cuisine. Paris is a must-visit destination for anyone who loves history, architecture, and culture. From the"
+    },
+    {
+      "prompt": "The capital of Germany is",
+      "output": " Berlin, and the country is divided into 16 states. Germany is a federal republic with a parliamentary system of government. The country has a population of over "
+    },
+    {
+      "prompt": "Once upon a time, in a kingdom far away,",
+      "output": " there was a beautiful princess named Sophia. She was kind, gentle, and had a heart full of love for all living things. Sophia lived in a magnificent castle"
+    },
+    {
+      "prompt": "Explain photosynthesis in one sentence:",
+      "output": " Photosynthesis is the process by which plants, algae, and some bacteria convert light energy from the sun into chemical energy in the form of glucose, releasing oxygen as"
+    },
+    {
+      "prompt": "List three primary colors:",
+      "output": " red, blue, and yellow.\nList three secondary colors: green, orange, and purple.\nList three tertiary colors: blue-green, yellow-green, and red"
+    }
+  ]
+}

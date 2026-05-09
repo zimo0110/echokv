@@ -117,24 +117,90 @@ allocation) rather than absolute δ̂ vs τ. Working out the right
 fork-side controller settings is the next engineering step;
 the data we'd want is a δ̂ trace at multiple active tiers.
 
-### Outstanding follow-up: fork-τ recalibration + controller-logic audit
+### Controller-logic audit + tau_budget sweep on the fork
+
+Audit of ``PIDPrecisionController.tick_multi_precision`` revealed
+the actual decision rule:
+
+> **argmin-with-budget**: build candidate set ``{current ± 1
+> step}`` ordered ascending by bits; pick the lowest-bit tier whose
+> per-tier EMA is below ``tau_budget``. If no candidate fits, hold.
+
+So ``tau_budget``, not ``τ``, is the live knob. Sweep on Llama-70B
+GSM8K-Hard, n=30:
+
+```
+tau_budget    per-rank picks            consolidated      acc
+0.02          rank: 79 INT4 + 1 INT2    79 INT4 + 1 INT2  0.540  (uniform INT4)
+6e-3          rank: 79 INT4 + 1 INT2    79 INT4 + 1 INT2  0.533  (uniform INT4)
+3.2e-3        rank: ~30 INT4 + ~50 INT8 5 INT4 + 75 INT8  0.533
+2e-3          rank: ~5 INT4 + ~75 INT8  1 INT4 + 79 INT8  -      (uniform INT8)
+```
+
+Two findings from the sweep:
+
+1. **The rule prefers downgrade.** Going through candidates
+   ascending and picking the first-safe means INT2 is preferred if
+   safe; INT4 is preferred if INT2 is unsafe; INT8 only if both
+   smaller tiers are unsafe. To force upgrade-direction
+   differentiation (the paper's 40 INT8 + 40 INT4 shape),
+   ``tau_budget`` must be tight enough that **INT4 is unsafe** for
+   the layers we want pushed to INT8.
+
+2. **Per-rank decisions ≠ consolidated decisions.** At
+   ``tau_budget=3.2e-3`` each rank independently picks ~30 INT4 +
+   ~50 INT8 (the rank-level differentiation is real). But the
+   ``consolidate_tiers`` rule (per-layer max across ranks) collapses
+   to 5 INT4 + 75 INT8 — meaning **only 5 out of 80 layers had INT4
+   unanimously chosen by all 4 TP ranks**. The rank-level INT4 picks
+   land on different layers (TP head-subsetting → rank-specific δ̂
+   → divergent per-rank decisions for tier-4 EMAs near budget).
+   Per-layer max keeps the highest-precision choice, killing most
+   INT4 picks.
+
+### Implications
+
+  * **The paper's 40/40 mix on upstream-shadow-mode probably
+    benefited from rank-level *agreement*** — under shadow-mode
+    tier-4 EMAs cluster differently (FP16 reference) so
+    cross-rank decisions for the same layer are more correlated,
+    surviving the max-consolidate rule. The fork's real-INT4
+    cache decorrelates per-rank decisions.
+
+  * **A per-layer-mean (or majority-vote) consolidate rule** would
+    likely give the fork a 30-50 INT4 + 30-50 INT8 mix at
+    ``tau_budget=3.2e-3``, closer to the paper's shape. Per-layer
+    max is intentionally conservative ("the rank that wants higher
+    precision wins"); softening this is a methodology choice, not a
+    code bug.
+
+  * **Tau_budget for the fork is workload-specific and needs to
+    bracket the per-layer tier-4 EMA distribution.** For Llama-70B
+    GSM8K-Hard the median is ~3.2e-3 (min 1.3e-4, max 1.1e-2). The
+    paper's ``tau_budget=0.02`` was chosen for shadow-mode where
+    tier-4 EMAs are ~60× smaller; using the same value on the fork
+    keeps INT4 always-safe and the controller never differentiates.
+
+### Three concrete follow-ups remain
 
   * **Fork-side ``calibrate_tau_budget.py``.** Run the canary under
-    the fork at a fixed tier (e.g. all INT4 active in INT8 buffer)
-    and dump per-tier δ̂ EMAs. The paper's calibration scripts
-    (``evaluation/serving/calibrate_tau_budget.py``) have the
-    structure; only the LLM construction needs the fork's
-    ``kv_cache_dtype="int8_kivi"`` + initial swap.
+    the fork at a fixed tier and dump per-layer per-tier δ̂ EMAs.
+    Pick ``tau_budget`` to bisect the per-layer tier-4 EMA
+    distribution at the desired heterogeneity level. Half-day port
+    of ``evaluation/serving/calibrate_tau_budget*.py``.
 
-  * **Audit ``tick_multi_precision`` for tier-relative vs absolute
-    thresholds.** With the fork's δ̂ distribution (above), absolute
-    τ=1e-7 should have triggered upgrades; the fact that it didn't
-    indicates the tick logic uses a different decision rule.
+  * **Per-layer mean (or vote) consolidate rule.** Replace
+    ``consolidate_tiers`` (per-layer max) with a softer combinator
+    so per-rank disagreements don't always collapse to the highest-
+    precision pick. This would make the fork's 40/40-style mix
+    achievable without per-rank δ̂ correlation.
 
-  * **Tau_budget interaction.** The harness passes
-    ``tau_budget=0.02`` which the paper's session 14 phase 4
-    documented as load-bearing for the Pareto win at upstream-
-    shadow-mode. Whether the same value works on the fork is open.
+  * **Pareto reproduction with adjusted settings.** Once the
+    consolidate rule + ``tau_budget`` are calibrated for the fork,
+    run n=100 GSM8K-Hard at the bisecting ``tau_budget`` and
+    compare to the paper's session 14 phase 4 cell. If the fork's
+    Pareto win matches or exceeds the paper's 0.620 vs 0.540
+    static-INT4 baseline, that's the headline number.
 
 ---
 

@@ -57,6 +57,7 @@ Usage
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import logging
 import os
@@ -83,6 +84,7 @@ DEFAULT_8B = (
     "models--NousResearch--Meta-Llama-3.1-8B-Instruct/"
     "snapshots/d10aef7999a2b5ba950ab3974312feeedbfe0b77"
 )
+DEFAULT_70B = "/mnt/nvme_tmp6/llama-70b"
 
 
 def consolidate_tiers(per_rank_snapshots: list[dict]) -> list[int]:
@@ -299,9 +301,10 @@ def main(argv: Optional[list[str]] = None) -> int:
     initial_vec = build_uniform_tier_vector(num_layers, a.initial_active)
     log.info("setting warmup active bits = INT%d (buffer remains INT8)",
              a.initial_active)
-    def _swap_initial(model):
-        return swap_tier_vector_to_model(model, initial_vec)
-    llm.apply_model(_swap_initial)
+    llm.apply_model(
+        functools.partial(swap_tier_vector_to_model,
+                          bits_per_layer=initial_vec),
+    )
 
     # ---- Phase 1: warmup with canary observing ----
     log.info(
@@ -379,9 +382,10 @@ def main(argv: Optional[list[str]] = None) -> int:
     # ---- Phase 3: measurement (swap to consolidated, run full batch) ----
     log.info("=== phase 3: measurement (n=%d, swap_tier_vector_to_model) ===",
              a.n_prompts)
-    def _swap_consolidated(model):
-        return swap_tier_vector_to_model(model, consolidated)
-    llm.apply_model(_swap_consolidated)
+    llm.apply_model(
+        functools.partial(swap_tier_vector_to_model,
+                          bits_per_layer=consolidated),
+    )
 
     # Verify the swap took on every rank.
     post_swap = llm.apply_model(read_tier_vector_from_model)

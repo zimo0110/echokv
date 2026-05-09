@@ -1,0 +1,203 @@
+{
+  "config": {
+    "n_prompts": 10,
+    "target_tokens": 4000,
+    "max_model_len": 8192,
+    "max_tokens": 24,
+    "tp": 4,
+    "seed": 0,
+    "model": "/mnt/nvme_tmp6/llama-70b"
+  },
+  "fp16": {
+    "workload": "ruler",
+    "cache_dtype": "auto",
+    "n_prompts": 10,
+    "target_tokens": 4000,
+    "n_correct": 10.0,
+    "accuracy": 1.0,
+    "load_s": 41.44401914998889,
+    "gen_s": 2.912857818417251,
+    "total_in_tokens": 39380,
+    "total_out_tokens": 40,
+    "tps_in": 13519.369105834958,
+    "tps_out": 13.732218492468215,
+    "per_prompt": [
+      {
+        "request_id": "ruler_32k:0",
+        "reference": "916294",
+        "prompt_tokens": 3937,
+        "completion_tokens": 4,
+        "completion": " 916294",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:1",
+        "reference": "314278",
+        "prompt_tokens": 3938,
+        "completion_tokens": 4,
+        "completion": " 314278",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:2",
+        "reference": "881221",
+        "prompt_tokens": 3938,
+        "completion_tokens": 4,
+        "completion": " 881221",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:3",
+        "reference": "502448",
+        "prompt_tokens": 3939,
+        "completion_tokens": 4,
+        "completion": " 502448",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:4",
+        "reference": "133889",
+        "prompt_tokens": 3937,
+        "completion_tokens": 4,
+        "completion": " 133889",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:5",
+        "reference": "668325",
+        "prompt_tokens": 3938,
+        "completion_tokens": 4,
+        "completion": " 668325",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:6",
+        "reference": "215128",
+        "prompt_tokens": 3939,
+        "completion_tokens": 4,
+        "completion": " 215128",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:7",
+        "reference": "264725",
+        "prompt_tokens": 3939,
+        "completion_tokens": 4,
+        "completion": " 264725",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:8",
+        "reference": "388992",
+        "prompt_tokens": 3938,
+        "completion_tokens": 4,
+        "completion": " 388992",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:9",
+        "reference": "600511",
+        "prompt_tokens": 3937,
+        "completion_tokens": 4,
+        "completion": " 600511",
+        "correct": 1.0
+      }
+    ]
+  },
+  "int4_kivi": {
+    "workload": "ruler",
+    "cache_dtype": "int4_kivi",
+    "n_prompts": 10,
+    "target_tokens": 4000,
+    "n_correct": 10.0,
+    "accuracy": 1.0,
+    "load_s": 41.24706066492945,
+    "gen_s": 7.193011486902833,
+    "total_in_tokens": 39380,
+    "total_out_tokens": 40,
+    "tps_in": 5474.758391767318,
+    "tps_out": 5.560953165837804,
+    "per_prompt": [
+      {
+        "request_id": "ruler_32k:0",
+        "reference": "916294",
+        "prompt_tokens": 3937,
+        "completion_tokens": 4,
+        "completion": " 916294",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:1",
+        "reference": "314278",
+        "prompt_tokens": 3938,
+        "completion_tokens": 4,
+        "completion": " 314278",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:2",
+        "reference": "881221",
+        "prompt_tokens": 3938,
+        "completion_tokens": 4,
+        "completion": " 881221",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:3",
+        "reference": "502448",
+        "prompt_tokens": 3939,
+        "completion_tokens": 4,
+        "completion": " 502448",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:4",
+        "reference": "133889",
+        "prompt_tokens": 3937,
+        "completion_tokens": 4,
+        "completion": " 133889",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:5",
+        "reference": "668325",
+        "prompt_tokens": 3938,
+        "completion_tokens": 4,
+        "completion": " 668325",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:6",
+        "reference": "215128",
+        "prompt_tokens": 3939,
+        "completion_tokens": 4,
+        "completion": " 215128",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:7",
+        "reference": "264725",
+        "prompt_tokens": 3939,
+        "completion_tokens": 4,
+        "completion": " 264725",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:8",
+        "reference": "388992",
+        "prompt_tokens": 3938,
+        "completion_tokens": 4,
+        "completion": " 388992",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:9",
+        "reference": "600511",
+        "prompt_tokens": 3937,
+        "completion_tokens": 4,
+        "completion": " 600511",
+        "correct": 1.0
+      }
+    ]
+  }
+}

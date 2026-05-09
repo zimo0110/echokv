@@ -14,6 +14,68 @@ Commit hashes refer to the fork branch unless prefixed `host:`.
 
 ---
 
+## Phase G(d) — 70B scale-up on the fork (TP=4)
+
+**Host:** `evaluation/serving/run_phaseG_eval_fork.py` (gains
+``--model``), `evaluation/serving/run_phaseG_3phase_fork.py`
+(``functools.partial`` for picklable apply_model callables).
+**Smoke driver:** `/tmp/phaseG_70b_smoke.py`.
+**Result snapshots:** `results/serving/phaseG_70b_ruler.json`,
+`results/serving/phaseG_3phase_fork_70b.json`.
+
+### What changed
+
+Validates the EchoKV vLLM fork at the model scale the paper's actual
+results live at — Llama-3.1-70B-Instruct on TP=4 across four H100
+80GB. F.1, F.2, F.2.1, F.3.1, and the 3-phase harness all worked
+unmodified at the new scale; the only required code change was
+swapping local-closure ``apply_model`` callables for
+``functools.partial``\\(swap_tier_vector_to_model, bits_per_layer=...)``
+because TP > 1 collective_rpc requires picklable callables (closures
+defined inside ``main()`` resolve as ``__main__.<local>`` and fail
+cross-process by-name lookup).
+
+### Verification
+
+  * **Smoke (``/tmp/phaseG_70b_smoke.py``):** 70B boots in 39.7s at
+    ``int4_kivi`` TP=4. ``read_tier_vector_from_model`` /
+    ``read_buffer_bits_from_model`` return 80 layers per rank, all 4
+    ranks identical, all set 4. Three coherent generations
+    ("5", "Paris is a must-visit destination", a story).
+
+  * **RULER parity (``run_phaseG_eval_fork.py --model 70B --tp 4``):**
+    n=10 at 4K context, FP16 100% / INT4_kivi 100% — Δ=+0.000.
+    Decode rates: FP16 ~14 toks/s, INT4 ~5.6 toks/s (kernel still
+    not perf-tuned).
+
+  * **3-phase harness (``run_phaseG_3phase_fork.py --model 70B --tp 4
+    --force-pareto-tiers``):** GSM8K-Hard, n=20, warmup_n=8.
+      - Phase 1 warmup: 37.9s, acc=0.375, 9902 canary fires.
+      - Phase 2 consolidate: forced alternating 40 INT8 + 40 INT4
+        (avg 6.0 bits, 62.5% savings vs FP16, +50% size vs static-INT4).
+      - Phase 3 measurement: ``swap_tier_vector_to_model``\\(80-layer
+        heterogeneous vector) verified on all 4 ranks; 20 prompts,
+        41.9s, acc=0.550. Heterogeneous mix generated correctly across
+        TP.
+
+### Implications
+
+The fork is now validated at the paper's actual scale. The
+architectural shape of an EchoKV-3C run on Llama-70B
+(warmup → consolidate → swap → measure with real KIVI cache) works
+end-to-end on the fork; the remaining work to reproduce the paper's
+existing Pareto cells is choosing the controller settings (τ,
+``observability_rate``, ``tau_budget``) that match the upstream
+session_20260429_14_phase4 configuration and running
+n=50-100 measurement prompts.
+
+The pickling-via-functools.partial pattern matches the existing
+``canary_tp.TPCanaryHandle.install`` pattern; both rely on
+``functools.partial`` (or a regular module-level callable) being
+resolvable by qualified name across worker subprocesses.
+
+---
+
 ## Phase G(b) — 3-phase EchoKV harness on the fork
 
 **Host:** `evaluation/serving/run_phaseG_3phase_fork.py`,

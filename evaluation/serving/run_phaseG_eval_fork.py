@@ -49,11 +49,12 @@ if _REPO not in sys.path:
     sys.path.insert(0, _REPO)
 
 
-MODEL = (
+DEFAULT_8B = (
     "/mnt/nvme_tmp/nazar_hf/hub/"
     "models--NousResearch--Meta-Llama-3.1-8B-Instruct/"
     "snapshots/d10aef7999a2b5ba950ab3974312feeedbfe0b77"
 )
+DEFAULT_70B = "/mnt/nvme_tmp6/llama-70b"
 
 
 SUBPROCESS_SCRIPT = '''
@@ -151,7 +152,7 @@ def _run_one(cache_dtype: str, args) -> dict:
     print(f"\n[{cache_dtype}] launching subprocess ...")
     proc = subprocess.run(
         [sys.executable, "-c", SUBPROCESS_SCRIPT.format(
-            repo=_REPO, model=MODEL, tp=args.tp,
+            repo=_REPO, model=args.model, tp=args.tp,
             workload=args.workload,
             cache_dtype=cache_dtype, n=args.n_prompts, seed=args.seed,
             target_tokens=args.context,
@@ -173,6 +174,11 @@ def _run_one(cache_dtype: str, args) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
+    ap.add_argument(
+        "--model", default=DEFAULT_8B,
+        help=f"Model path. Defaults to Llama-3.1-8B-Instruct. "
+             f"Pass {DEFAULT_70B!r} for 70B (with --tp 4).",
+    )
     ap.add_argument("--tp", type=int, default=1)
     ap.add_argument(
         "--workload", default="ruler", choices=["ruler", "hotpotqa"],
@@ -196,7 +202,7 @@ def main() -> None:
     print("=" * 72)
     print(f"Phase G eval fork: {args.workload} n={args.n_prompts} "
           f"target={args.context}, max_model_len={args.max_model_len}")
-    print(f"  model: {MODEL.split('/')[-1]}, tp={args.tp}")
+    print(f"  model: {args.model.split('/')[-1]}, tp={args.tp}")
     print("=" * 72)
 
     fp16 = _run_one("auto", args)
@@ -211,7 +217,7 @@ def main() -> None:
             "max_tokens": args.max_tokens,
             "tp": args.tp,
             "seed": args.seed,
-            "model": MODEL,
+            "model": args.model,
         },
         "fp16": fp16,
         "int4_kivi": int4,

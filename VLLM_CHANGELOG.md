@@ -14,6 +14,63 @@ Commit hashes refer to the fork branch unless prefixed `host:`.
 
 ---
 
+## Phase G(b) — 3-phase EchoKV harness on the fork
+
+**Host:** `evaluation/serving/run_phaseG_3phase_fork.py`,
+`results/serving/phaseG_3phase_fork*.json`.
+
+### What changed
+
+Ports the upstream-vLLM ``run_session14_70b_*_echokv`` 3-phase pattern
+(warmup → consolidate → measurement) to the fork. The whole loop runs
+in **one engine** thanks to F.3.1 — no subprocess restart between
+warmup and measurement.
+
+The fork-port differs from upstream in three ways:
+
+  * **Boots at ``int8_kivi``** (max headroom) so the data buffer can
+    host any per-layer active bit-width chosen by the controller.
+  * **Initial active bits set via ``swap_tier_vector_to_model``**
+    after engine init (default INT4) — buffer stays INT8.
+  * **Observation-only canary** (``tier_application=False``): the
+    cache is already real KIVI quantized, so shadow-quantizing K/V
+    before attention would double-apply the noise. Controller still
+    observes per-layer δ̂ via the canary's measurement path.
+  * **Phase 3 swap is real**: ``swap_tier_vector_to_model(consolidated)``
+    changes the live engine's active bit-width per layer, and the
+    next forward writes new cache blocks at the new bits. The
+    upstream "seed tiers via ``controller._levels``" pattern is
+    superseded.
+
+Same as upstream: per-layer max consolidation across TP ranks,
+``memory_projection`` reports avg bits + savings vs FP16 / static-INT4,
+short-circuits to ``warmup_only`` if controller converges to uniform
+INT4 (no Pareto to test).
+
+### Verification (Llama-3.1-8B, GSM8K-Hard, n=20, warmup n=8)
+
+  - Phase 1 warmup: 8 prompts, 13.6s, acc=0.250, 3990 canary fires.
+  - Phase 2 consolidate: controller converged to uniform INT4 on
+    Llama-8B + GSM8K-Hard (matches upstream's 8B finding — the
+    paper's actual Pareto win required scaling to 70B for this
+    workload).
+  - Phase 3 measurement (with ``--force-pareto-tiers`` injecting
+    16 INT4 + 16 INT8 alternating): swap verified on all ranks,
+    20 prompts, acc=0.500, wall=14.0s. Heterogeneous mix generates
+    correctly inside the engine — proving the swap-and-measure half
+    of the loop works end-to-end.
+
+### Implications
+
+The fork now hosts the paper's full 3-phase pattern with a *real*
+KIVI cache. To reproduce the paper's 70B GSM8K-Hard Pareto cell at
+τ=2e-5 (40 INT8 + 40 INT4 + 0 INT2 → +0.050 above static-INT4-vs-INT8
+linear interp), the next step is scaling the harness to Llama-70B
+TP=4 (Lane 2(d) — 70B scale-up). The 8B+small-n smoke confirms the
+fork is the right substrate.
+
+---
+
 ## Phase G — accuracy parity check on real eval workloads
 
 **Host:** `evaluation/serving/run_phaseG_eval_fork.py`,

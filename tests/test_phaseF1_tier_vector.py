@@ -158,21 +158,22 @@ def test_cache_config_uniform_dict_accepted():
     assert set(cfg.kivi_bits_per_layer.values()) == {4}
 
 
-def test_cache_config_heterogeneous_dict_rejected():
-    """Phase F.1 limitation: heterogeneous bits at allocation time is
-    blocked at config validation, with a message pointing at Phase F.2."""
-    from pydantic import ValidationError
-
+def test_cache_config_heterogeneous_dict_accepted_post_f2():
+    """Phase F.2 unblocked heterogeneous bits at allocation time
+    (split-buffer layout: scale/zp moved off the paged budget so
+    block_size adjustment unifies pages across bit-widths). The earlier
+    Phase F.1 validator that rejected mixed values is removed."""
     from vllm.config.cache import CacheConfig
-    with pytest.raises(ValidationError, match="Phase F.2"):
-        CacheConfig(
-            block_size=16,
-            cache_dtype="int4_kivi",
-            kivi_bits_per_layer={
-                "model.layers.0.self_attn.attn": 4,
-                "model.layers.1.self_attn.attn": 8,
-            },
-        )
+    cfg = CacheConfig(
+        block_size=16,
+        cache_dtype="int4_kivi",
+        kivi_bits_per_layer={
+            "model.layers.0.self_attn.attn": 4,
+            "model.layers.1.self_attn.attn": 8,
+        },
+    )
+    assert cfg.kivi_bits_per_layer is not None
+    assert sorted(cfg.kivi_bits_per_layer.values()) == [4, 8]
 
 
 def test_cache_config_invalid_bits_rejected():

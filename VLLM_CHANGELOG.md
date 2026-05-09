@@ -86,15 +86,55 @@ results already confirmed kernel correctness).
     but the Pareto reproduction needs a fork-specific τ sweep, not
     direct port of the upstream τ values.
 
-### Outstanding follow-up: fork-τ recalibration
+### Quantitative per-tier δ̂ on the fork (warmup at active=INT4)
 
-The paper's `evaluation/serving/calibrate_tau_budget.py` and
-`calibrate_tau_budget_70b_gsm8k_hard.py` produce per-tier δ̂ EMAs
-under the static-INT4 calibration regime. A fork-equivalent would
-run the 3-phase harness under the fork at multiple τ values and
-extract the τ that produces the same per-tier δ̂ distribution as the
-upstream calibration. Adding it is a half-day task; probably the
-right next step before claiming paper Pareto reproduction.
+A second sweep at τ=1e-7 (200× tighter than upstream) still produced
+uniform INT4 (acc=0.533, n=30; identical 79 INT4 + 1 INT2 mix). The
+per-tier δ̂ snapshot revealed why:
+
+```
+tier 2 (downgrade): mean=6.6e-2, max=1.4e-1   (∼20-50× the paper's
+                                                calibration tier-2)
+tier 4 (active):    mean=3.5e-3, max=1.2e-2
+tier 8 (upgrade):   mean=1.2e-5, max=3.1e-5   (∼100× smaller than
+                                                paper's calibration
+                                                tier-4 δ̂_max=3.6e-3)
+```
+
+The tier-8-upgrade δ̂ is the key. On the upstream paper run with
+shadow-mode (FP16 cache + simulated K/V quant at attention input),
+the canary measures `KL(softmax(QK_tier_INT8) ‖ softmax(QK_FP16))`,
+typically 1e-3+. On the fork at active=INT4, the canary measures
+`KL(softmax(QK_tier_INT8) ‖ softmax(QK_real_INT4))`, mean 1.2e-5.
+That's ∼100× smaller because both sides are quantized — the
+"upgrade" measurement is a perturbation between two quantized
+distributions, not between a quantized and an FP16 reference.
+
+Even with absolute τ at 1e-7 the controller doesn't upgrade, which
+suggests `tick_multi_precision` uses a *tier-relative* threshold
+(probably the ratio of tier-4 δ̂ to tier-8 δ̂, or some tau_budget
+allocation) rather than absolute δ̂ vs τ. Working out the right
+fork-side controller settings is the next engineering step;
+the data we'd want is a δ̂ trace at multiple active tiers.
+
+### Outstanding follow-up: fork-τ recalibration + controller-logic audit
+
+  * **Fork-side ``calibrate_tau_budget.py``.** Run the canary under
+    the fork at a fixed tier (e.g. all INT4 active in INT8 buffer)
+    and dump per-tier δ̂ EMAs. The paper's calibration scripts
+    (``evaluation/serving/calibrate_tau_budget.py``) have the
+    structure; only the LLM construction needs the fork's
+    ``kv_cache_dtype="int8_kivi"`` + initial swap.
+
+  * **Audit ``tick_multi_precision`` for tier-relative vs absolute
+    thresholds.** With the fork's δ̂ distribution (above), absolute
+    τ=1e-7 should have triggered upgrades; the fact that it didn't
+    indicates the tick logic uses a different decision rule.
+
+  * **Tau_budget interaction.** The harness passes
+    ``tau_budget=0.02`` which the paper's session 14 phase 4
+    documented as load-bearing for the Pareto win at upstream-
+    shadow-mode. Whether the same value works on the fork is open.
 
 ---
 

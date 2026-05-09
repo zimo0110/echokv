@@ -14,6 +14,85 @@ Commit hashes refer to the fork branch unless prefixed `host:`.
 
 ---
 
+## Phase F.3.1 — runtime tier swap inside one engine
+
+**Fork:** `vllm/v1/attention/ops/kivi_cache_layout.py` (tolerant slice + ``buffer_bits``), `vllm/v1/attention/backends/triton_attn.py` (``swap_kivi_bits``, ``kivi_buffer_bits``).
+**Host:** `evaluation/serving/fork_tier.py` (``swap_tier_vector_to_model``, ``read_buffer_bits_from_model``), `tests/test_phaseF1_tier_vector.py` (5 new tests).
+
+### What changed
+
+The controller can now downsize a layer's active bit-width inside a
+running engine without restart. The data buffer is allocated for the
+maximum bit-width any layer might need (``kivi_buffer_bits``); the
+*active* ``kivi_bits`` may be smaller and the kernel reads/writes
+only the first portion of each slot.
+
+  * ``slice_kivi_cache`` gains an optional ``buffer_bits`` parameter.
+    When ``buffer_bits > bits``, the slice computes K and V views at
+    the active ``bits`` (so kernel pointer arithmetic is correct) but
+    uses ``buffer_bits`` for the V_data section offset (so V starts
+    in its allocated region, not in the unused tail of the K
+    section). The slice tolerates
+    ``data_buf.numel() == num_blocks * page_bytes(buffer_bits)``.
+    The unused bytes between each section's active size and its
+    allocated size remain in the buffer, never read or written.
+
+  * ``TritonAttentionImpl.kivi_buffer_bits`` — new field, equal to
+    ``kivi_bits`` at engine init, immutable thereafter. Used by
+    ``slice_kivi_cache`` and ``_resolve_kivi_block_size`` so the
+    layout calculations stay consistent with the buffer's actual
+    size after a runtime swap.
+
+  * ``TritonAttentionImpl.swap_kivi_bits(new_bits)`` — new method.
+    Mutates only the active ``kivi_bits``, leaves
+    ``kivi_buffer_bits`` pinned. Validates ``new_bits ≤
+    kivi_buffer_bits`` (upsizing past the allocated bit-width is
+    rejected).
+
+  * ``apply_per_layer_kivi_precision`` (the engine-init hook) now
+    also sets ``kivi_buffer_bits`` so the per-layer override
+    resolves correctly when the spec bits diverge from the engine
+    default.
+
+  * Host-side ``swap_tier_vector_to_model(model, bits)`` walks every
+    Attention's impl and calls ``swap_kivi_bits`` in lockstep.
+    ``read_buffer_bits_from_model(model)`` reports the per-layer
+    buffer bit-width (vs the active bit-width that
+    ``read_tier_vector_from_model`` already returns).
+
+### Caller contract
+
+The active bits change without flushing or rewriting existing cache
+blocks; those blocks were written at the previous ``kivi_bits`` and
+become uninterpretable at the new ``kivi_bits``. The caller must
+ensure no in-flight requests reference the cache before the swap —
+typically achieved by quiescing the scheduler between request
+batches. Per-block bit tagging that would allow mid-request swaps
+is a future Phase F.3.2.
+
+### Verification
+
+  * 127/127 unit tests pass (5 new in
+    ``tests/test_phaseF1_tier_vector.py`` covering ``swap_kivi_bits``
+    state, upsize rejection, chained swaps, dict form, no-impls
+    error).
+  * End-to-end ``/tmp/phaseF31_runtime_swap_smoke.py`` (Llama-3.1-8B,
+    ``kv_cache_dtype="int8_kivi"``, no per-layer override): boots
+    with ``buffer_bits=8 active=8`` per layer, runs batch 1 at
+    INT8, swaps active → INT4 (buffer immutable), runs batch 2 at
+    INT4, swaps active → INT2, runs batch 3 at INT2. All three
+    batches produce coherent output:
+      - Batch 1 (INT8): "5", "Paris is a must-visit destination",
+        "red, blue, and yellow"
+      - Batch 2 (INT4): "27", "Tokyo. It is a city of over 13
+        million...", "William Shakespeare"
+      - Batch 3 (INT2): "63", "Pacific Ocean", "solid, liquid, and gas"
+  * The F.1 / F.2 / F.3.0 smokes continue to pass at
+    ``gpu_memory_utilization=0.85`` with the F.3.1 slice change in
+    place — no regression.
+
+---
+
 ## Phase F.2.1 — profile-aware accounting for the per-layer scale/zp side buffer
 
 **Fork:** `vllm/v1/worker/gpu_worker.py` (``determine_available_memory`` + ``initialize_from_config``).
@@ -645,16 +724,13 @@ Ten end-to-end smoke drivers under `/tmp/`:
 
 ## Outstanding follow-ups
 
-1. **F.3.1 — runtime tier swapping within a single engine.** Phase
-   F.3.0 demonstrated the warmup-then-freeze pattern across two
-   engine boots. True closed-loop tier adjustment inside one engine
-   needs the buffer-size constraint resolved: each layer's spec is
-   sized for one bit-width, but ``apply_per_layer_kivi_precision``
-   mutates the active bit-width to a value the buffer wasn't sized
-   for, so the next ``slice_kivi_cache`` asserts. Two design options:
-   allocate-at-max-bits with a tolerant slice (memory wasteful for
-   downgrade-heavy tier vectors), or per-tier dedicated buffers
-   (3× memory, no waste).
+1. **F.3.2 — mid-request tier swaps.** Phase F.3.1 supports
+   runtime swaps at *batch boundaries* (the cache must be drained
+   before the swap because existing blocks are interpreted at the
+   previous bit-width). Per-block bit tagging would allow swaps
+   mid-request: each cache block carries the bit-width it was
+   written at, and the read kernel dispatches accordingly. Useful
+   if the controller's tick interval drops below request granularity.
 
 2. **Sliding window + KIVI.** `Attention.get_kv_cache_spec` falls
    through to `SlidingWindowSpec` when `self.sliding_window` is set.

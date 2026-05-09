@@ -196,3 +196,102 @@ def test_cache_config_none_passes_through():
         kivi_bits_per_layer=None,
     )
     assert cfg.kivi_bits_per_layer is None
+
+
+# ---------------------------------------------------------------------------
+# Phase F.3.1: runtime swap helpers
+# ---------------------------------------------------------------------------
+
+
+class _StubImplF31(_StubImpl):
+    """Adds Phase F.3.1 fields/methods to the stub: ``kivi_buffer_bits``
+    + ``swap_kivi_bits``."""
+
+    def __init__(self, bits: int = 8) -> None:
+        super().__init__(bits=bits)
+        self.kivi_buffer_bits = int(bits)
+
+    def swap_kivi_bits(self, new_bits: int) -> None:
+        if new_bits not in (2, 4, 8):
+            raise ValueError(f"bits must be 2, 4, or 8 (got {new_bits})")
+        if new_bits > self.kivi_buffer_bits:
+            raise ValueError(
+                f"swap_kivi_bits cannot upsize past buffer bits "
+                f"({self.kivi_buffer_bits}); requested {new_bits}"
+            )
+        self.kivi_bits = int(new_bits)
+
+
+class _F31Attention(torch.nn.Module):
+    def __init__(self, bits: int = 8) -> None:
+        super().__init__()
+        self.impl = _StubImplF31(bits=bits)
+
+
+_F31Attention.__name__ = "Attention"
+
+
+class _F31Model(torch.nn.Module):
+    def __init__(self, num_layers: int = 4, bits: int = 8) -> None:
+        super().__init__()
+        self.model = torch.nn.Module()
+        self.model.layers = torch.nn.ModuleList()
+        for _ in range(num_layers):
+            block = torch.nn.Module()
+            block.self_attn = torch.nn.Module()
+            block.self_attn.attn = _F31Attention(bits=bits)
+            self.model.layers.append(block)
+
+
+def test_read_buffer_bits_distinguishes_active_from_buffer():
+    from evaluation.serving.fork_tier import (
+        read_buffer_bits_from_model, read_tier_vector_from_model,
+        swap_tier_vector_to_model,
+    )
+    model = _F31Model(num_layers=4, bits=8)
+    assert read_tier_vector_from_model(model) == [8, 8, 8, 8]
+    assert read_buffer_bits_from_model(model) == [8, 8, 8, 8]
+    swap_tier_vector_to_model(model, [4, 4, 4, 4])
+    # Active bits drop, buffer bits do NOT.
+    assert read_tier_vector_from_model(model) == [4, 4, 4, 4]
+    assert read_buffer_bits_from_model(model) == [8, 8, 8, 8]
+
+
+def test_swap_tier_vector_rejects_upsize_past_buffer():
+    from evaluation.serving.fork_tier import swap_tier_vector_to_model
+
+    model = _F31Model(num_layers=2, bits=4)  # buffers at INT4
+    with pytest.raises(ValueError, match="upsize past buffer"):
+        swap_tier_vector_to_model(model, [8, 8])
+
+
+def test_swap_tier_vector_chains():
+    """Applying multiple swaps in sequence keeps buffer_bits pinned."""
+    from evaluation.serving.fork_tier import (
+        read_buffer_bits_from_model, read_tier_vector_from_model,
+        swap_tier_vector_to_model,
+    )
+    model = _F31Model(num_layers=4, bits=8)
+    swap_tier_vector_to_model(model, [4, 4, 4, 4])
+    swap_tier_vector_to_model(model, [2, 2, 2, 2])
+    assert read_tier_vector_from_model(model) == [2, 2, 2, 2]
+    assert read_buffer_bits_from_model(model) == [8, 8, 8, 8]
+    swap_tier_vector_to_model(model, [4, 4, 4, 4])  # back up within buffer
+    assert read_tier_vector_from_model(model) == [4, 4, 4, 4]
+
+
+def test_swap_tier_vector_dict_form():
+    from evaluation.serving.fork_tier import (
+        build_uniform_tier_vector, read_tier_vector_from_model,
+        swap_tier_vector_to_model,
+    )
+    model = _F31Model(num_layers=3, bits=8)
+    swap_tier_vector_to_model(model, build_uniform_tier_vector(3, 4))
+    assert read_tier_vector_from_model(model) == [4, 4, 4]
+
+
+def test_swap_tier_vector_no_kivi_impls_raises():
+    from evaluation.serving.fork_tier import swap_tier_vector_to_model
+    plain = torch.nn.Linear(4, 4)
+    with pytest.raises(RuntimeError, match="apply_per_layer_kivi_precision"):
+        swap_tier_vector_to_model(plain, [4])

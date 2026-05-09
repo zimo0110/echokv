@@ -132,3 +132,58 @@ def read_tier_vector_from_model(model: Any) -> list[int]:
     Attention impl."""
     impls = _collect_kivi_impls(model)
     return [int(impl.kivi_bits) for _, _, impl in impls]
+
+
+def read_buffer_bits_from_model(model: Any) -> list[int]:
+    """Read each layer's *buffer* bit-width — the value the data buffer
+    was allocated for at engine init. Independent of the active
+    ``kivi_bits`` after a Phase F.3.1 runtime swap."""
+    impls = _collect_kivi_impls(model)
+    return [int(getattr(impl, "kivi_buffer_bits", impl.kivi_bits))
+            for _, _, impl in impls]
+
+
+def swap_tier_vector_to_model(
+    model: Any,
+    bits_per_layer: list[int] | dict[str, int],
+) -> int:
+    """Phase F.3.1: change every layer's *active* ``kivi_bits`` to the
+    new value in ``bits_per_layer`` without reallocating the data
+    buffer. Returns the number of layers updated.
+
+    Caller responsibility: ensure no in-flight requests reference the
+    KV cache before calling. Existing cache blocks were written at
+    the previous bit-width and become uninterpretable at the new
+    bit-width; per-block bit tagging is a future Phase F.3.2.
+
+    Each new value must be ≤ the layer's ``kivi_buffer_bits`` (the
+    bit-width its data buffer was sized for at engine init); upsizes
+    raise ``ValueError`` per the impl's ``swap_kivi_bits``.
+    """
+    impls = _collect_kivi_impls(model)
+    if not impls:
+        raise RuntimeError(
+            "no Attention.impl exposes apply_per_layer_kivi_precision; "
+            "is this running against the EchoKV fork "
+            "(feature/echokv-int4-cache)?"
+        )
+
+    if isinstance(bits_per_layer, dict):
+        if len(bits_per_layer) != len(impls):
+            raise ValueError(
+                f"tier vector dict has {len(bits_per_layer)} entries "
+                f"but model has {len(impls)} attention layers"
+            )
+        for _, name, impl in impls:
+            if name not in bits_per_layer:
+                raise KeyError(f"layer {name!r} missing from tier vector dict")
+            impl.swap_kivi_bits(int(bits_per_layer[name]))
+    else:
+        if len(bits_per_layer) != len(impls):
+            raise ValueError(
+                f"tier vector has {len(bits_per_layer)} entries but "
+                f"model has {len(impls)} attention layers"
+            )
+        for (_, _, impl), bits in zip(impls, bits_per_layer):
+            impl.swap_kivi_bits(int(bits))
+    return len(impls)

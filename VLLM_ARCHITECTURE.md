@@ -186,19 +186,40 @@ Validator (in `CacheConfig`):
 Heterogeneous values across layers are accepted (Phase F.2). The earlier
 F.1 guard that rejected mixed bits is gone.
 
-### 4.3 `apply_per_layer_kivi_precision` (runtime hook)
+### 4.3 `apply_per_layer_kivi_precision` (engine-init hook)
 
 `TritonAttentionImpl.apply_per_layer_kivi_precision(bits, group_size=32)`
-mutates the impl's `kivi_bits` and `kivi_group_size`. Called by the
-EchoKV controller at tier-update ticks. Per **INV-2**, only *new* block
-allocations pick up the new precision; in-flight blocks continue at
-their original bit-width.
+sets a layer's bit-width *before* the data buffer is allocated. Called
+by `Attention.__init__` to apply the per-layer override from
+`CacheConfig.kivi_bits_per_layer` (Phase F.1). Sets both the active
+`kivi_bits` and the buffer's `kivi_buffer_bits` to the same value —
+the spec then sizes the data buffer accordingly.
 
-A layer's runtime bits must match the bits its paged buffer was sized
-for at engine init. The host-side helper
-[`apply_tier_vector_to_model`](evaluation/serving/fork_tier.py) walks
-every Attention's impl and calls the hook in lockstep, so the controller
-keeps the impl's view consistent with what the spec already chose.
+For runtime swaps after the buffer is allocated, use
+[`swap_kivi_bits`](#44-swap_kivi_bits-runtime-hook) instead.
+
+### 4.4 `swap_kivi_bits` (runtime hook, Phase F.3.1)
+
+`TritonAttentionImpl.swap_kivi_bits(new_bits)` mutates only the active
+`kivi_bits`, leaving `kivi_buffer_bits` pinned at the engine-init
+value. Called by the EchoKV controller between request batches.
+
+Constraints:
+
+  * `new_bits ∈ {2, 4, 8}`
+  * `new_bits ≤ kivi_buffer_bits` (the buffer was sized for the maximum;
+    upsizing past it is rejected)
+
+Caller contract (drain-and-swap): no in-flight requests may reference
+the cache when `swap_kivi_bits` is called. Existing cache blocks were
+written at the previous active bits; they're uninterpretable at the
+new active bits. Mid-request swaps need per-block bit tagging
+(Phase F.3.2).
+
+The host-side helper
+[`swap_tier_vector_to_model`](evaluation/serving/fork_tier.py) walks
+every Attention's impl and calls `swap_kivi_bits` in lockstep across
+TP ranks via `llm.apply_model`.
 
 ## 5. Code layout
 
@@ -327,32 +348,36 @@ quant codes for E2M1 floats and the zero-point semantics aren't
 implemented. The paper's NVFP4 baseline plan (PAPER_DRAFT.md §7.1) calls
 for this kernel.
 
-### 8.4 F.3.1 — runtime tier swapping within one engine
+### 8.4 ~~F.3.1 — runtime tier swapping within one engine~~ — fixed in Phase F.3.1
 
-Phase F.3.0 demonstrates the warmup-then-freeze pattern across two
-engine boots:
+Phase F.3.1 implemented the **allocate-at-max-bits + tolerant slice**
+design. ``slice_kivi_cache`` accepts a ``buffer_bits`` parameter
+distinct from the active ``bits``; when ``buffer_bits > bits`` the K
+and V views are sized at the active bits (so kernel pointer arithmetic
+is correct) while V's offset within the buffer uses ``buffer_bits``
+(so V starts in its allocated region, not the unused tail of the K
+section). ``TritonAttentionImpl.swap_kivi_bits(new_bits)`` is the
+runtime hook; ``swap_tier_vector_to_model`` is the host-side
+TP-shippable counterpart.
 
-  * Phase 1 — install ``CanaryHarness`` against the fork (observation
-    only — the cache is already KIVI INTb downstream of the hook,
-    shadow-quantizing K/V would double-apply noise). Run warmup
-    prompts; the controller ticks per-layer δ̂ EMAs and converges to
-    a tier vector. (See ``run_phaseF3_canary_fork.py``.)
+The contract is **drain-and-swap**: the caller must ensure no
+in-flight requests reference the cache before swapping (existing
+blocks were written at the previous bit-width and are uninterpretable
+at the new bit-width). Mid-request swaps (per-block bit tagging) are
+deferred to Phase F.3.2.
 
-  * Phase 2 — boot a fresh engine with
-    ``LLM(kivi_bits_per_layer=<warmup tier>)`` so each layer's KV
-    cache is allocated at the controller-chosen bits from the very
-    first measurement token. (See ``run_phaseF3_two_phase.py``.)
+For the warmup-then-freeze pattern Phase F.3.0 still works exactly as
+documented — F.3.1 is additive. Common usage:
 
-True per-layer dynamic tier swapping inside one engine still requires
-F.3.1 work: each layer's paged data buffer is sized for one
-bit-width at engine init via the spec; ``apply_per_layer_kivi_precision``
-mutates ``impl.kivi_bits`` in place but the next
-``slice_kivi_cache`` asserts the buffer matches
-``page_bytes(active_bits)`` exactly. Resolving this needs either
-(a) allocate-at-max-bits + a tolerant slice that accepts
-``buffer_size >= num_blocks * page_bytes(active_bits)``, or
-(b) per-tier dedicated buffers with the impl swapping which buffer
-is active.
+  * **Boot at the maximum bit-width** any layer might ever use (e.g.
+    ``kv_cache_dtype="int8_kivi"`` with no ``kivi_bits_per_layer``).
+    Each layer's data buffer is sized for INT8.
+  * **Initial tier**: optionally pin a starting tier via
+    ``apply_per_layer_kivi_precision`` post-init or
+    ``kivi_bits_per_layer`` at init.
+  * **Swap at runtime** via ``swap_tier_vector_to_model`` between
+    request batches — controller decisions take effect immediately on
+    the next batch without engine restart.
 
 ## 9. Performance characteristics (current snapshot, no perf tuning)
 
@@ -461,6 +486,47 @@ past ``del llm``). Use observation-only mode on the fork
 quantised at write time, so shadow-quantizing K/V before attention
 would double-apply noise.
 
+### 10.5 Runtime tier swap inside one engine (Phase F.3.1)
+
+```python
+from vllm import LLM, SamplingParams
+from evaluation.serving.fork_tier import (
+    build_uniform_tier_vector,
+    swap_tier_vector_to_model,
+)
+
+# Boot at the maximum bit-width. With no kivi_bits_per_layer the buffer
+# is sized for the engine-global cache_dtype's bits.
+llm = LLM(
+    model="meta-llama/Llama-3.1-8B-Instruct",
+    kv_cache_dtype="int8_kivi",
+    tensor_parallel_size=1,
+    dtype="bfloat16",
+    block_size=16,
+    enforce_eager=True,
+    gpu_memory_utilization=0.85,
+)
+
+# Batch 1 at active=INT8.
+sp = SamplingParams(temperature=0.0, max_tokens=32)
+llm.generate(["..."], sp)
+
+# Drain (handled implicitly by `generate` returning), then swap to INT4.
+def _swap(model):
+    return swap_tier_vector_to_model(model, build_uniform_tier_vector(32, 4))
+
+llm.apply_model(_swap)   # broadcast across TP ranks
+
+# Batch 2 at active=INT4 in the SAME engine — no restart.
+llm.generate(["..."], sp)
+```
+
+`swap_tier_vector_to_model` keeps each layer's `kivi_buffer_bits`
+pinned at engine-init bits and only mutates `kivi_bits` (the active
+bit-width the kernel reads). It's a synchronous, idempotent call;
+tied to `llm.apply_model` so all TP ranks see the same change before
+the next forward.
+
 ## 11. Testing
 
 122 tests across the host repo's `tests/` directory cover every phase
@@ -478,9 +544,11 @@ of the integration:
     state and the runtime hook.
   - Phase E.3: `test_phaseE3_int2_int8.py` — INT2 and INT8 parametric
     kernel paths.
-  - Phase F.1: `test_phaseF1_tier_vector.py` — host-side helpers,
+  - Phase F.1 / F.3.1: `test_phaseF1_tier_vector.py` — host-side
+    helpers (init-time + runtime swap),
     `CacheConfig.kivi_bits_per_layer` validator, dict ↔ list forms,
-    error paths.
+    error paths, `swap_tier_vector_to_model` chained / upsize
+    rejection / dict form.
 
 End-to-end smoke drivers under `/tmp/`:
 
@@ -488,6 +556,9 @@ End-to-end smoke drivers under `/tmp/`:
   - `phaseF_smoke.py` — Phase F.1 plumbing with a uniform per-layer dict.
   - `phaseF2_heterogeneous_smoke.py` — Phase F.2 heterogeneous patterns
     (`alternating-4-8`, `first-half-int8`, `ladder`).
+  - `phaseF31_runtime_swap_smoke.py` — Phase F.3.1 runtime tier swap.
+    Boots at INT8 buffer, runs three batches with active = 8 → 4 → 2,
+    each swap inside one engine via `swap_tier_vector_to_model`.
 
 Run the full unit suite:
 

@@ -259,7 +259,14 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--gpu-memory-utilization", type=float, default=0.85)
     ap.add_argument("--max-num-seqs", type=int, default=4)
     ap.add_argument("--n-prompts", type=int, default=30)
-    ap.add_argument("--warmup-n", type=int, default=8)
+    ap.add_argument(
+        "--warmup-n", type=int, default=32,
+        help="Warmup prompts per rank. Phase G(e) finding: at "
+             "warmup_n=8 the per-rank EMAs land at wildly different "
+             "values across runs (canary fires stochastically, "
+             "warmup is short). Bumping to 32 gives the EMA enough "
+             "samples per layer to converge near the true value.",
+    )
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument(
         "--observability-rate", type=float, default=0.25,
@@ -268,6 +275,16 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--tau", type=float, default=0.01)
     ap.add_argument("--tick-interval", type=int, default=10)
     ap.add_argument("--tau-budget", type=float, default=0.02)
+    ap.add_argument(
+        "--per-rank-seed", action="store_true", default=True,
+        help="Each TP rank seeds its canary RNG with base_seed + "
+             "rank_id (default on). Collapses one source of warmup "
+             "nondeterminism. Disable with --no-per-rank-seed for "
+             "upstream-compat.",
+    )
+    ap.add_argument(
+        "--no-per-rank-seed", action="store_false", dest="per_rank_seed",
+    )
     ap.add_argument("--multi-precision", action="store_true", default=True)
     ap.add_argument(
         "--initial-active", type=int, default=4, choices=[2, 4, 8],
@@ -276,17 +293,16 @@ def main(argv: Optional[list[str]] = None) -> int:
              "swap_tier_vector_to_model after init.",
     )
     ap.add_argument(
-        "--consolidate-rule", default="max",
+        "--consolidate-rule", default="vote-low",
         choices=["max", "min", "median-low", "median-high",
                  "mean-round", "vote-low", "vote-high"],
-        help="How to combine per-rank tier vectors into one. The "
-             "upstream paper used ``max`` (per-layer max — most "
-             "conservative). On the fork, max collapses to "
-             "mostly-uniform INT8 because TP head-subsetting "
-             "decorrelates rank-level picks near tau_budget; softer "
-             "rules (median-low, vote-low, mean-round) preserve "
-             "the per-rank differentiation that matches the paper's "
-             "Pareto shape.",
+        help="How to combine per-rank tier vectors into one. Default "
+             "``vote-low`` — per-layer majority vote, ties break "
+             "low — preserves the conservative spirit of upstream's "
+             "``max`` rule (a layer upgrades to INT8 only if a "
+             "majority of ranks decide it) while surviving the rank-"
+             "decorrelation from the fork's real-INT4 cache. Pass "
+             "``--consolidate-rule max`` for upstream-compat.",
     )
     ap.add_argument(
         "--force-pareto-tiers", action="store_true",
@@ -388,6 +404,11 @@ def main(argv: Optional[list[str]] = None) -> int:
             "decode_only_canary": True,
             "use_canary_stream": True,
             "seed": a.seed,
+            # Per-rank seed offset: collapse one source of warmup
+            # nondeterminism. Each rank seeds its canary RNG with
+            # base_seed + rank_id; runs at the same a.seed are
+            # reproducible.
+            "per_rank_seed": a.per_rank_seed,
         },
     )
     warmup_handle.install()
@@ -473,6 +494,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             "multi_precision": a.multi_precision,
             "tau_budget": a.tau_budget,
             "seed": a.seed + 1,
+            "per_rank_seed": a.per_rank_seed,
         },
     )
     measure_handle.install()

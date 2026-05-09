@@ -76,6 +76,15 @@ def install_canary_on_worker(model: Any, *, harness_kwargs: dict) -> int:
 
     Idempotent: if a harness is already attached to ``model`` from a
     previous install, it's removed first.
+
+    Per-rank seeding (Phase G(e) follow-up): when
+    ``harness_kwargs["per_rank_seed"]`` is True, each TP rank's
+    canary RNG is seeded with ``base_seed + rank_id`` instead of
+    ``base_seed`` directly. Without this, every rank sees identical
+    Bernoulli canary-fire patterns but operates on different head
+    subsets, producing correlated-but-different EMAs. With it, each
+    rank's canary trajectory is reproducible across runs at the same
+    seed, collapsing one big source of warmup nondeterminism.
     """
     from evaluation.serving.canary_vllm import CanaryHarness
 
@@ -87,7 +96,16 @@ def install_canary_on_worker(model: Any, *, harness_kwargs: dict) -> int:
         except AttributeError:
             pass
 
-    h = CanaryHarness(model=model, **harness_kwargs)
+    kwargs = dict(harness_kwargs)
+    if kwargs.pop("per_rank_seed", False):
+        try:
+            from vllm.distributed import get_tp_group
+            rank = get_tp_group().rank_in_group
+        except Exception:
+            rank = 0
+        kwargs["seed"] = int(kwargs.get("seed", 0)) + int(rank)
+
+    h = CanaryHarness(model=model, **kwargs)
     h.install()
     setattr(model, _HARNESS_ATTR, h)
     return h.num_layers

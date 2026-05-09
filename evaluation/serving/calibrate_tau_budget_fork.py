@@ -78,23 +78,29 @@ DEFAULT_8B = (
 DEFAULT_70B = "/mnt/nvme_tmp6/llama-70b"
 
 
+def _normalise_per_tier(d: dict) -> dict:
+    """Re-key a per_tier_delta dict to ``int`` regardless of whether
+    it came in with ``Precision`` (IntEnum), int, or str keys.
+    snapshot_canary_on_worker returns int-or-IntEnum keys in-process;
+    JSON deserialization turns them into strings."""
+    return {int(k): v for k, v in d.items()}
+
+
 def _consolidate_per_layer(per_rank_mp: list[dict]) -> dict:
     """Per-layer mean δ̂ across ranks (each rank measures on its own
     head subset under TP). Mirrors the upstream calibrator."""
     out: dict = {}
     if not per_rank_mp:
         return out
-    tiers = sorted({int(t) for d in per_rank_mp for t in d.keys()})
+    normalised = [_normalise_per_tier(d) for d in per_rank_mp]
+    tiers = sorted({k for d in normalised for k in d.keys()})
     for tier in tiers:
-        n_layers_per_rank = [
-            len(d.get(str(tier), [])) for d in per_rank_mp
-        ]
-        n = max(n_layers_per_rank) if n_layers_per_rank else 0
+        n = max(len(d.get(tier, [])) for d in normalised)
         per_layer: list[float] = []
         for li in range(n):
             vals = []
-            for d in per_rank_mp:
-                lst = d.get(str(tier)) or d.get(tier) or []
+            for d in normalised:
+                lst = d.get(tier, [])
                 if li < len(lst) and lst[li] > 0.0:
                     vals.append(lst[li])
             per_layer.append(sum(vals) / len(vals) if vals else 0.0)

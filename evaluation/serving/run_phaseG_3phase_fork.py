@@ -87,14 +87,63 @@ DEFAULT_8B = (
 DEFAULT_70B = "/mnt/nvme_tmp6/llama-70b"
 
 
-def consolidate_tiers(per_rank_snapshots: list[dict]) -> list[int]:
-    """Per-layer max across ranks: the most conservative consolidation
-    — rank that wants more precision wins. Same as upstream."""
+def consolidate_tiers(
+    per_rank_snapshots: list[dict],
+    *,
+    rule: str = "max",
+) -> list[int]:
+    """Combine per-rank tier vectors into a single per-layer vector.
+
+    Phase G(e) addendum 2 finding: the upstream ``max`` rule
+    (per-layer max — "rank that wants more precision wins") collapses
+    the fork's heterogeneous per-rank decisions into mostly-uniform
+    INT8 because TP head-subsetting decorrelates rank-level picks
+    near ``tau_budget``. Softer rules ("median-low", "vote-low",
+    "mean-round") preserve the per-rank differentiation; on
+    Llama-70B GSM8K-Hard at ``tau_budget=3.2e-3`` they all converge
+    to ~39 INT4 + 41 INT8 (vs 5 INT4 + 75 INT8 under ``max``).
+
+    Rules:
+      * ``max``        — per-layer max; upstream-compat.
+      * ``min``        — per-layer min; aggressive downgrade.
+      * ``median-low`` — per-layer ``statistics.median_low``; ties
+        break low.
+      * ``median-high``— per-layer ``statistics.median_high``; ties
+        break high.
+      * ``mean-round`` — per-layer rounded mean; nearest of {2,4,8}.
+      * ``vote-low``   — per-layer majority vote; ties break low.
+      * ``vote-high``  — per-layer majority vote; ties break high.
+    """
+    import statistics
+    from collections import Counter
     n = per_rank_snapshots[0]["num_layers"]
-    return [
-        max(s["tier_vector"][li] for s in per_rank_snapshots)
+    cols = [
+        [s["tier_vector"][li] for s in per_rank_snapshots]
         for li in range(n)
     ]
+    if rule == "max":
+        return [max(c) for c in cols]
+    if rule == "min":
+        return [min(c) for c in cols]
+    if rule == "median-low":
+        return [statistics.median_low(c) for c in cols]
+    if rule == "median-high":
+        return [statistics.median_high(c) for c in cols]
+    if rule == "mean-round":
+        valid = (2, 4, 8)
+        return [
+            min(valid, key=lambda t, c=c: abs(t - sum(c) / len(c)))
+            for c in cols
+        ]
+    if rule == "vote-low" or rule == "vote-high":
+        out = []
+        for c in cols:
+            counts = Counter(c)
+            top = max(counts.values())
+            winners = sorted([t for t, k in counts.items() if k == top])
+            out.append(winners[0] if rule == "vote-low" else winners[-1])
+        return out
+    raise ValueError(f"unknown consolidate rule {rule!r}")
 
 
 def consolidate_deltas(per_rank_snapshots: list[dict]) -> list[float]:
@@ -227,6 +276,19 @@ def main(argv: Optional[list[str]] = None) -> int:
              "swap_tier_vector_to_model after init.",
     )
     ap.add_argument(
+        "--consolidate-rule", default="max",
+        choices=["max", "min", "median-low", "median-high",
+                 "mean-round", "vote-low", "vote-high"],
+        help="How to combine per-rank tier vectors into one. The "
+             "upstream paper used ``max`` (per-layer max — most "
+             "conservative). On the fork, max collapses to "
+             "mostly-uniform INT8 because TP head-subsetting "
+             "decorrelates rank-level picks near tau_budget; softer "
+             "rules (median-low, vote-low, mean-round) preserve "
+             "the per-rank differentiation that matches the paper's "
+             "Pareto shape.",
+    )
+    ap.add_argument(
         "--force-pareto-tiers", action="store_true",
         help="Diagnostic: ignore the controller's consolidated tiers "
              "and inject a fixed heterogeneous tier vector (alternating "
@@ -343,7 +405,8 @@ def main(argv: Optional[list[str]] = None) -> int:
              warmup_result["accuracy"], warmup_result["wall_clock_s"])
 
     # ---- Phase 2: consolidate ----
-    consolidated = consolidate_tiers(warmup_snapshots)
+    consolidated = consolidate_tiers(warmup_snapshots, rule=a.consolidate_rule)
+    log.info("consolidate rule: %r", a.consolidate_rule)
     consolidated_delta = consolidate_deltas(warmup_snapshots)
     proj = memory_projection(consolidated)
     log.info("consolidated tiers (counts=%s, avg_bits=%.2f)",

@@ -181,26 +181,109 @@ Two findings from the sweep:
     tier-4 EMAs are ~60× smaller; using the same value on the fork
     keeps INT4 always-safe and the controller never differentiates.
 
+### Consolidate-rule sweep + warmup nondeterminism finding
+
+Implemented ``--consolidate-rule {max, min, median-low, median-high,
+mean-round, vote-low, vote-high}`` and re-ran 70B GSM8K-Hard at
+``tau_budget=3.2e-3``, n=100 with two consolidate rules:
+
+```
+run                       per-rank picks            consolidated      acc    avg_bits
+median-low (n=100)        ~50 INT4 + ~30 INT8/rank  62 INT4 + 18 INT8 0.510  4.90
+median-high (n=100)       ~75 INT4 + ~3  INT8/rank   5 INT8 + 74 INT4 0.550  4.22
+                                                     + 1 INT2
+
+vs paper Pareto cell:                              40 INT4 + 40 INT8 0.620  6.00
+vs static-INT4 baseline:                           80 INT4            0.540  4.00
+vs static-INT8 baseline:                           80 INT8            0.600  8.00
+```
+
+Key observations:
+
+1. **Per-rank decisions are strongly nondeterministic across runs at
+   identical settings.** Both runs use the same model, workload,
+   ``tau_budget``, ``warmup_n``, ``seed``; only the consolidate
+   rule (post-warmup) differs. Yet the per-rank tier picks are
+   completely different — median-low run had 50/30 per rank,
+   median-high run had 75/3 per rank. The host CHANGELOG flagged
+   this for session_20260429_14_phase3:
+
+   > "warmup canary fires sample non-deterministically across the
+   > warmup so the EMAs end at slightly different values from run
+   > to run. The load-bearing claim is the *trajectory during
+   > measurement*, not the warmup-end vector."
+
+   The fork inherits this behaviour. cuBLAS isn't deterministic by
+   default; the canary fires stochastically (Bernoulli at
+   ``observability_rate``); each rank's local warmup walk through
+   the EMA space lands at a different point. Two consecutive runs
+   at identical settings produce different consolidated tier
+   vectors.
+
+2. **At n=100 the binomial SE on GSM8K-Hard is ~0.05.** Both
+   runs' accuracies (0.510, 0.550) are within SE of static-INT4
+   (0.540), of each other, and of the linear-interp expectation
+   given their bits (0.5535 and 0.5165 respectively). Neither
+   produces a statistically defensible Pareto win. For a real
+   claim we'd need:
+     - Larger n (the paper's session 14 phase 4 used n=50, but
+       paired-McNemar paired against the same prompts at static-
+       INT4 — apples-to-apples).
+     - Multiple seeds (to average over warmup-nondeterminism).
+     - A warmup strategy that converges (longer warmup, lower
+       observability_rate, deterministic seed-per-rank).
+
+3. **The methodology gap is real.** The upstream paper's session
+   14 phase 4 result of acc=0.620 at avg=6.00 bits is +0.05 above
+   the linear interp — itself just at the edge of n=50 SE. With
+   warmup nondeterminism + cache-state-dependence on the fork, the
+   bar to clear is "statistically distinguishable improvement
+   above linear interp at the chosen avg_bits". The fork hasn't
+   cleared that bar in two runs.
+
+### Implications for the paper
+
+  * **The fork's machinery is complete**; what's left is a
+    statistical methodology investment. Multi-seed runs with
+    paired McNemar against static baselines (the same approach
+    the host's `paired_mcnemar_test*.py` already implements) are
+    the right next step.
+
+  * **Warmup nondeterminism is a paper-grade methodology question.**
+    The upstream session 14 phase 4 entry already documented it
+    informally; the fork makes the issue concrete because the
+    cache itself reflects the warmup decisions (real INT4 quantized
+    blocks linger), so warmup nondeterminism propagates into
+    measurement nondeterminism more directly than under shadow-
+    mode. This is worth a short paragraph in the paper's
+    methodology / limitations section.
+
 ### Three concrete follow-ups remain
+
+  * **Multi-seed runs with paired-McNemar against static-INT4.**
+    Run N seeds at the same ``tau_budget`` and ``consolidate-rule``,
+    each measuring static-INT4 and EchoKV-3C on the *same* prompts
+    (paired). Reuse ``evaluation/serving/paired_mcnemar_test*.py``.
+    This is the way to get a statistically defensible accuracy
+    comparison given warmup nondeterminism.
 
   * **Fork-side ``calibrate_tau_budget.py``.** Run the canary under
     the fork at a fixed tier and dump per-layer per-tier δ̂ EMAs.
     Pick ``tau_budget`` to bisect the per-layer tier-4 EMA
-    distribution at the desired heterogeneity level. Half-day port
-    of ``evaluation/serving/calibrate_tau_budget*.py``.
+    distribution at the desired heterogeneity level — done
+    automatically per workload instead of bisecting by hand.
+    Half-day port of ``evaluation/serving/calibrate_tau_budget*.py``.
 
-  * **Per-layer mean (or vote) consolidate rule.** Replace
-    ``consolidate_tiers`` (per-layer max) with a softer combinator
-    so per-rank disagreements don't always collapse to the highest-
-    precision pick. This would make the fork's 40/40-style mix
-    achievable without per-rank δ̂ correlation.
-
-  * **Pareto reproduction with adjusted settings.** Once the
-    consolidate rule + ``tau_budget`` are calibrated for the fork,
-    run n=100 GSM8K-Hard at the bisecting ``tau_budget`` and
-    compare to the paper's session 14 phase 4 cell. If the fork's
-    Pareto win matches or exceeds the paper's 0.620 vs 0.540
-    static-INT4 baseline, that's the headline number.
+  * **Warmup convergence work.** The fork's warmup at
+    ``warmup_n=8, observability_rate=0.25`` produces wildly
+    different per-rank EMAs across runs at identical settings.
+    Three knobs to investigate: longer ``warmup_n``, lower
+    ``observability_rate`` (more samples but slower), and per-rank
+    deterministic seeding so each rank's warmup trajectory is
+    reproducible. The host's
+    ``calibrate_tau_budget_70b_gsm8k_hard.py`` Phase 4 entry
+    suggests deterministic warmup with seeded canary firings is
+    the right approach; needs porting to the fork.
 
 ---
 

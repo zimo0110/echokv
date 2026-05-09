@@ -128,7 +128,29 @@ produces non-contiguous slices with surprising strides that break
 Triton's pointer arithmetic in the attention kernel. (We hit and fixed
 this in Phase D.4 — it surfaced as ~5% relative output error.)
 
-### 3.5 The `KiviCacheView`
+### 3.5 Profile-aware accounting (Phase F.2.1)
+
+The split-buffer layout puts the scale/zp tensors outside vLLM's paged
+KV-cache budget. To prevent the side buffers from OOMing the engine
+during the first forward, the worker's profiling pass and cache-init
+pass each handle one half of the accounting:
+
+  * **`determine_available_memory`** subtracts the side-buffer overhead
+    upfront. The helper walks each KIVI layer's spec, computes its
+    post-unify `block_size` (smaller bits get larger block_size after
+    `unify_kv_cache_spec_page_size`), totals the data and side
+    per-block bytes, and reduces `available_kv_cache_memory_bytes` by
+    the side fraction. The fraction is computed against
+    *per-group* data because vLLM allocates one buffer per
+    cache-group; for heterogeneous specs this matches what the cache
+    manager actually allocates.
+
+  * **`initialize_from_config`** eagerly allocates each layer's side
+    buffer immediately after vLLM's `bind_kv_cache`, so the subsequent
+    warmup forward pass sees the real memory footprint and doesn't
+    OOM trying to fault them in alongside peak activation memory.
+
+### 3.6 The `KiviCacheView`
 
 Both buffers are sliced into a single `KiviCacheView` with six tensor
 fields (`k_data`, `k_scale`, `k_zp`, `v_data`, `v_scale`, `v_zp`). The
@@ -275,21 +297,19 @@ Heterogeneous `GroupQuantizedAttentionSpec` layers go through:
 
 ## 8. Known limitations / follow-ups
 
-### 8.1 Profiler doesn't account for the per-layer scale/zp buffer
+### 8.1 ~~Profiler doesn't account for the per-layer scale/zp buffer~~ — fixed in Phase F.2.1
 
-vLLM's KV-cache profiler computes `num_blocks` from
-`gpu_memory_utilization` and the spec's `page_size_bytes` (data-only).
-The per-layer scale/zp side buffer is allocated *on top of* this budget.
-For Llama-3.1-8B at 32 layers and `block_size=16`, the side-buffer cost
-is roughly 15% of the data-buffer cost.
+`gpu_worker.py:determine_available_memory` now subtracts the per-layer
+scale/zp side-buffer overhead from `available_kv_cache_memory_bytes`
+before returning, and `gpu_worker.py:initialize_from_config` eagerly
+allocates each layer's side buffer immediately after the data buffer
+is bound (so vLLM's subsequent warmup forward sees the true memory
+footprint rather than triggering lazy allocation alongside peak
+activation memory).
 
-**Workaround**: callers leave headroom (e.g. `gpu_memory_utilization=0.65`
-in the heterogeneous smoke for full TP=1 Llama-8B).
-
-**Proper fix** (small): have `CacheConfig` subtract the side-buffer
-overhead from the cache budget upfront — compute
-`scalezp_per_token_bytes` at config time and reduce the available cache
-memory by that fraction before profiling.
+Callers can use `gpu_memory_utilization=0.85` and `max_model_len=4096`
+(upstream defaults) at uniform or heterogeneous bits without OOM —
+all the F.1, F.2, and F.3.0 demos run at those settings post-F.2.1.
 
 ### 8.2 Sliding window + KIVI not yet supported
 
@@ -337,15 +357,16 @@ is active.
 ## 9. Performance characteristics (current snapshot, no perf tuning)
 
 Llama-3.1-8B-Instruct, TP=1, H100 80GB, `block_size=16`,
-`enforce_eager=True`, `gpu_memory_utilization=0.65–0.85`, `max_model_len=4096`:
+`enforce_eager=True`, `gpu_memory_utilization=0.85`, `max_model_len=4096`
+(upstream serving defaults; F.2.1's profile-aware accounting + eager
+side-buffer allocation lets all configurations run at these settings):
 
   - Uniform INT4 (`kv_cache_dtype="int4_kivi"`, no per-layer dict):
-    ~110 toks/s input, ~155 toks/s output on the 3-prompt smoke.
-  - Heterogeneous (16 INT4 + 16 INT8): same correctness, ~14–25
-    toks/s output (decode-bound; the kernel hasn't been tuned for
-    heterogeneous launch patterns yet).
-  - Heterogeneous (10 INT8 / 10 INT4 / 12 INT2 ladder): ~24 toks/s
-    output.
+    ~107 toks/s input, ~146 toks/s output on the 3-prompt smoke.
+  - Heterogeneous 16 INT4 + 16 INT8: same correctness, ~107 toks/s
+    input, ~153 toks/s output.
+  - Heterogeneous 10 INT8 / 10 INT4 / 12 INT2 ladder: ~105 toks/s
+    input, ~151 toks/s output.
 
 Headline accuracy parity (matching FP16) on the 3-prompt smoke is
 maintained for all three configurations.
@@ -392,7 +413,7 @@ llm = LLM(
     dtype="bfloat16",
     block_size=16,
     enforce_eager=True,
-    gpu_memory_utilization=0.65,     # leave headroom for scale/zp
+    gpu_memory_utilization=0.85,     # F.2.1 reserves scale/zp upfront
 )
 
 # Verify the per-layer dispatch.

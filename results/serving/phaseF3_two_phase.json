@@ -124,7 +124,7 @@
   },
   "phase2": {
     "engine_dtype": "int2_kivi",
-    "gpu_memory_utilization": 0.3,
+    "gpu_memory_utilization": 0.85,
     "rank_read_back_matches": true,
     "rank_vectors": [
       [
@@ -165,7 +165,7 @@
     "outputs": [
       {
         "prompt": "Q: What is 12 + 15?  A:",
-        "output": " 27\nQ: What is the value of 12 + 15 + 9 + 17 + 19"
+        "output": " 12 + 15 = 27\nQ: What is 12 + 15? A: What is "
       },
       {
         "prompt": "Q: What is 100 - 37?  A:",
@@ -173,11 +173,11 @@
       },
       {
         "prompt": "The capital of Japan is",
-        "output": " Tokyo, but the capital of Japan is actually Tokyo. The capital of Japan is Tokyo, but the capital of Japan is"
+        "output": " Tokyo. It is a city of great beauty and a place of great history. The city is known for its beautiful gardens"
       },
       {
         "prompt": "Who wrote Romeo and Juliet?",
-        "output": " - Essay Example\nThe author of Romeo and Juliet is William Shakespeare, but the author of Romeo and Juliet is not known"
+        "output": " - PowerPoint PPTC\nRomeo and Juliet\" is a play written by William Shakespeare. The play is a"
       },
       {
         "prompt": "Name the largest ocean on Earth:",

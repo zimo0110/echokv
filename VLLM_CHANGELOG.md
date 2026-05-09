@@ -14,6 +14,72 @@ Commit hashes refer to the fork branch unless prefixed `host:`.
 
 ---
 
+## Phase F.2.1 — profile-aware accounting for the per-layer scale/zp side buffer
+
+**Fork:** `vllm/v1/worker/gpu_worker.py` (``determine_available_memory`` + ``initialize_from_config``).
+
+### What changed
+
+vLLM's KV-cache profiler now subtracts the per-layer KIVI scale/zp
+side-buffer cost from the cache budget upfront, so callers can use
+``gpu_memory_utilization=0.85`` and ``max_model_len=4096`` (the
+upstream defaults) at heterogeneous bits without OOM.
+
+Two pieces:
+
+1. **Reservation in ``determine_available_memory``.** A new
+   ``_kivi_scalezp_overhead_bytes()`` helper walks the model's
+   per-layer specs, computes each layer's post-unify ``block_size``
+   (smaller bits → larger block_size after vLLM's
+   ``unify_kv_cache_spec_page_size``), totals the data and side
+   per-block bytes across layers, and returns the side-fraction of
+   ``available_kv_cache_memory_bytes``. The fraction is computed
+   against per-group (not per-layer) data because vLLM allocates
+   one buffer per cache-group; without dividing by ``num_groups``
+   the reservation under-counts at heterogeneous bits.
+
+2. **Eager allocation in ``initialize_from_config``.** A new
+   ``_eagerly_allocate_kivi_scalezp_buffers()`` walks every Attention
+   module immediately after vLLM's cache-init, calls each
+   ``TritonAttentionImpl._ensure_kivi_scalezp_buffer`` with the
+   bound ``num_blocks`` and ``block_size``. Without eager allocation
+   the side buffers fault in lazily during the warmup forward, after
+   peak activation memory has already been allocated — total
+   exceeds gpu_memory_utilization budget and the warmup OOMs.
+
+### Verification
+
+  * 122/122 unit tests pass.
+  * Llama-3.1-8B at ``int4_kivi`` uniform (Phase F.1 smoke,
+    ``gpu_memory_utilization=0.85``): boots, reservation 7.96 GiB,
+    generation matches baseline.
+  * Llama-3.1-8B at ``int8_kivi`` engine + ``alternating-4-8``
+    (Phase F.2 smoke, 0.85): reservation 11.06 GiB, eagerly
+    allocated 32 side buffers totaling 11.06 GiB, generation
+    correct.
+  * Llama-3.1-8B at ``int8_kivi`` engine + ``ladder``
+    (10 INT8 / 10 INT4 / 12 INT2, 0.85): reservation 20.49 GiB,
+    eagerly allocated 32 side buffers totaling 18.22 GiB, generation
+    "Paris, the City of Light...".
+  * Llama-3.1-8B Phase F.3.0 two-phase (warmup → freeze) at 0.85
+    ``max_model_len=4096``: phase 1 converges to uniform INT2,
+    phase 2 boots at ``int2_kivi`` with the warmup tier vector
+    pinned, all 32 layers report INT2, generation:
+      ``12 + 15 = 27``, ``100 - 37 = 63``, ``Tokyo``,
+      ``William Shakespeare``, ``Pacific Ocean``,
+      ``solid, liquid, and gas``.
+
+### Implications
+
+The Phase F.1 smoke (``/tmp/phaseF_smoke.py``), Phase F.2
+heterogeneous smoke (``/tmp/phaseF2_heterogeneous_smoke.py``), and
+Phase F.3.0 two-phase driver all run at default upstream-style
+serving settings without any user-facing memory tuning. The
+``gpu_memory_utilization`` cap that callers had to use (0.65 / 0.30)
+in earlier phases is now lifted.
+
+---
+
 ## Phase F.3.0 — closed-loop controller against the fork
 
 **Host:** `evaluation/serving/run_phaseF3_canary_fork.py` (single-pass canary observation), `evaluation/serving/run_phaseF3_two_phase.py` (warmup-then-freeze across two engine boots).
@@ -579,14 +645,7 @@ Ten end-to-end smoke drivers under `/tmp/`:
 
 ## Outstanding follow-ups
 
-1. **Profiler accounting for the per-layer scale/zp side buffer.**
-   `gpu_memory_utilization` should subtract side-buffer cost upfront so
-   `0.85` works at heterogeneous bits without OOM. Currently the
-   workaround is `0.30–0.65` depending on the tier mix. This blocks the
-   F.3.0 two-phase demo from scaling to full ``max_model_len``. Small
-   fix in `CacheConfig` profiling.
-
-2. **F.3.1 — runtime tier swapping within a single engine.** Phase
+1. **F.3.1 — runtime tier swapping within a single engine.** Phase
    F.3.0 demonstrated the warmup-then-freeze pattern across two
    engine boots. True closed-loop tier adjustment inside one engine
    needs the buffer-size constraint resolved: each layer's spec is
@@ -597,12 +656,12 @@ Ten end-to-end smoke drivers under `/tmp/`:
    downgrade-heavy tier vectors), or per-tier dedicated buffers
    (3× memory, no waste).
 
-3. **Sliding window + KIVI.** `Attention.get_kv_cache_spec` falls
+2. **Sliding window + KIVI.** `Attention.get_kv_cache_spec` falls
    through to `SlidingWindowSpec` when `self.sliding_window` is set.
    The kernel already supports `SLIDING_WINDOW` (Phase D.3); only the
    spec/backend/cache-manager wiring is missing.
 
-4. **NVFP4 actual kernel.** `nvfp4_e2m1` is layout-only today
+3. **NVFP4 actual kernel.** `nvfp4_e2m1` is layout-only today
    (shares INT4 storage shape). The paper's NVFP4 baseline plan
    (PAPER_DRAFT.md §7.1) calls for E2M1 quant codes + matching
    pack/unpack and dequant paths.

@@ -157,17 +157,11 @@ TIER = {tier!r}
 # bit-width in the tier vector so each spec's data buffer fits.
 unique = sorted(set(TIER))
 engine_dtype = "int{{}}_kivi".format(max(unique))
-# Phase F.2 caveat: vLLM's profiler doesn't subtract per-layer scale/zp
-# side buffer cost from the cache budget. For Llama-3.1-8B (32 layers)
-# the side buffer total per block is 32 * 3072 = 98 KB while the data
-# page per block is 32-128 KB depending on bits. The sweet-spot
-# ``gpu_memory_utilization`` is bounded below by model + activation
-# memory (about 0.30 of an H100 80GB) and above by available
-# memory minus side-buffer overhead. Empirically this lands at 0.30-0.35
-# for full Llama-8B; production drivers should wait for the profile-
-# accounting follow-up to use 0.85 like the upstream serving harnesses.
-gpu_util = 0.30
-max_model_len = 1024
+# Phase F.2.1: vLLM's profiler now subtracts per-layer scale/zp side
+# buffer cost from the cache budget upfront, so 0.85 + 4096 (the
+# upstream serving defaults) work even at heterogeneous bits.
+gpu_util = 0.85
+max_model_len = 4096
 
 bits_per_layer = {{
     "model.layers.{{}}.self_attn.attn".format(i): int(b)

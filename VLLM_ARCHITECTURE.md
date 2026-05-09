@@ -550,6 +550,14 @@ of the integration:
     error paths, `swap_tier_vector_to_model` chained / upsize
     rejection / dict form.
 
+End-to-end accuracy parity drivers under `evaluation/serving/`:
+
+  - `run_phaseG_eval_fork.py` — RULER and HotpotQA at FP16 vs
+    INT4_kivi on Llama-3.1-8B. Two-engine subprocess pattern; emits
+    a per-prompt + summary record per cache dtype with a verdict on
+    statistical parity. Verified: RULER 4K/8K/16K all 100%/100%,
+    HotpotQA n=30 hard 0.467/0.500 (Δ=+0.033, within noise).
+
 End-to-end smoke drivers under `/tmp/`:
 
   - `phaseE2_boot.py` — boot Llama-8B with `int4_kivi`, compare against FP16.

@@ -1,0 +1,201 @@
+{
+  "config": {
+    "n_prompts": 10,
+    "target_tokens": 8000,
+    "max_model_len": 12288,
+    "max_tokens": 24,
+    "tp": 1,
+    "seed": 0,
+    "model": "/mnt/nvme_tmp/nazar_hf/hub/models--NousResearch--Meta-Llama-3.1-8B-Instruct/snapshots/d10aef7999a2b5ba950ab3974312feeedbfe0b77"
+  },
+  "fp16": {
+    "cache_dtype": "auto",
+    "n_prompts": 10,
+    "target_tokens": 8000,
+    "n_correct": 10.0,
+    "accuracy": 1.0,
+    "load_s": 14.014207912608981,
+    "gen_s": 2.655410785228014,
+    "total_in_tokens": 78381,
+    "total_out_tokens": 240,
+    "tps_in": 29517.466915488785,
+    "tps_out": 90.38149627737982,
+    "per_prompt": [
+      {
+        "request_id": "ruler_32k:0",
+        "reference": "916294",
+        "prompt_tokens": 7838,
+        "completion_tokens": 24,
+        "completion": " 916294. \n\nNote: The text above is a repetition of the same sentence, which is a well-known pang",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:1",
+        "reference": "314278",
+        "prompt_tokens": 7838,
+        "completion_tokens": 24,
+        "completion": " 314278. \n\nNote: The text above is a repetition of the same sentence, which is a well-known pang",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:2",
+        "reference": "881221",
+        "prompt_tokens": 7838,
+        "completion_tokens": 24,
+        "completion": " 881221. \n\nNote: The text above is a repetition of the same sentence, which is a well-known pang",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:3",
+        "reference": "502448",
+        "prompt_tokens": 7838,
+        "completion_tokens": 24,
+        "completion": " 502448\n\nQ: What is the phrase that is repeated multiple times in the text?\nA: The quick brown",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:4",
+        "reference": "133889",
+        "prompt_tokens": 7838,
+        "completion_tokens": 24,
+        "completion": " 133889\n\nQ: What is the phrase that is repeated multiple times in the text?\nA: The quick brown",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:5",
+        "reference": "668325",
+        "prompt_tokens": 7838,
+        "completion_tokens": 24,
+        "completion": " 668325. \n\nREMEMBER: the magic number is 668325. Write it down somewhere safe. \n\n",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:6",
+        "reference": "215128",
+        "prompt_tokens": 7839,
+        "completion_tokens": 24,
+        "completion": " 215128. \n\nNote: The text above is a repetition of the same sentence, which is a well-known pang",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:7",
+        "reference": "264725",
+        "prompt_tokens": 7837,
+        "completion_tokens": 24,
+        "completion": " 264725. \n\nNote: The text above is a repetition of the same sentence, which is a well-known pang",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:8",
+        "reference": "388992",
+        "prompt_tokens": 7839,
+        "completion_tokens": 24,
+        "completion": " 388992. \n\nQ: What is the phrase that is repeated above? Answer with the phrase only.\nA:",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:9",
+        "reference": "600511",
+        "prompt_tokens": 7838,
+        "completion_tokens": 24,
+        "completion": " 600511. \n\nNote: The text above is a repetition of the same sentence, which is a well-known pang",
+        "correct": 1.0
+      }
+    ]
+  },
+  "int4_kivi": {
+    "cache_dtype": "int4_kivi",
+    "n_prompts": 10,
+    "target_tokens": 8000,
+    "n_correct": 10.0,
+    "accuracy": 1.0,
+    "load_s": 14.320975576527417,
+    "gen_s": 13.160919996909797,
+    "total_in_tokens": 78381,
+    "total_out_tokens": 240,
+    "tps_in": 5955.586692906269,
+    "tps_out": 18.235807227485033,
+    "per_prompt": [
+      {
+        "request_id": "ruler_32k:0",
+        "reference": "916294",
+        "prompt_tokens": 7838,
+        "completion_tokens": 24,
+        "completion": " 916294\n\nQ: What is the phrase that is repeated throughout the text? Answer with the phrase only.\nA",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:1",
+        "reference": "314278",
+        "prompt_tokens": 7838,
+        "completion_tokens": 24,
+        "completion": " 314278. \n\nNote: The text above is a copy of the original text, with the addition of a few",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:2",
+        "reference": "881221",
+        "prompt_tokens": 7838,
+        "completion_tokens": 24,
+        "completion": " 881221\n\nQ: What is the phrase that is repeated multiple times in the text? Answer with the phrase only",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:3",
+        "reference": "502448",
+        "prompt_tokens": 7838,
+        "completion_tokens": 24,
+        "completion": " 502448\n\nQ: What is the phrase that is repeated over and over again in the text?\nA: The",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:4",
+        "reference": "133889",
+        "prompt_tokens": 7838,
+        "completion_tokens": 24,
+        "completion": " 133889\n\nQ: What is the phrase that is repeated throughout the text?\nA: The quick brown fox jumps",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:5",
+        "reference": "668325",
+        "prompt_tokens": 7838,
+        "completion_tokens": 24,
+        "completion": " 668325. \n\nREMEMBER: the magic number is 668325. Write it down somewhere safe. \n\n",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:6",
+        "reference": "215128",
+        "prompt_tokens": 7839,
+        "completion_tokens": 24,
+        "completion": " 215128. \n\nQ: What is the phrase that is repeated over and over again in the text? \nA",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:7",
+        "reference": "264725",
+        "prompt_tokens": 7837,
+        "completion_tokens": 24,
+        "completion": " 264725. \n\nQ: What is the phrase that is repeated above? Answer with the phrase only.\nA:",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:8",
+        "reference": "388992",
+        "prompt_tokens": 7839,
+        "completion_tokens": 24,
+        "completion": " 388992\n\nQ: What is the phrase that is repeated multiple times in the text? Answer with the phrase.\n",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:9",
+        "reference": "600511",
+        "prompt_tokens": 7838,
+        "completion_tokens": 24,
+        "completion": " 600511. \n\nNote: The text above is a repetition of the same sentence, which is a well-known pang",
+        "correct": 1.0
+      }
+    ]
+  }
+}

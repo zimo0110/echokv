@@ -1,0 +1,523 @@
+{
+  "config": {
+    "n_prompts": 30,
+    "target_tokens": 4000,
+    "max_model_len": 8192,
+    "max_tokens": 32,
+    "tp": 1,
+    "seed": 0,
+    "model": "/mnt/nvme_tmp/nazar_hf/hub/models--NousResearch--Meta-Llama-3.1-8B-Instruct/snapshots/d10aef7999a2b5ba950ab3974312feeedbfe0b77"
+  },
+  "fp16": {
+    "workload": "hotpotqa",
+    "cache_dtype": "auto",
+    "n_prompts": 30,
+    "target_tokens": 4000,
+    "n_correct": 14.0,
+    "accuracy": 0.4666666666666667,
+    "load_s": 14.049732225947082,
+    "gen_s": 1.8872935445979238,
+    "total_in_tokens": 41887,
+    "total_out_tokens": 176,
+    "tps_in": 22194.215690449873,
+    "tps_out": 93.25523340222928,
+    "per_prompt": [
+      {
+        "request_id": "hotpotqa:5abf63f15542997ec76fd3ea",
+        "reference": "October 1922",
+        "prompt_tokens": 1964,
+        "completion_tokens": 3,
+        "completion": "1923",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a7555215542996c70cfaee1",
+        "reference": "Hey Pa! There's a Goat on the Roof",
+        "prompt_tokens": 1625,
+        "completion_tokens": 4,
+        "completion": "Poleconomy",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a8595a85542992a431d1b48",
+        "reference": "Great Exuma",
+        "prompt_tokens": 1899,
+        "completion_tokens": 4,
+        "completion": "The Bahamas.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a7fb7985542994857a767d2",
+        "reference": "Claudio Javier L\u00f3pez",
+        "prompt_tokens": 880,
+        "completion_tokens": 4,
+        "completion": "Claudio L\u00f3pez",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5ae73d235542991e8301cc29",
+        "reference": "Free Range Films",
+        "prompt_tokens": 1356,
+        "completion_tokens": 5,
+        "completion": "Free Range Films.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ab47cd75542991751b4d78d",
+        "reference": "2002",
+        "prompt_tokens": 1642,
+        "completion_tokens": 3,
+        "completion": "2002",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a8efb5a55429918e830d172",
+        "reference": "Jamnagar",
+        "prompt_tokens": 1131,
+        "completion_tokens": 3,
+        "completion": "India.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a7ae2f2554299042af8f6aa",
+        "reference": "football",
+        "prompt_tokens": 1207,
+        "completion_tokens": 3,
+        "completion": "Football.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a7b88b45542997c3ec97201",
+        "reference": "Terrence Jones",
+        "prompt_tokens": 1644,
+        "completion_tokens": 5,
+        "completion": "Terrence Jones.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a8f7a135542992414482adc",
+        "reference": "12 mi southeast of Rome",
+        "prompt_tokens": 1432,
+        "completion_tokens": 6,
+        "completion": "Alba Longa.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5ae554ce55429960a22e02b7",
+        "reference": "You Can Be a Star",
+        "prompt_tokens": 1578,
+        "completion_tokens": 7,
+        "completion": "\"You Can Be a Star\"",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ac07327554299012d1db5f2",
+        "reference": "an American football quarterback",
+        "prompt_tokens": 1078,
+        "completion_tokens": 13,
+        "completion": "Colin Kaepernick, his preferred nickname is \"Kap\".",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5ade858a55429975fa854eea",
+        "reference": "tennis",
+        "prompt_tokens": 867,
+        "completion_tokens": 4,
+        "completion": "Tennis.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ae61e7555429929b0807adf",
+        "reference": "MMA",
+        "prompt_tokens": 1558,
+        "completion_tokens": 4,
+        "completion": "Pride FC",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5ac289ff5542996366519a02",
+        "reference": "Marsilea",
+        "prompt_tokens": 1823,
+        "completion_tokens": 6,
+        "completion": "Marsilea.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ac0b1835542992a796ded65",
+        "reference": "Viglen",
+        "prompt_tokens": 1489,
+        "completion_tokens": 4,
+        "completion": "Viglen",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ae40b2b55429970de88d8b3",
+        "reference": "California Polytechnic State University",
+        "prompt_tokens": 1937,
+        "completion_tokens": 8,
+        "completion": "California Polytechnic State University.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ae7e8f55542994a481bbe06",
+        "reference": "Commander James Bond RN",
+        "prompt_tokens": 1250,
+        "completion_tokens": 29,
+        "completion": "Commander James Bond RN\u2014code number 007\u2014is a fictional character created by the British journalist and novelist Ian Fleming in 1952.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a8dfae55542995085b3736b",
+        "reference": "games",
+        "prompt_tokens": 835,
+        "completion_tokens": 4,
+        "completion": "Board games.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5adf4b335542993a75d264a5",
+        "reference": "Rockstar San Diego",
+        "prompt_tokens": 1248,
+        "completion_tokens": 4,
+        "completion": "Rockstar Games",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a78d16455429974737f78bb",
+        "reference": "Ernst Willi Messerschmid",
+        "prompt_tokens": 1135,
+        "completion_tokens": 7,
+        "completion": "Ernst Messerschmid",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5abd920e55429924427fd05d",
+        "reference": "yes",
+        "prompt_tokens": 1019,
+        "completion_tokens": 2,
+        "completion": "No",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5ab67d2055429954757d3304",
+        "reference": "Labrador Retriever",
+        "prompt_tokens": 1313,
+        "completion_tokens": 5,
+        "completion": "Retriever.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5ae5db98554299546bf82fa6",
+        "reference": "1.7 billion",
+        "prompt_tokens": 1647,
+        "completion_tokens": 5,
+        "completion": "1.7 billion",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ae0613d5542993d6555eb22",
+        "reference": "Monticello",
+        "prompt_tokens": 1659,
+        "completion_tokens": 5,
+        "completion": "Monticello.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ae6233c5542992ae0d1623e",
+        "reference": "schoolmaster at J. L. Young's Adelaide Educational Institution and at Saint Peter's College.",
+        "prompt_tokens": 1201,
+        "completion_tokens": 4,
+        "completion": "Schoolmaster.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5ae5d008554299546bf82f7d",
+        "reference": "StubHub Center",
+        "prompt_tokens": 1243,
+        "completion_tokens": 5,
+        "completion": "StubHub Center.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a8ba3ff55429971feec4744",
+        "reference": "Mayor of the City of New York",
+        "prompt_tokens": 1204,
+        "completion_tokens": 5,
+        "completion": "The White House.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5adc5b875542996e68525328",
+        "reference": "2006 season",
+        "prompt_tokens": 1619,
+        "completion_tokens": 3,
+        "completion": "2006",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a7319e755429901807daf86",
+        "reference": "most total touchdowns in NCAA history",
+        "prompt_tokens": 1404,
+        "completion_tokens": 12,
+        "completion": "most total passing yards, touchdowns, and completions.",
+        "correct": 0.0
+      }
+    ]
+  },
+  "int4_kivi": {
+    "workload": "hotpotqa",
+    "cache_dtype": "int4_kivi",
+    "n_prompts": 30,
+    "target_tokens": 4000,
+    "n_correct": 15.0,
+    "accuracy": 0.5,
+    "load_s": 14.22915472369641,
+    "gen_s": 3.1344704488292336,
+    "total_in_tokens": 41887,
+    "total_out_tokens": 173,
+    "tps_in": 13363.341809665282,
+    "tps_out": 55.19273600573194,
+    "per_prompt": [
+      {
+        "request_id": "hotpotqa:5abf63f15542997ec76fd3ea",
+        "reference": "October 1922",
+        "prompt_tokens": 1964,
+        "completion_tokens": 3,
+        "completion": "1923",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a7555215542996c70cfaee1",
+        "reference": "Hey Pa! There's a Goat on the Roof",
+        "prompt_tokens": 1625,
+        "completion_tokens": 4,
+        "completion": "Poleconomy",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a8595a85542992a431d1b48",
+        "reference": "Great Exuma",
+        "prompt_tokens": 1899,
+        "completion_tokens": 11,
+        "completion": "The Bahamian island of Great Exuma.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a7fb7985542994857a767d2",
+        "reference": "Claudio Javier L\u00f3pez",
+        "prompt_tokens": 880,
+        "completion_tokens": 5,
+        "completion": "Claudio L\u00f3pez.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5ae73d235542991e8301cc29",
+        "reference": "Free Range Films",
+        "prompt_tokens": 1356,
+        "completion_tokens": 5,
+        "completion": "Free Range Films.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ab47cd75542991751b4d78d",
+        "reference": "2002",
+        "prompt_tokens": 1642,
+        "completion_tokens": 3,
+        "completion": "2002",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a8efb5a55429918e830d172",
+        "reference": "Jamnagar",
+        "prompt_tokens": 1131,
+        "completion_tokens": 3,
+        "completion": "India.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a7ae2f2554299042af8f6aa",
+        "reference": "football",
+        "prompt_tokens": 1207,
+        "completion_tokens": 3,
+        "completion": "Football.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a7b88b45542997c3ec97201",
+        "reference": "Terrence Jones",
+        "prompt_tokens": 1644,
+        "completion_tokens": 5,
+        "completion": "Terrence Jones.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a8f7a135542992414482adc",
+        "reference": "12 mi southeast of Rome",
+        "prompt_tokens": 1432,
+        "completion_tokens": 6,
+        "completion": "Alba Longa.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5ae554ce55429960a22e02b7",
+        "reference": "You Can Be a Star",
+        "prompt_tokens": 1578,
+        "completion_tokens": 7,
+        "completion": "You Can Be a Star.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ac07327554299012d1db5f2",
+        "reference": "an American football quarterback",
+        "prompt_tokens": 1078,
+        "completion_tokens": 7,
+        "completion": "Colin Kaepernick, Kap.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5ade858a55429975fa854eea",
+        "reference": "tennis",
+        "prompt_tokens": 867,
+        "completion_tokens": 4,
+        "completion": "Tennis.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ae61e7555429929b0807adf",
+        "reference": "MMA",
+        "prompt_tokens": 1558,
+        "completion_tokens": 4,
+        "completion": "Pride FC",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5ac289ff5542996366519a02",
+        "reference": "Marsilea",
+        "prompt_tokens": 1823,
+        "completion_tokens": 6,
+        "completion": "Marsilea.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ac0b1835542992a796ded65",
+        "reference": "Viglen",
+        "prompt_tokens": 1489,
+        "completion_tokens": 4,
+        "completion": "Viglen",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ae40b2b55429970de88d8b3",
+        "reference": "California Polytechnic State University",
+        "prompt_tokens": 1937,
+        "completion_tokens": 7,
+        "completion": "California Polytechnic State University",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ae7e8f55542994a481bbe06",
+        "reference": "Commander James Bond RN",
+        "prompt_tokens": 1250,
+        "completion_tokens": 29,
+        "completion": "Commander James Bond RN\u2014code number 007\u2014is a fictional character created by the British journalist and novelist Ian Fleming in 1952.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a8dfae55542995085b3736b",
+        "reference": "games",
+        "prompt_tokens": 835,
+        "completion_tokens": 4,
+        "completion": "Board games.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5adf4b335542993a75d264a5",
+        "reference": "Rockstar San Diego",
+        "prompt_tokens": 1248,
+        "completion_tokens": 5,
+        "completion": "Rockstar Games.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a78d16455429974737f78bb",
+        "reference": "Ernst Willi Messerschmid",
+        "prompt_tokens": 1135,
+        "completion_tokens": 7,
+        "completion": "Ernst Messerschmid",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5abd920e55429924427fd05d",
+        "reference": "yes",
+        "prompt_tokens": 1019,
+        "completion_tokens": 2,
+        "completion": "No",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5ab67d2055429954757d3304",
+        "reference": "Labrador Retriever",
+        "prompt_tokens": 1313,
+        "completion_tokens": 5,
+        "completion": "Retriever.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5ae5db98554299546bf82fa6",
+        "reference": "1.7 billion",
+        "prompt_tokens": 1647,
+        "completion_tokens": 7,
+        "completion": "1.7 billion views.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ae0613d5542993d6555eb22",
+        "reference": "Monticello",
+        "prompt_tokens": 1659,
+        "completion_tokens": 5,
+        "completion": "Monticello.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ae6233c5542992ae0d1623e",
+        "reference": "schoolmaster at J. L. Young's Adelaide Educational Institution and at Saint Peter's College.",
+        "prompt_tokens": 1201,
+        "completion_tokens": 4,
+        "completion": "Schoolmaster.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5ae5d008554299546bf82f7d",
+        "reference": "StubHub Center",
+        "prompt_tokens": 1243,
+        "completion_tokens": 5,
+        "completion": "StubHub Center.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a8ba3ff55429971feec4744",
+        "reference": "Mayor of the City of New York",
+        "prompt_tokens": 1204,
+        "completion_tokens": 5,
+        "completion": "The White House.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5adc5b875542996e68525328",
+        "reference": "2006 season",
+        "prompt_tokens": 1619,
+        "completion_tokens": 3,
+        "completion": "2006",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a7319e755429901807daf86",
+        "reference": "most total touchdowns in NCAA history",
+        "prompt_tokens": 1404,
+        "completion_tokens": 5,
+        "completion": "Most total touchdowns.",
+        "correct": 0.0
+      }
+    ]
+  }
+}

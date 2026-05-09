@@ -1,0 +1,203 @@
+{
+  "config": {
+    "n_prompts": 10,
+    "target_tokens": 4000,
+    "max_model_len": 8192,
+    "max_tokens": 32,
+    "tp": 1,
+    "seed": 0,
+    "model": "/mnt/nvme_tmp/nazar_hf/hub/models--NousResearch--Meta-Llama-3.1-8B-Instruct/snapshots/d10aef7999a2b5ba950ab3974312feeedbfe0b77"
+  },
+  "fp16": {
+    "workload": "hotpotqa",
+    "cache_dtype": "auto",
+    "n_prompts": 10,
+    "target_tokens": 4000,
+    "n_correct": 4.0,
+    "accuracy": 0.4,
+    "load_s": 14.706168943084776,
+    "gen_s": 0.7748796548694372,
+    "total_in_tokens": 14780,
+    "total_out_tokens": 40,
+    "tps_in": 19073.929618774604,
+    "tps_out": 51.62091913064845,
+    "per_prompt": [
+      {
+        "request_id": "hotpotqa:5abf63f15542997ec76fd3ea",
+        "reference": "October 1922",
+        "prompt_tokens": 1964,
+        "completion_tokens": 3,
+        "completion": "1923",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a7555215542996c70cfaee1",
+        "reference": "Hey Pa! There's a Goat on the Roof",
+        "prompt_tokens": 1625,
+        "completion_tokens": 4,
+        "completion": "Poleconomy",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a8595a85542992a431d1b48",
+        "reference": "Great Exuma",
+        "prompt_tokens": 1899,
+        "completion_tokens": 4,
+        "completion": "The Bahamas.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a7fb7985542994857a767d2",
+        "reference": "Claudio Javier L\u00f3pez",
+        "prompt_tokens": 880,
+        "completion_tokens": 4,
+        "completion": "Claudio L\u00f3pez",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5ae73d235542991e8301cc29",
+        "reference": "Free Range Films",
+        "prompt_tokens": 1356,
+        "completion_tokens": 5,
+        "completion": "Free Range Films.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ab47cd75542991751b4d78d",
+        "reference": "2002",
+        "prompt_tokens": 1642,
+        "completion_tokens": 3,
+        "completion": "2002",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a8efb5a55429918e830d172",
+        "reference": "Jamnagar",
+        "prompt_tokens": 1131,
+        "completion_tokens": 3,
+        "completion": "India.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a7ae2f2554299042af8f6aa",
+        "reference": "football",
+        "prompt_tokens": 1207,
+        "completion_tokens": 3,
+        "completion": "Football.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a7b88b45542997c3ec97201",
+        "reference": "Terrence Jones",
+        "prompt_tokens": 1644,
+        "completion_tokens": 5,
+        "completion": "Terrence Jones.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a8f7a135542992414482adc",
+        "reference": "12 mi southeast of Rome",
+        "prompt_tokens": 1432,
+        "completion_tokens": 6,
+        "completion": "Alba Longa.",
+        "correct": 0.0
+      }
+    ]
+  },
+  "int4_kivi": {
+    "workload": "hotpotqa",
+    "cache_dtype": "int4_kivi",
+    "n_prompts": 10,
+    "target_tokens": 4000,
+    "n_correct": 5.0,
+    "accuracy": 0.5,
+    "load_s": 14.727551817893982,
+    "gen_s": 1.1706438679248095,
+    "total_in_tokens": 14780,
+    "total_out_tokens": 48,
+    "tps_in": 12625.530620341762,
+    "tps_out": 41.00307643954023,
+    "per_prompt": [
+      {
+        "request_id": "hotpotqa:5abf63f15542997ec76fd3ea",
+        "reference": "October 1922",
+        "prompt_tokens": 1964,
+        "completion_tokens": 3,
+        "completion": "1923",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a7555215542996c70cfaee1",
+        "reference": "Hey Pa! There's a Goat on the Roof",
+        "prompt_tokens": 1625,
+        "completion_tokens": 4,
+        "completion": "Poleconomy",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a8595a85542992a431d1b48",
+        "reference": "Great Exuma",
+        "prompt_tokens": 1899,
+        "completion_tokens": 11,
+        "completion": "The Bahamian island of Great Exuma.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a7fb7985542994857a767d2",
+        "reference": "Claudio Javier L\u00f3pez",
+        "prompt_tokens": 880,
+        "completion_tokens": 5,
+        "completion": "Claudio L\u00f3pez.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5ae73d235542991e8301cc29",
+        "reference": "Free Range Films",
+        "prompt_tokens": 1356,
+        "completion_tokens": 5,
+        "completion": "Free Range Films.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5ab47cd75542991751b4d78d",
+        "reference": "2002",
+        "prompt_tokens": 1642,
+        "completion_tokens": 3,
+        "completion": "2002",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a8efb5a55429918e830d172",
+        "reference": "Jamnagar",
+        "prompt_tokens": 1131,
+        "completion_tokens": 3,
+        "completion": "India.",
+        "correct": 0.0
+      },
+      {
+        "request_id": "hotpotqa:5a7ae2f2554299042af8f6aa",
+        "reference": "football",
+        "prompt_tokens": 1207,
+        "completion_tokens": 3,
+        "completion": "Football.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a7b88b45542997c3ec97201",
+        "reference": "Terrence Jones",
+        "prompt_tokens": 1644,
+        "completion_tokens": 5,
+        "completion": "Terrence Jones.",
+        "correct": 1.0
+      },
+      {
+        "request_id": "hotpotqa:5a8f7a135542992414482adc",
+        "reference": "12 mi southeast of Rome",
+        "prompt_tokens": 1432,
+        "completion_tokens": 6,
+        "completion": "Alba Longa.",
+        "correct": 0.0
+      }
+    ]
+  }
+}

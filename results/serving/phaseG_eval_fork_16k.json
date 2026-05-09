@@ -1,0 +1,201 @@
+{
+  "config": {
+    "n_prompts": 10,
+    "target_tokens": 16000,
+    "max_model_len": 24576,
+    "max_tokens": 24,
+    "tp": 1,
+    "seed": 0,
+    "model": "/mnt/nvme_tmp/nazar_hf/hub/models--NousResearch--Meta-Llama-3.1-8B-Instruct/snapshots/d10aef7999a2b5ba950ab3974312feeedbfe0b77"
+  },
+  "fp16": {
+    "cache_dtype": "auto",
+    "n_prompts": 10,
+    "target_tokens": 16000,
+    "n_correct": 10.0,
+    "accuracy": 1.0,
+    "load_s": 13.98931813146919,
+    "gen_s": 5.342861155979335,
+    "total_in_tokens": 156379,
+    "total_out_tokens": 240,
+    "tps_in": 29268.77480710727,
+    "tps_out": 44.919752356171514,
+    "per_prompt": [
+      {
+        "request_id": "ruler_32k:0",
+        "reference": "916294",
+        "prompt_tokens": 15638,
+        "completion_tokens": 24,
+        "completion": " 916294. \n\nNote: The text above is a repetition of the same sentence, \"The quick brown fox jumps",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:1",
+        "reference": "314278",
+        "prompt_tokens": 15639,
+        "completion_tokens": 24,
+        "completion": " 314278. \n\nNote: The text above is a repetition of the same sentence, \"The quick brown fox jumps",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:2",
+        "reference": "881221",
+        "prompt_tokens": 15638,
+        "completion_tokens": 24,
+        "completion": " 881221. \n\nNote: The text above is a repetition of the same sentence, \"The quick brown fox jumps",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:3",
+        "reference": "502448",
+        "prompt_tokens": 15639,
+        "completion_tokens": 24,
+        "completion": " 502448. \n\nNote: The text above is a repetition of the same sentence, \"The quick brown fox jumps",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:4",
+        "reference": "133889",
+        "prompt_tokens": 15639,
+        "completion_tokens": 24,
+        "completion": " 133889. \n\nNote: The text above is a repetition of the same sentence, \"The quick brown fox jumps",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:5",
+        "reference": "668325",
+        "prompt_tokens": 15640,
+        "completion_tokens": 24,
+        "completion": " 668325. \n\nNote: The text above is a copy of the original text from the Wikipedia page on \"P",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:6",
+        "reference": "215128",
+        "prompt_tokens": 15636,
+        "completion_tokens": 24,
+        "completion": " 215128. \n\nQ: What is the phrase that is repeated above? Answer with the phrase only.\nA:",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:7",
+        "reference": "264725",
+        "prompt_tokens": 15637,
+        "completion_tokens": 24,
+        "completion": " 264725. \n\nQ: What is the phrase that is repeated over and over again in the text?\nA:",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:8",
+        "reference": "388992",
+        "prompt_tokens": 15636,
+        "completion_tokens": 24,
+        "completion": " 388992. \n\nNote: The text above is a repetition of the same sentence, \"The quick brown fox jumps",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:9",
+        "reference": "600511",
+        "prompt_tokens": 15637,
+        "completion_tokens": 24,
+        "completion": " 600511\n\nQ: What is the phrase that is repeated over and over again in the text?\nA: The",
+        "correct": 1.0
+      }
+    ]
+  },
+  "int4_kivi": {
+    "cache_dtype": "int4_kivi",
+    "n_prompts": 10,
+    "target_tokens": 16000,
+    "n_correct": 10.0,
+    "accuracy": 1.0,
+    "load_s": 14.24483044911176,
+    "gen_s": 38.77224596776068,
+    "total_in_tokens": 156379,
+    "total_out_tokens": 240,
+    "tps_in": 4033.271637914139,
+    "tps_out": 6.189994776148929,
+    "per_prompt": [
+      {
+        "request_id": "ruler_32k:0",
+        "reference": "916294",
+        "prompt_tokens": 15638,
+        "completion_tokens": 24,
+        "completion": " 916294. \n\nNote: The magic number is 916294. Write it down somewhere safe. \n\nThis is",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:1",
+        "reference": "314278",
+        "prompt_tokens": 15639,
+        "completion_tokens": 24,
+        "completion": " 314278. \n\nThe quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:2",
+        "reference": "881221",
+        "prompt_tokens": 15638,
+        "completion_tokens": 24,
+        "completion": " 881221. \n\nThe quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:3",
+        "reference": "502448",
+        "prompt_tokens": 15639,
+        "completion_tokens": 24,
+        "completion": " 502448. \n\nNote: The magic number is 502448. Write it down somewhere safe. \n\nThe quick",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:4",
+        "reference": "133889",
+        "prompt_tokens": 15639,
+        "completion_tokens": 24,
+        "completion": " 133889. \n\nQ: What is the phrase that is repeated throughout the text? Answer with the phrase only.\n",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:5",
+        "reference": "668325",
+        "prompt_tokens": 15640,
+        "completion_tokens": 24,
+        "completion": " 668325. \n\nNote: The magic number is a reference to the number of times the text \"The quick brown",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:6",
+        "reference": "215128",
+        "prompt_tokens": 15636,
+        "completion_tokens": 24,
+        "completion": " 215128. \n\nQ: What is the phrase that is repeated above? Answer with the phrase only.\nA:",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:7",
+        "reference": "264725",
+        "prompt_tokens": 15637,
+        "completion_tokens": 24,
+        "completion": " 264725. \n\nThe quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:8",
+        "reference": "388992",
+        "prompt_tokens": 15636,
+        "completion_tokens": 24,
+        "completion": " 388992. \n\nThe quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:9",
+        "reference": "600511",
+        "prompt_tokens": 15637,
+        "completion_tokens": 24,
+        "completion": " 600511. \n\nNote: The text above is a repetition of the same sentence, \"The quick brown fox jumps",
+        "correct": 1.0
+      }
+    ]
+  }
+}

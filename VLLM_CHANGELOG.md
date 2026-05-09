@@ -14,6 +14,90 @@ Commit hashes refer to the fork branch unless prefixed `host:`.
 
 ---
 
+## Phase G(e) — paper Pareto reproduction attempt: cache-state dependence widens
+
+**Result snapshot:** `results/serving/phaseG_3phase_fork_70b_paper_tau2e5.json`.
+
+### What happened
+
+Ran the 3-phase fork harness at the upstream paper's τ=2e-5
+(session_20260429_14_phase4 Pareto cell: 40 INT8 + 40 INT4, acc=0.620
+on Llama-70B GSM8K-Hard). On the fork the controller converged to
+**79 INT4 + 1 INT2** (avg_bits=3.98) and Phase 3 measurement acc was
+**0.540** — exactly matching the upstream static-INT4 baseline. No
+heterogeneity, no Pareto win.
+
+### Why it's interesting (not a regression)
+
+This is the same **cache-state-dependence** the paper itself flagged
+as the calibration↔production gap (CHANGELOG.md
+"session_20260429_14_phase4: production-scale τ recalibration", §3
+"Mechanism of the calibration↔production gap"):
+
+> "Calibration runs uniform INT4 so each canary fire measures the
+> marginal effect of quantizing one new K against an INT4-quantized
+> cache. Production warmup transitions tiers; by end of warmup many
+> layers have INT2 cache entries, perturbing the cache itself, so
+> the marginal effect of further quantization on the new K is much
+> smaller."
+
+The fork makes this stronger. The paper's upstream runs used **FP16
+cache + shadow-mode K/V quantization**, so the canary's δ̂ measured
+the cost of quantizing K against an FP16 reference. On the fork the
+cache is **really INT4**: the canary's neighbor-tier measurements are
+taken against an already-INT4-noisy reference. Marginal δ̂ for moving
+to INT2 (or INT8) is smaller still — the controller has no
+signal-driven reason to upgrade. At τ=2e-5 nothing crosses the
+threshold; the controller stays at INT4 across the whole network.
+
+### Quantitative evidence
+
+```
+                 controller mix         avg_bits   acc
+upstream paper:  INT8 40 / INT4 40       6.00     0.620   (τ=2e-5)
+fork (this run): INT4 79 / INT2  1       3.98     0.540   (τ=2e-5)
+                 = static-INT4 baseline                    (acc 0.540 = paper's static-INT4)
+```
+
+12,742 canary fires across 51,520 attention calls during the warmup
+— the canary is firing, just measuring deltas that don't cross the
+upstream-tuned τ. Fork-side τ recalibration is needed to reproduce
+paper Pareto cells; this is a **calibration-protocol** difference,
+not a kernel correctness issue (Phase G's RULER+HotpotQA parity
+results already confirmed kernel correctness).
+
+### Implications for the paper
+
+  * **The paper's τ values are upstream-shadow-mode-specific.** Any
+    fork-side reproduction needs its own τ calibration — the
+    `calibrate_tau_budget*.py` host scripts must be rerun against
+    the fork's real KIVI cache. The δ̂ distribution under the fork
+    will be tighter than under upstream-shadow-mode by a similar
+    factor to the calibration↔production gap the paper already
+    documented.
+
+  * **The fork's no-shadow-mode is a *feature*** for paper claims
+    about real serving deployments: it eliminates the
+    calibration↔production gap by making the warmup distribution
+    match the production distribution exactly (both use real KIVI
+    cache).
+
+  * **Phase G(b)/(d) "fork is ready to host paper Pareto runs" stands**,
+    but the Pareto reproduction needs a fork-specific τ sweep, not
+    direct port of the upstream τ values.
+
+### Outstanding follow-up: fork-τ recalibration
+
+The paper's `evaluation/serving/calibrate_tau_budget.py` and
+`calibrate_tau_budget_70b_gsm8k_hard.py` produce per-tier δ̂ EMAs
+under the static-INT4 calibration regime. A fork-equivalent would
+run the 3-phase harness under the fork at multiple τ values and
+extract the τ that produces the same per-tier δ̂ distribution as the
+upstream calibration. Adding it is a half-day task; probably the
+right next step before claiming paper Pareto reproduction.
+
+---
+
 ## Phase G(d) — 70B scale-up on the fork (TP=4)
 
 **Host:** `evaluation/serving/run_phaseG_eval_fork.py` (gains

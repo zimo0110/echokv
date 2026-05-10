@@ -285,6 +285,17 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument(
         "--no-per-rank-seed", action="store_false", dest="per_rank_seed",
     )
+    ap.add_argument(
+        "--freeze-warmup-controller", action="store_true",
+        help="Freeze the controller during warmup. Layer tiers stay at "
+             "the initial value (set by --initial-active) for the whole "
+             "warmup; canary observes per-layer per-tier δ̂ but doesn't "
+             "trigger transitions. Used for the contamination diagnostic "
+             "(Phase G(e) addendum 8): comparing per-tier δ̂ at the same "
+             "active tier under different upstream tier histories tells "
+             "us whether the canary's reading is contaminated by other "
+             "layers' tier states.",
+    )
     ap.add_argument("--multi-precision", action="store_true", default=True)
     ap.add_argument(
         "--initial-active", type=int, default=4, choices=[2, 4, 8],
@@ -398,7 +409,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             # Observation-only on the fork — cache is already real
             # KIVI; tier_application would shadow-double-quantize.
             "tier_application": False,
-            "freeze_controller": False,
+            "freeze_controller": a.freeze_warmup_controller,
             "multi_precision": a.multi_precision,
             "tau_budget": a.tau_budget,
             "decode_only_canary": True,

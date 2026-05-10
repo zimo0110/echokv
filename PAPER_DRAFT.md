@@ -559,6 +559,102 @@ RULER@128K 378 s vs 388 s). The K_ref buffer itself is per-layer
 per-rank, ~2.5 MB total for 70B at TP=4 — three orders of magnitude
 smaller than the KV cache.
 
+### 6.8 Real-cache validation via vLLM fork integration
+
+The Phase 5–8 results above were generated under *shadow mode* —
+upstream vLLM 0.16 with an FP16 KV cache and a forward-pre-hook that
+quantises K and V on the fly per the controller's tier vector
+*before they enter the cache*. The cache itself is FP16; the
+quantisation noise that the canary measures and the controller acts
+on is injected by the hook, not by the cache substrate. This was a
+methodological choice forced by vLLM 0.16's single-global-dtype
+KV-cache architecture, and we flagged it as a limitation in the
+Phase-3 CHANGELOG entry (session_20260427_11).
+
+To validate the closed loop in a production-grade serving
+substrate, we integrated EchoKV into a fork of vLLM 0.16 with
+native KIVI-style INTb KV-cache support per layer
+(``feature/echokv-int4-cache`` at ``vllm/v1/attention/...``). The
+fork supports per-layer ``bits ∈ {2, 4, 8}`` at engine init
+(``CacheConfig.kivi_bits_per_layer``) and runtime tier swapping
+between request batches (``swap_tier_vector_to_model``). At uniform
+INT4, the fork passes accuracy parity tests on RULER@4K/8K/16K
+(100% / 100% needle recall at FP16 and INT4) and HotpotQA hard
+n=30 (Δ=+0.033, within binomial SE).
+
+The closed-loop EchoKV-3C protocol on the fork, however, does *not*
+reproduce the GSM8K-Hard Pareto cell from §6.3. Across 3 seeds at
+n=100 the per-rank tier-vector picks span the full space from
+uniform-INT4 to uniform-INT8, and the mean accuracy is 0.447 vs the
+static-INT4 baseline's 0.540 — the fork EchoKV-3C *underperforms*
+static INT4 by 0.093 on this workload at this protocol. The
+upstream Phase-5 result (acc=0.620 at avg=6.0 bits, +0.080 above
+static-INT4) does not transfer.
+
+#### Why shadow-mode results don't transfer
+
+The fork integration exposed two coupled effects that the upstream
+shadow-mode protocol masked.
+
+**(a) Cache-state feedback loop.** As the controller downgrades a
+layer mid-warmup, future canary fires at that layer measure δ̂
+against the now-quantised cache. The KL between an INTb-quantised
+candidate and an already-INTb cache is much smaller than the same
+KL against an FP16 reference — typically two orders of magnitude
+smaller in our measurements. The controller's argmin-with-budget
+rule reads this shrunk δ̂ as "the layer is safe at INTb" and
+either holds or downgrades further, producing a positive-feedback
+cascade toward the lowest tier. Under shadow-mode the cache
+remains FP16 throughout, so this loop never closes.
+
+**(b) Input-distribution contamination.** The absolute canary's
+K_ref ring buffer (Phase-1 contribution) captures *FP16 K
+projections* per layer, but those projections are themselves
+computed from residual-stream activations entering the layer's
+attention block — and *those activations* reflect upstream cache
+reads. K_ref is "FP16" in the sense of dtype but its content
+distribution is shifted by every upstream layer's tier choice. A
+controlled diagnostic (Phase-G(e) addendum 8) compared the
+canary's per-tier δ̂ at uniform-INT4 vs uniform-INT8 cache, both
+with the controller frozen so the active tier was constant; the δ̂
+distributions differed by a uniform 3.2–3.5× across all
+measurement tiers, the signature of an upstream-context-dependent
+global multiplier on the canary's signal. K_ref closed the
+substrate-feedback path at the layer's K-projection output;
+upstream contamination of the layer's K-projection *input* remains.
+
+These two effects compound: (a) shrinks tier-b δ̂ values at every
+layer that has already downgraded; (b) shrinks them globally as
+upstream layers' input distributions drift. Together they explain
+the ~100× signal compression we see vs the shadow-mode calibration
+distribution and the controller's resulting tier-vector chaos.
+
+#### What we don't claim about the fork
+
+  * The fork's failure to reproduce shadow-mode Pareto **does not
+    invalidate** the §6.3–6.5 results. The shadow-mode protocol
+    measures what it measures honestly: with an FP16 reference
+    cache, the canary's δ̂ accurately tracks the cost of going to
+    INTb. The Pareto cell at avg=6.00 bits acc=0.620 is real for
+    that protocol. We document the protocol's scope explicitly: it
+    captures the controller's *information-theoretic* choices but
+    elides one of two coupled feedback paths that production
+    serving exposes.
+
+  * Conversely, the fork's failure **does** narrow the deployment
+    claim. EchoKV-3C as deployed on the fork at the protocols we
+    tested does not, today, beat uniform INT4 on Llama-3.1-70B
+    GSM8K-Hard. To make the deployment claim we need (a) the
+    activation-buffer fix proposed in §7.4 below, or (b) a
+    different controller protocol that doesn't depend on
+    contamination-free per-tier δ̂ measurements.
+
+The fork integration is therefore best understood as a
+methodological contribution in its own right: it surfaces a
+second feedback path (input-distribution contamination) that
+shadow-mode hides, and provides the evaluation substrate to test
+proposed fixes against.
+
 ### 6.7 What the paper does not claim
 
 We are explicit about what these results don't show:
@@ -634,6 +730,21 @@ We are explicit about what these results don't show:
    accumulate too many small async tier updates per task at the
    default tick-interval of 10 steps, but have not yet tested a
    higher tick-interval. New Open Q 34 in REPORT.md.
+
+9. **The closed-loop Pareto claim is shadow-mode-protocol-specific.**
+   §6.8 documents that EchoKV-3C on a real-KIVI-cache vLLM fork
+   does not, today, reproduce the §6.3 GSM8K-Hard Pareto cell. The
+   shadow-mode protocol used for §6.3–6.5 keeps the cache FP16
+   throughout warmup, and the canary's δ̂ is an honest measure of
+   "what would happen if the cache were INTb"; on a real-INTb
+   serving substrate the cache *is* INTb, and a feedback loop
+   between controller decisions and δ̂ measurements emerges that
+   the FP16 cache substrate suppresses. The paper's claim is
+   therefore best read as "EchoKV-3C identifies a Pareto-better
+   tier vector under the canary's information-theoretic protocol";
+   the deployment claim "EchoKV-3C runs Pareto-better in
+   production serving" is conditional on the activation-buffer fix
+   in §7.4, which is not yet implemented or tested.
 
 ---
 
@@ -730,6 +841,65 @@ performance under the dynamic protocol. ~2 hours wall.
 - **Memory measurement vs projection** — convert the 4.33–4.40
   bits-per-rank numbers from `memory_projection` into measured
   on-GPU memory via a vLLM block-allocator fork — Open Question 16.
+
+### 7.4 Per-layer activation-buffer canary (closes the second feedback path)
+
+The vLLM fork integration in §6.8 exposed input-distribution
+contamination of the canary's per-tier δ̂. K_ref decouples the
+canary's *substrate* from the runtime tier vector at the layer's
+K-projection output; what's left is to decouple the canary's
+*input* — the residual-stream activation entering each attention
+block — from upstream cache state.
+
+**Architecture.** Maintain a per-layer FP16 activation ring buffer
+shaped ``(N, hidden_size)``. The buffer is populated periodically
+by a clean-forward refresh: a small held-out batch is run through
+the model with all layers temporarily forced to FP16 attention,
+and per-layer pre-attention activations are captured. At canary
+fires, the kernel reads a row from this buffer and applies the
+layer's W_Q and W_K *in-kernel* to produce clean q_ref and k_ref;
+the KL is then computed between
+``softmax(q_ref · quant_b(k_ref)ᵀ / √d)`` and
+``softmax(q_ref · k_ref ᵀ / √d)``. The result is a function of the
+layer's parameters and the workload's input statistics only —
+independent of the runtime tier vector during a refresh window.
+
+**Cost.** Per-layer buffer at FP16 is ``hidden_size × N`` bytes; for
+Llama-3.1-70B at TP=4 with N=64 and hidden=8192 this is 1 MB per
+layer per rank, ~80 MB total per rank. The same profile-aware
+accounting we built for the F.2.1 scale/zp side buffers extends to
+this allocation. Refresh cost is one FP16 forward per ~6 400
+production decode steps at the recommended cadence — negligible
+amortised. Per-fire compute adds two single-row matmuls (W_Q · x
+and W_K · x), small relative to the existing canary stream.
+
+**Why it's framed as future work.** The Phase-G(e) addendum-8
+diagnostic confirmed contamination is real but partial (~3.3×
+signature in the cleanest comparison; the residual ~30× of the
+100× signal compression from §6.8 must come from other sources
+including warmup nondeterminism and the simulate_quantization vs
+production-kernel-rounding mismatch). The activation buffer
+addresses (b) cleanly but won't on its own resolve (a) the
+cache-state feedback loop or the warmup nondeterminism.
+Implementing it is a 3–4 day kernel change; running the
+multi-seed paired-McNemar protocol against static-INT4 on the
+new substrate is another 1–2 days. Both are noted as Open
+Questions for the next paper iteration; we expect the
+combination of the activation buffer and a deterministic-CUDA +
+split-seed protocol to recover the §6.3 Pareto cell on the fork,
+but the experiment hasn't been run yet.
+
+**Two-feedback-path framing.** The K_ref contribution closes one
+feedback path (substrate); the activation buffer closes a second
+(input distribution). The current paper attributes both to "the
+absolute canary"; an honest expanded version would separate them
+and credit the fork integration as the work that exposed the
+second path. We have not made this expansion in the current draft
+because the activation-buffer experiment is not yet run; if the
+fix recovers the Pareto cell, the framing earns its place in the
+contributions list, and the paper's headline claim sharpens to
+"workload-adaptive per-layer KV quantization, validated on a
+real-cache serving substrate."
 
 ---
 

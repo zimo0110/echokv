@@ -1,0 +1,15 @@
+{
+  "model": "/mnt/nvme_tmp6/llama-70b",
+  "tp": 4,
+  "n_prompts": 500,
+  "max_num_seqs": 8,
+  "max_new_tokens": 512,
+  "max_model_len": 4096,
+  "seed": 0,
+  "kv_cache_dtype": "int8_kivi",
+  "active_tier": 4,
+  "accuracy": 0.502,
+  "n_correct": 251.0,
+  "wall_clock_s": 693.8751253020018,
+  "comparison_target": "emulation static_int4 n=500: 0.466"
+}

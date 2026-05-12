@@ -347,6 +347,8 @@ class CanaryHarness:
         kref_window_size: int = 64,
         ema_alpha: float = 0.1,
         seed: int = 0,
+        upgrade_only: bool = False,
+        grace_ticks: int = 0,
     ) -> None:
         self.llm = llm
         self.canary_rate = float(canary_rate)
@@ -492,6 +494,8 @@ class CanaryHarness:
             hysteresis_band=hysteresis_band,
             tick_interval=tick_interval,
             min_dwell_ticks=min_dwell_ticks,
+            upgrade_only=bool(upgrade_only),
+            grace_ticks=int(grace_ticks),
         )
         if initial_level is not None:
             ctrl_kwargs["initial_level"] = initial_level

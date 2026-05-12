@@ -205,6 +205,15 @@ def make_workload_requests(workload: str, n: int, seed: int) -> list:
     if workload == "hotpotqa":
         from evaluation.motivation.workloads import _hotpotqa_stream
         return list(_hotpotqa_stream(n=n, seed=seed, level="hard"))
+    if workload == "ruler":
+        from evaluation.motivation.workloads import _ruler_sample
+        # Shorter than upstream's RULER@4K — at 4K tokens with 80
+        # layers, observability_rate=0.25, the canary's per-prefill
+        # work overflows vLLM's RPC sample_tokens timeout (~60 s).
+        # 1K tokens matches the typical GSM8K-Hard prompt length and
+        # keeps the diagnostic comparison apples-to-apples on
+        # prompt-distribution-vs-content rather than length.
+        return [_ruler_sample(i, seed=seed, target_tokens=1_000) for i in range(n)]
     raise ValueError(f"unknown workload {workload!r}")
 
 
@@ -252,7 +261,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--model", default=DEFAULT_8B)
     ap.add_argument("--workload", default="gsm8k_hard",
-                    choices=["gsm8k_hard", "hotpotqa"])
+                    choices=["gsm8k_hard", "hotpotqa", "ruler"])
     ap.add_argument("--tp", type=int, default=1)
     ap.add_argument("--max-model-len", type=int, default=4096)
     ap.add_argument("--max-new-tokens", type=int, default=512)
@@ -284,6 +293,27 @@ def main(argv: Optional[list[str]] = None) -> int:
     )
     ap.add_argument(
         "--no-per-rank-seed", action="store_false", dest="per_rank_seed",
+    )
+    ap.add_argument(
+        "--warmup-grace-ticks", type=int, default=0,
+        help="Controller HOLDs every layer for the first N ticks so "
+             "the per-tier EMA can absorb samples against the active "
+             "substrate before the rule fires on transient early "
+             "values. EMAs continue to update during grace. Phase G(e) "
+             "addendum 11: upgrade-only with no grace cascades because "
+             "first-tick δ̂_4 is high (early samples dominate); a grace "
+             "period lets the EMA stabilise before any decision is "
+             "committed. With ema_alpha=0.1 the half-life is ~7 "
+             "samples; 20 ticks of grace ≈ 3 half-lives.",
+    )
+    ap.add_argument(
+        "--warmup-only-upgrades", action="store_true",
+        help="During warmup, the controller is allowed to upgrade tiers "
+             "(higher bit-width) but downgrades are suppressed. Breaks "
+             "the cache-state feedback loop where downgrades shrink "
+             "subsequent δ̂ measurements (Phase G(e) addendum 10: "
+             "active-vs-frozen δ̂ ratio is ~5× at tiers 4/8). The "
+             "consolidation step still applies normally.",
     )
     ap.add_argument(
         "--freeze-warmup-controller", action="store_true",
@@ -420,6 +450,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             # base_seed + rank_id; runs at the same a.seed are
             # reproducible.
             "per_rank_seed": a.per_rank_seed,
+            "upgrade_only": a.warmup_only_upgrades,
+            "grace_ticks": a.warmup_grace_ticks,
         },
     )
     warmup_handle.install()

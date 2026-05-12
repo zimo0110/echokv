@@ -596,6 +596,74 @@ Workload & Config & Acc. & Bits/rank & Savings & $p$ \\
 \end{tabular}
 \end{table}
 
+\subsection{Cross-Family Generalization: Qwen2.5-72B}
+\label{sec:cross_family}
+
+To test whether EchoKV's canary--controller loop transfers across model
+\emph{families}---not just scales within Llama---we re-ran the full
+$4$-workload sweep on Qwen2.5-72B-Instruct (TP$=$4) using the same
+calibration recipe. RULER@4K calibration on Qwen yields
+$\tau_0{=}0.0228$, almost identical to Llama's $0.022$
+(\S\ref{sec:tau})---a clean replication of the calibration scale on a
+different architecture. With this $\tau_0$ and \emph{no other tuning},
+the controller produces the workload-coherent tier signatures in
+Table~\ref{tab:qwen_headline}.
+
+\begin{table}[h]
+\centering
+\caption{Qwen2.5-72B-Instruct (TP$=$4), same protocols as
+  Table~\ref{tab:headline}. EchoKV uses $\tau_0{=}0.0228$ from RULER@4K
+  calibration, $\sqrt{L/L_0}$ context scaling.}
+\label{tab:qwen_headline}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrr}
+\toprule
+Workload     & FP16    & KIVI-INT4         & EchoKV                     & Bits & Sav. & Tiers \\
+\midrule
+GSM8K-Hard   & $0.650$ & $0.664_{p=0.65}$  & $\mathbf{0.650}_{p=1.00}$  & $8.00$ & $50\%$ & 80/0/0 \\
+HotpotQA     & $0.680$ & $0.670_{p=0.40}$  & $\mathbf{0.680}_{p=1.00}$  & $7.90$ & $51\%$ & 78/2/0 \\
+RULER@128K   & $1.000$ & $1.000_{p=1.00}$  & $\mathbf{1.000}_{p=1.00}$  & $4.05$ & $75\%$ & 1/79/0 \\
+$\tau$-Bench & $0.167$ & $0.300_{p=0.017}$ & $\mathbf{0.300}_{p=0.008}$ & $7.95$ & $50\%$ & 1/79/0 \\
+\bottomrule
+\end{tabular}
+\par\smallskip
+{\footnotesize Tiers column shows consolidated INT4/INT8/INT2 layer counts (out of $80$); $\tau$-Bench numbers are merged airline+retail on the $n{=}90$ paired-task subset (first $5$ tasks per split consumed by EchoKV warmup, excluded from all cells for paired comparison).\par}
+\end{table}
+
+\textbf{The qualitative tier-vector pattern replicates across families.}
+RULER@128K converges to near-uniform INT4 on both Llama and Qwen
+($75\%$ savings, perfect retrieval). Short and agentic workloads bias
+the controller toward higher precision on Qwen than on Llama
+(Table~\ref{tab:qwen_headline} vs Table~\ref{tab:headline}). This
+reflects Qwen's measurably higher per-layer $\hat{\delta}_4$ on those
+workloads relative to its calibration anchor---the same closed-loop
+mechanism producing different tier vectors because Qwen's quantization
+sensitivity profile differs from Llama's.
+
+\textbf{An unexpected $\tau$-Bench finding.} On Qwen2.5-72B, every
+quantization configuration significantly \emph{outperforms} FP16 under
+paired McNemar: KIVI-INT4 ($\Delta{=}{+}0.13$, $p{=}0.017$), Static INT8
+($\Delta{=}{+}0.11$, $p{=}0.013$), and EchoKV
+($\Delta{=}{+}0.13$, $p{=}0.008$, all on $n{=}90$ merged
+airline+retail). Per-task analysis attributes this to FP16 trajectory
+failures: $29$ of $40$ FP16 failures finish with the model declaring
+success but receiving $\text{reward}{=}0$ from the simulator (policy
+violations and incorrect bookings). Quantization noise perturbs
+the deterministic decoding path enough to escape the FP16 failure
+attractor on $\sim$$17$ of $50$ airline tasks, while only inducing
+$1$--$2$ tool-call parse errors per cell. The same controller, untuned,
+captures this benefit on a previously-unseen architecture.
+
+\textbf{Stronger RULER@128K at $n{=}100$.} Re-running RULER@128K at
+$n{=}100$ on both models confirms the $n{=}20$ result with five times
+the statistical power: Llama-3.1-70B and Qwen2.5-72B both achieve
+acc${=}1.000$ across FP16, KIVI-INT4, and EchoKV; EchoKV consolidates
+to $3.98$ and $4.05$ bits/rank respectively, both $\sim$$75\%$ savings.
+Identical retrieval performance, near-identical bit budget, on
+architecturally distinct $70$B-class models, with the controller
+selecting tiers live during serving.
+
 %% ─────────────────────────────────────────────────────────────────────────────
 \section{Limitations}
 \label{sec:limitations}
@@ -616,9 +684,13 @@ deficit ($p{=}0.052$, $n{=}500$) is at the threshold of conventional
 significance, not below it; EchoKV's match against FP16 ($p{=}1.00$) is
 well within paired-McNemar noise but a confirming workload at $n{=}1000$
 would strengthen the headline. The merged $\tau$-Bench cell ($n{=}90$
-paired tasks) is also borderline. RULER@128K is run at $n{=}20$ because
-$128$K-context prefill costs $5$--$6$ GPU-hours per cell at $n{=}500$;
-both FP16 and KIVI-INT4 saturate at accuracy $1.000$ here, so the row of
+paired tasks) is also borderline. RULER@128K is reported at $n{=}20$ in
+Table~\ref{tab:headline} (the headline cell) because $128$K-context
+prefill costs $5$--$6$ GPU-hours per cell at $n{=}500$; we additionally
+re-ran RULER@128K at $n{=}100$ on both Llama-3.1-70B and Qwen2.5-72B
+(\S\ref{sec:cross_family}) and confirmed acc${=}1.000$ across all
+configurations with five times the statistical power. Both FP16 and
+KIVI-INT4 saturate at accuracy $1.000$ on RULER@128K, so the row of
 Table~\ref{tab:headline} carries information only about the tier vector
 the controller selects, not about an accuracy comparison.
 
@@ -648,13 +720,17 @@ are computed from per-block tier counts in the allocator. A vLLM
 block-allocator fork that exposes on-GPU memory directly would let us
 report measured rather than projected savings.
 
-\textbf{Single model family.} Primary experiments use Llama-3.1-70B;
-\S\ref{sec:scale_transfer} extends the full serving stack to Llama-3.1-8B
-on two workloads, showing consistent qualitative behaviour. Evaluation
-across architecturally distinct model families (e.g., Mistral, Qwen) is
-left to future work. The canary design is model-agnostic, but
-per-architecture $\tau_0$ recalibration is required, as the 8B
-GSM8K-Hard result in \S\ref{sec:scale_transfer} concretely illustrates.
+\textbf{Model coverage.} Primary experiments use Llama-3.1-70B;
+\S\ref{sec:scale_transfer} extends to Llama-3.1-8B (scale transfer)
+and \S\ref{sec:cross_family} extends to Qwen2.5-72B-Instruct (cross-family
+generalisation), with all four headline workloads on each model. The
+RULER@128K cell is additionally re-run at $n{=}100$ on both 70B-class
+models for higher statistical power. Mistral, DeepSeek-V3, and
+multimodal variants remain future work. The canary design is
+model-agnostic, but $\tau_0$ recalibration per architecture is required,
+as the 8B over-conservatism in \S\ref{sec:scale_transfer} and the
+shifted Qwen tier signatures in \S\ref{sec:cross_family} both
+concretely illustrate.
 
 %% ─────────────────────────────────────────────────────────────────────────────
 \section{Future Work}

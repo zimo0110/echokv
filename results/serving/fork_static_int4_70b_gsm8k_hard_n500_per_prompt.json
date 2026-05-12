@@ -1,0 +1,2515 @@
+{
+  "phase": "fork_static_int4",
+  "model": "/mnt/nvme_tmp6/llama-70b",
+  "tp": 4,
+  "n_prompts": 500,
+  "max_num_seqs": 8,
+  "max_new_tokens": 512,
+  "max_model_len": 4096,
+  "seed": 0,
+  "kv_cache_dtype": "int8_kivi (swapped to uniform INT4)",
+  "accuracy": 0.504,
+  "wall_clock_s": 679.7320922706276,
+  "per_prompt": [
+    {
+      "idx": 0,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Fireman Frank has 3495007 shoes. If he gets 5 pairs of shoes on Mon"
+    },
+    {
+      "idx": 1,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] The marching band is ordering new uniforms. Each uniform comes with"
+    },
+    {
+      "idx": 2,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Shiela is required to submit a 2539854-page research paper. She alr"
+    },
+    {
+      "idx": 3,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Mrs. Tatiana owns a grocery store that sells different fruits and v"
+    },
+    {
+      "idx": 4,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] There are 6906324 trees in Chris's yard.  Ferdinand has half the nu"
+    },
+    {
+      "idx": 5,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Gabriel and Luri each own a portable media player that can store up"
+    },
+    {
+      "idx": 6,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Ben has 9420200 tubes of blue paint and 3 tubes of yellow paint. Ja"
+    },
+    {
+      "idx": 7,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] James delivers 600 newspapers in a day. He delivers 3056808 newspap"
+    },
+    {
+      "idx": 8,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Samantha has 12 fewer paintings than Shelley, and Shelley has 35292"
+    },
+    {
+      "idx": 9,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Tom went on a two-week-long trip through Europe. In the first 4 day"
+    },
+    {
+      "idx": 10,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Marty has 100 centimeters of ribbon that he must cut into 8361211 e"
+    },
+    {
+      "idx": 11,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Carla just gave birth to identical octuplets. She dresses 3/4 of th"
+    },
+    {
+      "idx": 12,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Mike decides he wants to replace his movie collection with digital "
+    },
+    {
+      "idx": 13,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Ruiz can make 120 pounds of chocolates in two hours. Marissa makes "
+    },
+    {
+      "idx": 14,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Dale is selling butterscotch candies to raise money for his club at"
+    },
+    {
+      "idx": 15,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Prince is a butcher. He sells 15kg of meat every hour he works, and"
+    },
+    {
+      "idx": 16,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Patty's Plumbing charges $40 to visit a house to make a repair, plu"
+    },
+    {
+      "idx": 17,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A train travels between 3 different cities.  It goes 75 miles from "
+    },
+    {
+      "idx": 18,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Mary is two years younger than Joan, who is five years older than J"
+    },
+    {
+      "idx": 19,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] 20% of 7871124 people think horse"
+    },
+    {
+      "idx": 20,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Denise and Daniel are reading the same book. Yesterday, Denise read"
+    },
+    {
+      "idx": 21,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] While working at the restaurant, each of the 3804253 customers who "
+    },
+    {
+      "idx": 22,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Roy has saved 40% more in money earned by chores than his brother A"
+    },
+    {
+      "idx": 23,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Rong has been saving 8751260 coins in his piggy bank every month. N"
+    },
+    {
+      "idx": 24,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Peter purchased 20 popsicles at $0.25 each. He also purchased 27302"
+    },
+    {
+      "idx": 25,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] An apple orchard sells apples in bags of 4228934. The orchard sold "
+    },
+    {
+      "idx": 26,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A juggler can juggle 2028842 balls.  Half of the balls are golf bal"
+    },
+    {
+      "idx": 27,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Dominick went to his team's changing room and saw half as many robo"
+    },
+    {
+      "idx": 28,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] John takes care of 1328372 dogs.  Each dog takes .5 hours a day to "
+    },
+    {
+      "idx": 29,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Audrey has to take two math tests to pass 6th grade. She must corre"
+    },
+    {
+      "idx": 30,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] The combined age of Peter, Paul and Jean is 100 years old. Find the"
+    },
+    {
+      "idx": 31,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Billy is buying some candy with $10 his father gave him. The candy "
+    },
+    {
+      "idx": 32,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] John has 3 boxes.  Each box is 5 inches by 6 inches by 4 inches.  T"
+    },
+    {
+      "idx": 33,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Deandre caught 3 tunas last Monday, the first tuna he caught weighs"
+    },
+    {
+      "idx": 34,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] The red car is 40% cheaper than the blue car. The price of the blue"
+    },
+    {
+      "idx": 35,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Artie has a flower stand at the Farmers Market. He sells three kind"
+    },
+    {
+      "idx": 36,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] James buys 5072217 pairs of shoes a month.  He spends $5072217640 o"
+    },
+    {
+      "idx": 37,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Jake's family wants to compare the cost of the two different amusem"
+    },
+    {
+      "idx": 38,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Ellen and her sister, Lani, went to the mall to buy presents for th"
+    },
+    {
+      "idx": 39,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] John decides to do several activities while out on vacation.  He sp"
+    },
+    {
+      "idx": 40,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Mark was unwell for 3 months, during which he lost 10 pounds per mo"
+    },
+    {
+      "idx": 41,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A simple folding newspaper or tabloid can be made by folding a piec"
+    },
+    {
+      "idx": 42,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Andrew bakes 200 mini cinnamon rolls and 300 mini blueberry muffins"
+    },
+    {
+      "idx": 43,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] It takes James 10 minutes to read 3 pages of his book before he goe"
+    },
+    {
+      "idx": 44,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Boris owns a chocolate factory. He produces 50,000 bars of chocolat"
+    },
+    {
+      "idx": 45,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Carl has four times as many marbles as Sean and Sean has half as ma"
+    },
+    {
+      "idx": 46,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] After Andrea saved some money, she then spent the rest of her money"
+    },
+    {
+      "idx": 47,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Three friends: Mike, Jim, and Tony decided to play a game. After 3 "
+    },
+    {
+      "idx": 48,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] An interior design firm offers installation for $7754471.  It inclu"
+    },
+    {
+      "idx": 49,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] James buys a new wardrobe.  He buys 1662810 suits and 1662810 dress"
+    },
+    {
+      "idx": 50,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] In 10 years, Melanie will be 18 years old. In how many years will h"
+    },
+    {
+      "idx": 51,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Four dogs sat in a line within the veterinarian's waiting room.  Th"
+    },
+    {
+      "idx": 52,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Marcell and Beatrice are having a contest to see who can eat the mo"
+    },
+    {
+      "idx": 53,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Steve is 60 years old. His wife is 4 years older than him. Their so"
+    },
+    {
+      "idx": 54,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Cody and Trevor had 7633966 sandwiches. Cody ate a third of the san"
+    },
+    {
+      "idx": 55,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Darren decides to do body exercises for a whole week. He does 100 p"
+    },
+    {
+      "idx": 56,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Jen works for 7.5 hours a day 6 days a week. Her hourly rate is $35"
+    },
+    {
+      "idx": 57,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Marcus is trying to decide whether he really needs to do his homewo"
+    },
+    {
+      "idx": 58,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Charmaine will be 16 years old in 12 years. How old will she be 4 y"
+    },
+    {
+      "idx": 59,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Jenny is dividing up a pizza with 8963908 slices. She gives 1/3 to "
+    },
+    {
+      "idx": 60,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Dolly has 9906866 books. Pandora has one. If both Dolly and Pandora"
+    },
+    {
+      "idx": 61,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Gabriel wants to buy a car for $1423561 and a phone for $800. Gabri"
+    },
+    {
+      "idx": 62,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Judy teaches 8387270 dance classes, every day, on the weekdays and "
+    },
+    {
+      "idx": 63,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] The bananas at the supermarket cost $0.80 each, or a bunch for $3.0"
+    },
+    {
+      "idx": 64,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Jane planted a beanstalk in her backyard. After the first week, it "
+    },
+    {
+      "idx": 65,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] James buys a plane.  The plane cost $150,000.  He pays $8578246 a m"
+    },
+    {
+      "idx": 66,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] The Easter egg hunt team hid 4083476 eggs. The Smith twins each fou"
+    },
+    {
+      "idx": 67,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Trent is 5 years older than Jane, and Jane is 3 years younger than "
+    },
+    {
+      "idx": 68,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Jordan has 2792504 children who wear diapers.  Each child requires "
+    },
+    {
+      "idx": 69,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A council met to vote on a new regulation. The vote passed with twi"
+    },
+    {
+      "idx": 70,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Brook Hills High School currently enrolls 6525618 students. Half of"
+    },
+    {
+      "idx": 71,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Finley took part in a 525096200-meter race.  She started off in fir"
+    },
+    {
+      "idx": 72,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A fruit vendor bought 50 watermelons for $6199980. He sold all of t"
+    },
+    {
+      "idx": 73,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Diane gave a number train a starting value of 5562984. This startin"
+    },
+    {
+      "idx": 74,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Nick is choosing between two jobs. Job A pays $6141110 an hour for "
+    },
+    {
+      "idx": 75,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Robert had 3 pounds of candy, Cindy had 5 pounds of candy, and Aaro"
+    },
+    {
+      "idx": 76,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Shawnda decides that her neighborhood kids could really use a bike "
+    },
+    {
+      "idx": 77,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] There is one set of twins and one set of triplets. One twin is 7 ye"
+    },
+    {
+      "idx": 78,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Ginger and Amy both start with 8280487 pieces of Halloween candy. G"
+    },
+    {
+      "idx": 79,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Paul is at a train station and is waiting for his train. He isn't s"
+    },
+    {
+      "idx": 80,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Alison qualified for a spot on the running team, so she went shoppi"
+    },
+    {
+      "idx": 81,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] 6139339 seniors need to receive awards.  Each senior receives a pic"
+    },
+    {
+      "idx": 82,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Maria buys 9159581 shares of a stock for $9159581 each. The stock p"
+    },
+    {
+      "idx": 83,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] If Martin eats Cheerios every day for breakfast, he'll lose 1.25 po"
+    },
+    {
+      "idx": 84,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Fern is trying to decide between buying the Widgeteer 3000, which m"
+    },
+    {
+      "idx": 85,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Ram uses a lot of pens. He discovered that he can save money by mix"
+    },
+    {
+      "idx": 86,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Sarah has a rope that is 20 meters long. Her friend wants to buy th"
+    },
+    {
+      "idx": 87,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Skyler has 716646 hats on his hand with the colors red, blue, and w"
+    },
+    {
+      "idx": 88,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Rory orders 2 subs for $7.50 each, 2 bags of chips for $5442140 eac"
+    },
+    {
+      "idx": 89,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Juan asked his neighbor, Herb, how much his house was worth. Herb a"
+    },
+    {
+      "idx": 90,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Josh decides to take up juggling to perform at the school talent sh"
+    },
+    {
+      "idx": 91,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] India has 4 more than half the number of states in the USA. What's "
+    },
+    {
+      "idx": 92,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] If there are 657881 eggs in a basket, and there are twice as many e"
+    },
+    {
+      "idx": 93,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Bill is trying to dig a well in his backyard. He can dig 4 feet/hou"
+    },
+    {
+      "idx": 94,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A bag has a 5% discount. If it is marked $398072, how much will you"
+    },
+    {
+      "idx": 95,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Candy has a chair rental business. During the weekdays, 60 chairs a"
+    },
+    {
+      "idx": 96,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] 13610160 gallons of gas were equally divided into 3610160 different"
+    },
+    {
+      "idx": 97,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Out of the 9030534 Grade 5 students, 2/5 are boys and 2/3 of the gi"
+    },
+    {
+      "idx": 98,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Goldy bought 20 sacks of rice and gave 3 sacks to her cousin and 90"
+    },
+    {
+      "idx": 99,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] In a jewelers store, the price of a gold Jewell is 4/5 times as muc"
+    },
+    {
+      "idx": 100,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Krissa needs to order field trip shirts for her preschool students."
+    },
+    {
+      "idx": 101,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] George has 45% more pears than bananas. If George has 6317400 banan"
+    },
+    {
+      "idx": 102,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Emil is 19 years old now. When he turns 7450634, he will be half th"
+    },
+    {
+      "idx": 103,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Ali is a superstar counter. He has won 1753071 medals for counting "
+    },
+    {
+      "idx": 104,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] In Tate\u2019s garden pond, there are 4 male guppies, 1278904 female gup"
+    },
+    {
+      "idx": 105,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Scarlett found an aquarium for $10.00 at a yard sale.  At the pet s"
+    },
+    {
+      "idx": 106,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Grace weighs 125 pounds. Alex weighs 2 pounds less than 4 times wha"
+    },
+    {
+      "idx": 107,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Benny threw bologna at his balloons.  He threw two pieces of bologn"
+    },
+    {
+      "idx": 108,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] There are four birds at the Caboose. Sally Two is three years older"
+    },
+    {
+      "idx": 109,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Bernie has 2969558 dogs. They each need a certain amount of exercis"
+    },
+    {
+      "idx": 110,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A company pays each of its employees $2543121 in a month. The compa"
+    },
+    {
+      "idx": 111,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Faraday owns a flower shop. He sells a sunflower that costs $2 each"
+    },
+    {
+      "idx": 112,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Katherine has 1585041 hanging baskets to fill.  In each basket she "
+    },
+    {
+      "idx": 113,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Jon runs a triathlon.  It takes him 40 minutes for the swim, an hou"
+    },
+    {
+      "idx": 114,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Toby is reading a book that is 831007 pages long. It averages 200 w"
+    },
+    {
+      "idx": 115,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Damien created a currency based on bottle caps and got his friends "
+    },
+    {
+      "idx": 116,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] The tooth fairy left Sharon $5.00 in exchange for the first tooth S"
+    },
+    {
+      "idx": 117,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Joe has twice as many cars as Robert. He sells 8574074% of them and"
+    },
+    {
+      "idx": 118,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Miguel uses 2 pads of paper a week for his drawing. If there are 76"
+    },
+    {
+      "idx": 119,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Gerald works at a daycare that pays him $30 every day. He worked fo"
+    },
+    {
+      "idx": 120,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] The number of songs in a playlist is 300. If John has 8619159 such "
+    },
+    {
+      "idx": 121,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Gretchen has some coins. There are 30 more gold coins than silver c"
+    },
+    {
+      "idx": 122,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Melanie's father opens up an animal farm starting with 50 cows and "
+    },
+    {
+      "idx": 123,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] 200 pounds of carrots are to be distributed to 3044087 restaurants "
+    },
+    {
+      "idx": 124,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] John decides to get a loan by mortgaging his home.  His house is wo"
+    },
+    {
+      "idx": 125,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A farmer has 900 eggs. He placed them on a tray, which holds 277570"
+    },
+    {
+      "idx": 126,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Amy is taking a history test. She correctly answers 80% of the mult"
+    },
+    {
+      "idx": 127,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A company wanted to buy 500 computers and had $1684916 for each com"
+    },
+    {
+      "idx": 128,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Jill gets paid $20 per hour to teach and $8369732 to be a cheerlead"
+    },
+    {
+      "idx": 129,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] John just started watching a new show.  Each episode is 20 minutes "
+    },
+    {
+      "idx": 130,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Johnny took his allowance of $3554425 and added an extra $10 to it."
+    },
+    {
+      "idx": 131,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Matthew has a collection of 2029004 unique toy soldiers. He wants t"
+    },
+    {
+      "idx": 132,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A small sunflower has 3 dozen seeds and a large sunflower has 50% m"
+    },
+    {
+      "idx": 133,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] John decides to buy new phones for him, his 2 kids, and his wife.  "
+    },
+    {
+      "idx": 134,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Sarah has 5472234 books and Joseph had twice the number of Sarah\u2019s "
+    },
+    {
+      "idx": 135,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] The jumbo bottle of shampoo costs $37054774.00.  The directions say"
+    },
+    {
+      "idx": 136,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Thomas withdraws $468461200 in 20 dollar bills from the bank accoun"
+    },
+    {
+      "idx": 137,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Dax went to their farm to pick some apples and found half as many b"
+    },
+    {
+      "idx": 138,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Carl has a cane that is half as long as he is tall.  Carl is one fo"
+    },
+    {
+      "idx": 139,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] There are 8876718 pupils in a class. Half of the class likes blue. "
+    },
+    {
+      "idx": 140,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Last week the IRS received 5168 tax reports. On Monday and Tuesday "
+    },
+    {
+      "idx": 141,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A basic manicure starts at $1250807 while a pedicure starts at $40."
+    },
+    {
+      "idx": 142,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Four students scored a total of 251 points in a board game. Naomi s"
+    },
+    {
+      "idx": 143,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Vincent can buy flowers in packages of 3 for $8437946.50 or in pack"
+    },
+    {
+      "idx": 144,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Lee used to be able to run the 400-meter hurdles two seconds faster"
+    },
+    {
+      "idx": 145,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Topher, the green giant, wears enormous shoes.  The length of one o"
+    },
+    {
+      "idx": 146,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] The ratio of popsicles that Betty and Sam have is 5:6. If the total"
+    },
+    {
+      "idx": 147,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Becca, Smendrick, and PJ have collections of Magic Cards.  There is"
+    },
+    {
+      "idx": 148,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Jennie is helping at her mom's office. She has a pile of 6109674 le"
+    },
+    {
+      "idx": 149,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] On Easter Sunday Cindy went to the city park to participate in the "
+    },
+    {
+      "idx": 150,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] John collects garbage from 3 different apartment complexes.  The fi"
+    },
+    {
+      "idx": 151,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Liam and Mitchell own competing lemonade stands across the street f"
+    },
+    {
+      "idx": 152,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Naruto can lift a mountain ten times higher than Kagiyami can.  But"
+    },
+    {
+      "idx": 153,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Katy makes coffee using teaspoons of sugar and cups of water in the"
+    },
+    {
+      "idx": 154,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] There are 3721525 books in a small library. Half of them are writte"
+    },
+    {
+      "idx": 155,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Finn watches 11 tadpoles swimming in the pond.  Suddenly he sees 93"
+    },
+    {
+      "idx": 156,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] It rained 2 inches on Monday and is expected to rain 1 more inch th"
+    },
+    {
+      "idx": 157,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Marissa bought a ball at the store for $20. If she had $80 on her a"
+    },
+    {
+      "idx": 158,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Samwell owns an appliances store. For this week, one-fourth of thei"
+    },
+    {
+      "idx": 159,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Mary has 2291443 sheep. She gets 1 kg of milk from half of them and"
+    },
+    {
+      "idx": 160,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Jason works as a salesperson at a car dealership.  He needs to sell"
+    },
+    {
+      "idx": 161,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Dexter has 4709562 pigs. Each one eats 4 pounds of feed, twice a da"
+    },
+    {
+      "idx": 162,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Ellen is on a diet. She eats two carrots, a salad, and a yogurt eve"
+    },
+    {
+      "idx": 163,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Two apples fell out of the tree, and one of them landed on Newton's"
+    },
+    {
+      "idx": 164,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] To have the car for the weekend, Wilson's report card needs to show"
+    },
+    {
+      "idx": 165,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Jean is two years older than Mark.  Two years ago Mark was 5 years "
+    },
+    {
+      "idx": 166,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Mark has $50 in his bank account. He earns $1736265 per day at his "
+    },
+    {
+      "idx": 167,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] There is space for 20 pencils in the box. If there are 2693641 penc"
+    },
+    {
+      "idx": 168,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A bumper car rink has 7131149 red cars. They have 2 fewer green car"
+    },
+    {
+      "idx": 169,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Colby loves going to the movies and every month his parents give hi"
+    },
+    {
+      "idx": 170,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Pauline visits her favorite local museum three times a year. The co"
+    },
+    {
+      "idx": 171,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Liam is 16 years old now. Two years ago, Liam\u2019s age was twice the a"
+    },
+    {
+      "idx": 172,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] There are 9955955 plants in Mrs. Smith's garden. One-fourth of her "
+    },
+    {
+      "idx": 173,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Three friends spent $4352681 on 3 tickets to the fair. They also sp"
+    },
+    {
+      "idx": 174,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Jonathan was sad to learn he needed 2 more toys than he already had"
+    },
+    {
+      "idx": 175,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Jim decides to go to college to earn some more money.  It takes him"
+    },
+    {
+      "idx": 176,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Cherrie wants to buy Christmas gifts for her 5 friends. 1551100 of "
+    },
+    {
+      "idx": 177,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Greta and Celinda are baking cookies. Greta bakes 9530477 cookies a"
+    },
+    {
+      "idx": 178,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] If Mark weighs 150 pounds and Susan weighs 20 pounds less than Mark"
+    },
+    {
+      "idx": 179,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Bill starts on the 3rd floor. He rides the elevator up to the floor"
+    },
+    {
+      "idx": 180,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Joey plays football every week. Last week he played 2 matches on Mo"
+    },
+    {
+      "idx": 181,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] On Monday the post office delivered 8890433 letters. On Tuesday the"
+    },
+    {
+      "idx": 182,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Well's mother sells watermelons, peppers, and oranges at the local "
+    },
+    {
+      "idx": 183,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] To make a profit of $2000, Isaias has to sell the chickens he plann"
+    },
+    {
+      "idx": 184,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Pat has a flower bed that is 111 feet long.  Pat wants to fill her "
+    },
+    {
+      "idx": 185,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Jenna has 4 roommates. Each month the electricity bill is $487014. "
+    },
+    {
+      "idx": 186,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Peyton scheduled after-work activities of a one hour yoga class on "
+    },
+    {
+      "idx": 187,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] John and Jack have 30 minutes to walk to school together. It takes "
+    },
+    {
+      "idx": 188,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Calvin is making soup for his family for dinner. He has a pot with "
+    },
+    {
+      "idx": 189,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Ashley has an internet connection speed of 9578547kb per second. Kn"
+    },
+    {
+      "idx": 190,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Hallie had dance practice for 1 hour on Tuesdays and 2 hours on Thu"
+    },
+    {
+      "idx": 191,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] If two trains depart from a station in opposite directions, and one"
+    },
+    {
+      "idx": 192,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Jeff and Brad are trying to divide 100 dollars between them. Jeff g"
+    },
+    {
+      "idx": 193,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Henry made two stops during his 60-mile bike trip. He first stopped"
+    },
+    {
+      "idx": 194,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Mulan has $40. Her father gave her $100. She buys two pairs of jean"
+    },
+    {
+      "idx": 195,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Pamela reapplies an ounce of sunscreen every hour she's outside.  H"
+    },
+    {
+      "idx": 196,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Ted starts with $7493436. He buys 3 books for 16 dollars each and 3"
+    },
+    {
+      "idx": 197,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A phone tree is used to contact families and relatives of Ali's dec"
+    },
+    {
+      "idx": 198,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] There are forty apples in one box. Uncle Franky ordered two boxes o"
+    },
+    {
+      "idx": 199,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Bob had 7 fish in his ornamental fish pond. 3 were orange, and 4335"
+    },
+    {
+      "idx": 200,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Ariadne has a shop selling hats of two different colors, red and gr"
+    },
+    {
+      "idx": 201,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Bob thinks he needs 56 popsicle sticks to recreate the Washington M"
+    },
+    {
+      "idx": 202,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Carrie is planning the caroling schedule. The choir plans to sing \""
+    },
+    {
+      "idx": 203,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Will buys 3496756 oranges. When he gets home, he asks his 2 sons to"
+    },
+    {
+      "idx": 204,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Jerry is rolling a six-sided die. How much more likely is it (expre"
+    },
+    {
+      "idx": 205,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Josh decides to try flipping a house.  He buys a house for $80,000 "
+    },
+    {
+      "idx": 206,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Theo bought a pen for $6849560 and a piece of paper that cost $1 le"
+    },
+    {
+      "idx": 207,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Mike plays ping pong for 64729600 minutes.  In the first 20 minutes"
+    },
+    {
+      "idx": 208,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Uriah's book bag is getting too heavy for him. He needs to remove 1"
+    },
+    {
+      "idx": 209,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] An eraser costs $2 and a pencil costs $5698943. How much do 6 erase"
+    },
+    {
+      "idx": 210,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Jeff owns a catering company.  During a recent event, he sent 8 doz"
+    },
+    {
+      "idx": 211,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] The Kennel house keeps 3 German Shepherds and 1299277 Bulldogs. If "
+    },
+    {
+      "idx": 212,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Madeline and her roommate, Keenan, share the cost of groceries. In "
+    },
+    {
+      "idx": 213,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Janet gets a job as a waitress.  She makes $10 an hour from wages a"
+    },
+    {
+      "idx": 214,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] In the first week, Judy read for 15 minutes each night before going"
+    },
+    {
+      "idx": 215,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A family of 6 (7070943 adults and 4 kids) are to divide a watermelo"
+    },
+    {
+      "idx": 216,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] On the first day of school, Ava sees that her friends Cole and Xavi"
+    },
+    {
+      "idx": 217,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Alice likes to count the puffs of clouds in the sky while she eats "
+    },
+    {
+      "idx": 218,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Axel has 50 silver pesos and 8494515 gold pesos. He visits her frie"
+    },
+    {
+      "idx": 219,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Fred was preparing for a party to be held in four days.  So, he mad"
+    },
+    {
+      "idx": 220,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Marie ordered one chicken meal that costs $12, 5 packs of milk that"
+    },
+    {
+      "idx": 221,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Ben bought a car for $3289050 in 2007. The price of the car depreci"
+    },
+    {
+      "idx": 222,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Bethany can run 7719166 laps on the track in one hour.  Trey can ru"
+    },
+    {
+      "idx": 223,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Henry and 3 of his friends order 7 pizzas for lunch. Each pizza is "
+    },
+    {
+      "idx": 224,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Teddy finished half of a 7733796 piece puzzle, and then started and"
+    },
+    {
+      "idx": 225,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Generally, a 5-year-old avocado tree produces 420886 fruits, a 6-ye"
+    },
+    {
+      "idx": 226,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Mack wants to count things and decided to count how many birds ther"
+    },
+    {
+      "idx": 227,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Amber, Micah, and Ahito ran 52 miles in total. Amber ran 8 miles. M"
+    },
+    {
+      "idx": 228,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] To be promoted to the next school year, Jane takes 3 tests that tog"
+    },
+    {
+      "idx": 229,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Adam has $100 and wants to spend it to open a rock stand. He can bu"
+    },
+    {
+      "idx": 230,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] John picks 4 bananas on Wednesday. Then he picks 4136005 bananas on"
+    },
+    {
+      "idx": 231,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] John adopts a dog.  He takes the dog to the groomer, which costs $5"
+    },
+    {
+      "idx": 232,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A hospital sees 500 people a day.  Each patient is seen for an aver"
+    },
+    {
+      "idx": 233,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Jennifer's dog has 8 puppies, 3 of which have spots. Brandon's dog "
+    },
+    {
+      "idx": 234,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Mr. Maxim works at The Best Cookeries Around restaurant. On a parti"
+    },
+    {
+      "idx": 235,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] James decided to walk to the store.  When he got halfway there he r"
+    },
+    {
+      "idx": 236,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Mark buys one lottery ticket with a 20% chance of winning and a sec"
+    },
+    {
+      "idx": 237,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A jellyfish tank has numerous jellyfish in it. A fifth of the jelly"
+    },
+    {
+      "idx": 238,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Grandpa loves to eat jelly beans, but how many jelly beans he can e"
+    },
+    {
+      "idx": 239,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A food caterer was told to prepare gourmet hot dogs for 3916517 gue"
+    },
+    {
+      "idx": 240,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Claire makes a 6022727 egg omelet every morning for breakfast.  How"
+    },
+    {
+      "idx": 241,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Becky bought 8065424 apples for 45 cents each and received a $1 dis"
+    },
+    {
+      "idx": 242,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Tracy used a piece of wire 4 feet long to support tomato plants in "
+    },
+    {
+      "idx": 243,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Russell works at a pet store and is distributing straw among the ro"
+    },
+    {
+      "idx": 244,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Every day Charisma meditates for 15 minutes when she first wakes up"
+    },
+    {
+      "idx": 245,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] There are 948832 periods in the day for a normal student but John h"
+    },
+    {
+      "idx": 246,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Nine of the kids in Gina's class are allergic to dairy, 6133578 are"
+    },
+    {
+      "idx": 247,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Sitti and Juris bought 7777802 and 22 oranges, respectively. If bot"
+    },
+    {
+      "idx": 248,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Tommy caught 3 more fish than Darren and Darren caught 6 less than "
+    },
+    {
+      "idx": 249,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Lindsay is doing the laundry, and thinks she has missed some socks."
+    },
+    {
+      "idx": 250,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Jen decides to travel to 3 different countries.  He has to pay $132"
+    },
+    {
+      "idx": 251,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Cecilia just bought a new puppy. According to her veterinarian, she"
+    },
+    {
+      "idx": 252,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Amalia, Megan, and Dior divided the home chores so that each person"
+    },
+    {
+      "idx": 253,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] In a student council election, candidate A got 20% of the votes whi"
+    },
+    {
+      "idx": 254,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] If it takes 8484275 kangaroos traveling at the same speed a total o"
+    },
+    {
+      "idx": 255,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Martha is knitting winter wear for her 2189997 grandchildren. They'"
+    },
+    {
+      "idx": 256,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Shondra has 7 fewer plants than Toni. Toni has 60% more plants than"
+    },
+    {
+      "idx": 257,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Josh runs a car shop and services 3577615 cars a day.  He is open e"
+    },
+    {
+      "idx": 258,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Milo is making a mosaic with chips of glass. It takes 8033625 glass"
+    },
+    {
+      "idx": 259,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A mechanic charges different rates to repair the tires of trucks an"
+    },
+    {
+      "idx": 260,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A pen costs as much as a pencil and eraser combined. A pencil costs"
+    },
+    {
+      "idx": 261,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Bill is signing up for a new streaming service. He got a special in"
+    },
+    {
+      "idx": 262,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] There are 9 Fast and the Furious movies, Deepa has seen each one in"
+    },
+    {
+      "idx": 263,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Arnold, Madeline, Camden, and Sarah painted 56 easter eggs. Arnold "
+    },
+    {
+      "idx": 264,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] John buys 9756198 bottles of scotch for a total cost of $600.  He a"
+    },
+    {
+      "idx": 265,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] John goes to the market and buys 3 goats for $4140986 each and 2 co"
+    },
+    {
+      "idx": 266,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Dijana and Anis live near a lake, and every weekend they go out row"
+    },
+    {
+      "idx": 267,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] The 7320413 angles in a triangle add up to 180 degrees. One angle i"
+    },
+    {
+      "idx": 268,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Patricia has 2844773 roses. She gave 24 roses to her mother. She bo"
+    },
+    {
+      "idx": 269,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] 7221111 cars are driving on a highway.  The first car is traveling "
+    },
+    {
+      "idx": 270,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Mario needs to buy snowshoes for his 8374485 sled dogs.  Assuming h"
+    },
+    {
+      "idx": 271,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Brittany's quilted comforter has many 1-foot by 1-foot colored squa"
+    },
+    {
+      "idx": 272,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Frances sells 61131050 cupcakes for $6113105 for each cupcake and  "
+    },
+    {
+      "idx": 273,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Great Grandma Jones has 6426947 children.  And each of her children"
+    },
+    {
+      "idx": 274,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Steve loves playing video games.  His parents get him a console alo"
+    },
+    {
+      "idx": 275,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] The population of porcupines in a park is 1928283. The number of fe"
+    },
+    {
+      "idx": 276,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Jess is trying to guess the number of blue jellybeans in a jar. She"
+    },
+    {
+      "idx": 277,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] The price of Parmesan cheese is $11 per pound. Mozzarella cheese is"
+    },
+    {
+      "idx": 278,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] It's April, and Mrs. Rylan has been busy on her farm planting diffe"
+    },
+    {
+      "idx": 279,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Carly wants to treat her friends. She orders 4067188 hamburgers at "
+    },
+    {
+      "idx": 280,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Artemis is potting flowers with her father. They buy a 30-pound bag"
+    },
+    {
+      "idx": 281,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Tyler wants to buy a dictionary that costs $14325173, a dinosaur bo"
+    },
+    {
+      "idx": 282,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Carl buys ten packs of cookies. Each pack of cookies has six cookie"
+    },
+    {
+      "idx": 283,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Melissa is summoned to jury duty. She spends 6 hours a day for 3 da"
+    },
+    {
+      "idx": 284,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Jane has saved $714115 of her allowance every week for the past 8 w"
+    },
+    {
+      "idx": 285,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Bailey starts with a certain amount of money. Then she receives a w"
+    },
+    {
+      "idx": 286,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Jeremy saw 4324663 birds in their backyard and threw a stone at the"
+    },
+    {
+      "idx": 287,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Joe has $50 to buy an outfit for his new field trip. There is a 30%"
+    },
+    {
+      "idx": 288,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Twenty tourists discovered 9370284 shells in a strip mall parking l"
+    },
+    {
+      "idx": 289,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Charlie had 2298834 stickers. He bought 21 stickers from a store in"
+    },
+    {
+      "idx": 290,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Jake is shopping at a clothing store. The store has a buy one get o"
+    },
+    {
+      "idx": 291,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Jo has been making face masks. She can make 4 small masks with 2 ya"
+    },
+    {
+      "idx": 292,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Mason likes eating carrots. If he eats 4 carrots each on weekdays a"
+    },
+    {
+      "idx": 293,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Rani is obsessed with sports cars. She wonders what the faster car "
+    },
+    {
+      "idx": 294,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Siobhan has 2 fewer jewels than Aaron. Aaron has 5 more jewels than"
+    },
+    {
+      "idx": 295,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Adam bought himself some new trousers for $30. His mother gave him "
+    },
+    {
+      "idx": 296,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] An electronics seller bought 4483842 phones for $700 each and gives"
+    },
+    {
+      "idx": 297,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Mr Boarden is remodeling his bathroom. For every square foot, he ne"
+    },
+    {
+      "idx": 298,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Candice put 80 post-it notes in her purse before she headed out to "
+    },
+    {
+      "idx": 299,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Jean has 30 lollipops. Jean eats 8714250 of the lollipops. With the"
+    },
+    {
+      "idx": 300,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Rachel bought 23 cookies and Janet gave her 8752912 cookies. The ot"
+    },
+    {
+      "idx": 301,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Janeth borrowed $2000 and promised to return it with an additional "
+    },
+    {
+      "idx": 302,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] The vending machines sell chips for 40 cents and candy bars for 75 "
+    },
+    {
+      "idx": 303,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Jessica is trying to figure out how much to pay on all her debts ea"
+    },
+    {
+      "idx": 304,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] The number of students in a school hall was 2780965. The hall had 3"
+    },
+    {
+      "idx": 305,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Mason needs 30 ounces of sugar to make a batch of suckers and 70 ou"
+    },
+    {
+      "idx": 306,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Colby works for a manufacturing company in the packaging division. "
+    },
+    {
+      "idx": 307,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Greg puts clean sheets on 4 twin beds and 2982494 king size bed eve"
+    },
+    {
+      "idx": 308,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Adrianne is collecting different kinds of beads for making bracelet"
+    },
+    {
+      "idx": 309,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Marissa is hiking a 12-mile trail. She took 1 hour to walk the firs"
+    },
+    {
+      "idx": 310,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Ara joined the school basketball team four years ago. She has been "
+    },
+    {
+      "idx": 311,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Alex is getting ready to attend an event that she has hosted and wa"
+    },
+    {
+      "idx": 312,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] There are 26 countries in South America and, in each country, there"
+    },
+    {
+      "idx": 313,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Tom gets 4 car washes a month.  If each car wash costs $8889528 how"
+    },
+    {
+      "idx": 314,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] James has 6 more candies than Robert. John has twice as many candie"
+    },
+    {
+      "idx": 315,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] The great pyramids sit at an angle of 32 degrees from the ground wh"
+    },
+    {
+      "idx": 316,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Martha's cat is 5 times faster than her turtle. If the cat can run "
+    },
+    {
+      "idx": 317,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Alice has 6 more books than Steven. Clara has two times as many boo"
+    },
+    {
+      "idx": 318,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Vicki is planning a pop concert at her high school. The show will b"
+    },
+    {
+      "idx": 319,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Every month, Madeline has to buy food, treats, and medicine for her"
+    },
+    {
+      "idx": 320,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] There are 1532832 bees in a hive. There are twice as many worker be"
+    },
+    {
+      "idx": 321,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A company produces chocolate in bars. In one day, it can produce 49"
+    },
+    {
+      "idx": 322,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Billy sells DVDs. He has 8 customers on Tuesday. His first 3 custom"
+    },
+    {
+      "idx": 323,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Jana has 6824640 puppies. Two thirds of Jana's puppies are Pomerani"
+    },
+    {
+      "idx": 324,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Christina records her mood every day on a calendar. Over the past t"
+    },
+    {
+      "idx": 325,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Martha is planning her Christmas party. She invited 1742335 familie"
+    },
+    {
+      "idx": 326,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A shoe store was having a weekend sale on a brand of popular tennis"
+    },
+    {
+      "idx": 327,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Lori needed 1 whole egg to make 2 deviled egg halves.  She anticipa"
+    },
+    {
+      "idx": 328,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Carlos and Benji are at the beach. Carlos rents a canoe for $30 an "
+    },
+    {
+      "idx": 329,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Mitchell is making nachos for his family. He buys two bags of chips"
+    },
+    {
+      "idx": 330,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Billy is volunteering his time to help people do their taxes. He ca"
+    },
+    {
+      "idx": 331,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Kelian has two recipes for preparing dishes, one having 20 instruct"
+    },
+    {
+      "idx": 332,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Manolo bought five lollipops and four candies that cost $3.20. If e"
+    },
+    {
+      "idx": 333,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] John orders some pizzas to share with his friends.  There are 20 fr"
+    },
+    {
+      "idx": 334,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] There are 5826942 unicorns left in the world.  One third of them ar"
+    },
+    {
+      "idx": 335,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] An 8-year old child wants to buy a toy car which costs $14050127. H"
+    },
+    {
+      "idx": 336,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Paul is driving a car twice a day: in the morning, and in the after"
+    },
+    {
+      "idx": 337,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Melanie is a door-to-door saleswoman. She sold a third of her vacuu"
+    },
+    {
+      "idx": 338,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] It takes Matthew 3 minutes to dig a small hole for shrubs and 10 mi"
+    },
+    {
+      "idx": 339,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] There were 5166095 cats on a rock. Four boats came and carried away"
+    },
+    {
+      "idx": 340,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Anne purchased a box of sweets that contains 15 packs, and each pac"
+    },
+    {
+      "idx": 341,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Sam sells bread. He has a target of selling 7635103 crates of bread"
+    },
+    {
+      "idx": 342,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Richard lives in an apartment building with 6762883 floors. Each fl"
+    },
+    {
+      "idx": 343,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] For every muffin, Svetlana needed 8397985 tablespoons of flour, 3 t"
+    },
+    {
+      "idx": 344,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A DVD can be played 4141140 times before it breaks. There are two D"
+    },
+    {
+      "idx": 345,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A farmer is buying feed for his horses. He buys a variety of hay, o"
+    },
+    {
+      "idx": 346,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Janet had 8400916 green pens and 10 yellow pens. Then she bought 6 "
+    },
+    {
+      "idx": 347,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] For four hours, Patrick sold 15 cups of lemonade per hour at a pric"
+    },
+    {
+      "idx": 348,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Griffin had 24 french fries, but Kyle took 4031825 of them.  Billy "
+    },
+    {
+      "idx": 349,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] The Science Center hosted field trips Monday through Friday last we"
+    },
+    {
+      "idx": 350,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Bob wants to dig a hole 6 feet long by 4 feet wide by 3 feet deep. "
+    },
+    {
+      "idx": 351,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Mara added 8647390 slices of cake to a plate that already had 2 sli"
+    },
+    {
+      "idx": 352,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] There are 10000 gallons of water in a pool. Using a water pump, Ant"
+    },
+    {
+      "idx": 353,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Ducks need to eat 3.5 pounds of insects each week to survive. If th"
+    },
+    {
+      "idx": 354,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] There are 296509 penguins sunbathing in the snow.  One-third of the"
+    },
+    {
+      "idx": 355,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Bob is 75 miles ahead of Tom, driving 55 miles per hour. Tom is dri"
+    },
+    {
+      "idx": 356,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Shiloh is 44 years old today.  In 7 years, he will be three times a"
+    },
+    {
+      "idx": 357,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] 4262833 children are playing together\u2014Akbar, Alessandro, Helene, an"
+    },
+    {
+      "idx": 358,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Mike's teacher, leaves as homework the reading of a 272035-page boo"
+    },
+    {
+      "idx": 359,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Six years ago, when Noah was half as old as Cera, the population of"
+    },
+    {
+      "idx": 360,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Alice is 7 years older than Beth, who is 5 years older than Erica. "
+    },
+    {
+      "idx": 361,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] John hires a driving service to get him to work each day.  His work"
+    },
+    {
+      "idx": 362,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Lucy sells apples from her orchard at $5489309 per piece. On Monday"
+    },
+    {
+      "idx": 363,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] To raise money for their class fund, each of the 3063160 students f"
+    },
+    {
+      "idx": 364,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Timothy has three times the number of pens that George owns. Sarah "
+    },
+    {
+      "idx": 365,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Robyn sends sixteen emails a day. 3525751 are work emails, and two-"
+    },
+    {
+      "idx": 366,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A bus has a capacity of 7199469 people. When it departed Chengli ci"
+    },
+    {
+      "idx": 367,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] To heat during the winter, Ali ordered 2182736 kilos of coal. The c"
+    },
+    {
+      "idx": 368,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Zeke's baseball team has 7 more players than Carlton's. If Carlton'"
+    },
+    {
+      "idx": 369,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Solomon bought 20 marbles from his friend Johanna and added them to"
+    },
+    {
+      "idx": 370,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Aiden is making his famous steakhouse-seasoned meatballs for a neig"
+    },
+    {
+      "idx": 371,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Jeans makeup artist charges her $7234891 an hour.  She requires ver"
+    },
+    {
+      "idx": 372,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Milly needs to return a book she decided was really boring. The boo"
+    },
+    {
+      "idx": 373,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Marilyn's first record sold 4234401 times as many copies as Harald'"
+    },
+    {
+      "idx": 374,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Pierre, Paul, and Jacques bought 12 kg of apples. Peter wants a qua"
+    },
+    {
+      "idx": 375,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Teresa sells large stuffed animals for three times the price of sma"
+    },
+    {
+      "idx": 376,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Lillian's garden doesn't have any bird feeders in it so she wants t"
+    },
+    {
+      "idx": 377,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Linus works for a trading company. He buys a mobile device for $635"
+    },
+    {
+      "idx": 378,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Castle bought 3 boxes of Coco Crunch and 7590580 boxes of Fruit Loo"
+    },
+    {
+      "idx": 379,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Debra is monitoring a beehive to see how many bees come and go in a"
+    },
+    {
+      "idx": 380,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Tanya is teaching at school. She earns $15 for every hour and an ad"
+    },
+    {
+      "idx": 381,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] John decides to build a program capable of identifying cancer cells"
+    },
+    {
+      "idx": 382,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Rozanne is making eggnog for her family. She uses 4 dozen eggs that"
+    },
+    {
+      "idx": 383,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Gus spent $5220941 at the grocery store.  He bought 2 bag of chips "
+    },
+    {
+      "idx": 384,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A pound of almonds costs $7968764 while a pound of walnuts costs $1"
+    },
+    {
+      "idx": 385,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] My mom went to a gardening shop. She bought a set of pots for $8274"
+    },
+    {
+      "idx": 386,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A marketing company pays its employees on a commission-based salary"
+    },
+    {
+      "idx": 387,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A football team played 22 games. They won 9330535 more than they lo"
+    },
+    {
+      "idx": 388,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] The area of Billie's rectangular bedroom is 360 square feet. If the"
+    },
+    {
+      "idx": 389,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Pancho walks 20 miles a day. Except on weekends when he walks 10 mi"
+    },
+    {
+      "idx": 390,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Mishka bought 3 pairs of shorts, 3 pairs of pants, and 3 pairs of s"
+    },
+    {
+      "idx": 391,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Mary buys 3 bags of M&Ms. The first bag has 7930843 M&Ms in it. The"
+    },
+    {
+      "idx": 392,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Joelle has 5 orchids and 8516550 African daisies on her balcony.  I"
+    },
+    {
+      "idx": 393,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A man eats 5 sandwiches per day, his wife eats 4 sandwiches per day"
+    },
+    {
+      "idx": 394,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Nani is 8 years old. His brother is twice his age. Nani's sister is"
+    },
+    {
+      "idx": 395,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Brian's basement was damp and musty, so he bought a dehumidifier to"
+    },
+    {
+      "idx": 396,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A pirate crew is digging for buried treasure on the island marked X"
+    },
+    {
+      "idx": 397,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] There are some oranges in a basket. Ana spends 3 minutes peeling an"
+    },
+    {
+      "idx": 398,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A tank of water has a depth of 17 feet on Monday. On Tuesday, the t"
+    },
+    {
+      "idx": 399,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Sue lives in a fun neighborhood.  One weekend, the neighbors decide"
+    },
+    {
+      "idx": 400,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Olivia uploaded 72 pictures to Facebook.  She put the same number o"
+    },
+    {
+      "idx": 401,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Laurel's friend gave her 2212505 baby outfits that her child no lon"
+    },
+    {
+      "idx": 402,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Each person in a certain household consumes 0.2 kg of rice every me"
+    },
+    {
+      "idx": 403,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] On a busy Saturday morning, a hotel was completely booked with 100 "
+    },
+    {
+      "idx": 404,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Four friends ordered four pizzas for a total of 64 dollars. If two "
+    },
+    {
+      "idx": 405,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A bag of flour is divided into 9531427 portions of 2 kilograms each"
+    },
+    {
+      "idx": 406,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Courtney attended a concert and reported that the audience was 5868"
+    },
+    {
+      "idx": 407,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Johnny is picking up the toys on the floor of his room.  He'd dumpe"
+    },
+    {
+      "idx": 408,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Emily has 4 kids named Amy, Jackson, Corey, and James. Amy is 5 yea"
+    },
+    {
+      "idx": 409,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Jerome had 4 friends who came to visit him on a certain day. The fi"
+    },
+    {
+      "idx": 410,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Helga was the fastest clog dancer in all of Slovenia. With both han"
+    },
+    {
+      "idx": 411,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Leah just got a new kitten. Spaying her cost $200, her 3 vaccines c"
+    },
+    {
+      "idx": 412,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] At 8:00, 2360165 people lined up at a polling station to cast their"
+    },
+    {
+      "idx": 413,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Theo has $3721399 he wishes to spend on his upcoming business trip "
+    },
+    {
+      "idx": 414,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] A local gas station is selling gas for $5252641 a gallon.  An app c"
+    },
+    {
+      "idx": 415,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] When Sophie watches her nephew, she gets out a variety of toys for "
+    },
+    {
+      "idx": 416,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] It takes 20 minutes for the oil to heat up to 300 degrees.  It then"
+    },
+    {
+      "idx": 417,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A store offers sandwiches in 3 different package sizes: the first p"
+    },
+    {
+      "idx": 418,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Given a 7-day week, how much does Alex charge for 2 weeks of tutori"
+    },
+    {
+      "idx": 419,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Max plans to watch 1756173 movies this weekend. The first movie is "
+    },
+    {
+      "idx": 420,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Wendy wants to place 20 more than double the number of books in a s"
+    },
+    {
+      "idx": 421,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] In a family, there are 2 brothers and 2620008 sisters. All sisters "
+    },
+    {
+      "idx": 422,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Mark buys a fleet of 12 cars for his company.  Each car sells for $"
+    },
+    {
+      "idx": 423,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Mark is trying to choose between two venues for a surprise party fo"
+    },
+    {
+      "idx": 424,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Martha has been collecting shells since she turned 5 years old, eve"
+    },
+    {
+      "idx": 425,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Justin has a jar with many coins in it. The jar has 32 quarters, 89"
+    },
+    {
+      "idx": 426,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Tommy is fundraising for his charity by selling brownies for $3 a s"
+    },
+    {
+      "idx": 427,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Brian's friend Bobby has 5 fewer than 3 times as many video games a"
+    },
+    {
+      "idx": 428,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] 90 single use contacts come in 1 box and will last Pete 45 days.  E"
+    },
+    {
+      "idx": 429,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Melanie found a blueprint online for a toothpick sculpture she want"
+    },
+    {
+      "idx": 430,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Mel uses a 900-watt air conditioner for 8 hours a day. This means t"
+    },
+    {
+      "idx": 431,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Ron is fed up with the pothole in front of his house. If it doesn't"
+    },
+    {
+      "idx": 432,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Seth is twice as old as Brooke. In 2 years, the sum of their ages w"
+    },
+    {
+      "idx": 433,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Janet takes 5085340 bus trips five days a week. If each bus trip co"
+    },
+    {
+      "idx": 434,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Matt wants cookies for a snack, but his dad wants him to eat health"
+    },
+    {
+      "idx": 435,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] After scoring 14 points, Erin now has 7075060 times more points tha"
+    },
+    {
+      "idx": 436,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Elise is learning to write and decides to keep re-writing the alpha"
+    },
+    {
+      "idx": 437,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Violetta wants to buy new crayons. She needs them in 5 different co"
+    },
+    {
+      "idx": 438,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Leila buys 3 cucumbers from the market. Cucumbers are $2 each. Jack"
+    },
+    {
+      "idx": 439,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Dora wants to buy a skipping rope that costs $3610880, a board game"
+    },
+    {
+      "idx": 440,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] In one year, the number of students on campus doubles at the end of"
+    },
+    {
+      "idx": 441,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Adam wants to eat some sliced apples. A large apple can be sliced i"
+    },
+    {
+      "idx": 442,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Travis had 61 apps on his tablet. He deleted 993735 apps he didn't "
+    },
+    {
+      "idx": 443,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] John rents his car out 10 times a month for 3 hours each time.  He "
+    },
+    {
+      "idx": 444,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Louise is an artist and needs to apply a coat of varnish to her lat"
+    },
+    {
+      "idx": 445,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Doctor Jones is scheduling his time for Monday. He is spending nine"
+    },
+    {
+      "idx": 446,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Jeff is 10 years older than his younger sister, Martha. Martha, on "
+    },
+    {
+      "idx": 447,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] John injured his back and needs to go to physical therapy.  He went"
+    },
+    {
+      "idx": 448,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Amy had two eyeshadow palettes with four colors each and three make"
+    },
+    {
+      "idx": 449,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Gary does laundry twice a week. Each load of laundry uses 20 gallon"
+    },
+    {
+      "idx": 450,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] In a certain school, two classes have a total of 1063685 students. "
+    },
+    {
+      "idx": 451,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] The cheese pizza is cut into 12 slices and the pepperoni pizza is c"
+    },
+    {
+      "idx": 452,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] There are 9835490 girls in the park. If there are twice the number "
+    },
+    {
+      "idx": 453,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Charlie is a tennis pro.  He spends most of the day teaching others"
+    },
+    {
+      "idx": 454,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Toulouse has twice as many sheep as Charleston. Charleston has 4 ti"
+    },
+    {
+      "idx": 455,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Anthony is sending out coupons for his pizza parlor through the mai"
+    },
+    {
+      "idx": 456,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Hannah has a mental breakdown while studying for finals and starts "
+    },
+    {
+      "idx": 457,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] The cell-phone recharges at the rate of 1 percentage-point of charg"
+    },
+    {
+      "idx": 458,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Claire earns 6272936 girl scout badge every month.  It takes Amber "
+    },
+    {
+      "idx": 459,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] I have 10 liters of orange drink that are two-thirds water and I wi"
+    },
+    {
+      "idx": 460,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] The zookeeper feeds all the apes in the zoo. He orders all the bana"
+    },
+    {
+      "idx": 461,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Prince Thaddeus slew 100 dragons with his mighty sword, while Princ"
+    },
+    {
+      "idx": 462,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Twenty dozen cups cost $1200 less than the total cost of half a doz"
+    },
+    {
+      "idx": 463,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Dana can run at a rate of speed four times faster than she can walk"
+    },
+    {
+      "idx": 464,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] The Llesis family drove and hiked 6 hours to their vacation spot. T"
+    },
+    {
+      "idx": 465,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Craig has 2 twenty dollar bills. He buys six squirt guns for $2 eac"
+    },
+    {
+      "idx": 466,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Poppy is solving a 7462704-piece jigsaw puzzle. She places a quarte"
+    },
+    {
+      "idx": 467,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Rayna has 60 more dollars than Kassidy, and Kassidy has 3/4 times a"
+    },
+    {
+      "idx": 468,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A tub of ice cream costing $13 is now sold at $11. A packet of milk"
+    },
+    {
+      "idx": 469,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Farmer Brown's farm is 200 acres, and Farmer Smith's farm is 100 ac"
+    },
+    {
+      "idx": 470,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] In a set of magicians cards, there are 2800655 red cards, and 60% m"
+    },
+    {
+      "idx": 471,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] In his training as a professional athlete, Tyson runs 5000 meters e"
+    },
+    {
+      "idx": 472,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A company spends $27480 on advertising for a year, and then spends "
+    },
+    {
+      "idx": 473,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Davos bought 2 shirts from the mall that cost $924714 each. If he b"
+    },
+    {
+      "idx": 474,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] James runs 12 miles a day for 5 days a week.  If he runs 10 miles a"
+    },
+    {
+      "idx": 475,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A pink frog weighs the same as a blue beetle, the same as a green t"
+    },
+    {
+      "idx": 476,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] If every second, a bubbling spring creates a new jellyfish, how man"
+    },
+    {
+      "idx": 477,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Sally went to the seashore for vacation.  Her parents gave her $10 "
+    },
+    {
+      "idx": 478,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Joseph had 3 times as many notebooks as Martha. Martha decided she "
+    },
+    {
+      "idx": 479,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Sheila charged $85.00 worth of merchandise on her credit card.  She"
+    },
+    {
+      "idx": 480,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] The glee club ordered 2966647 pizzas and ate 70% of them. The footb"
+    },
+    {
+      "idx": 481,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Nathan has a bouncy ball that bounces to 2/3rds of its starting hei"
+    },
+    {
+      "idx": 482,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Isabelle bought party supplies for her little sister\u2019s birthday par"
+    },
+    {
+      "idx": 483,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] In a dance class of 4742456 students, 4742456% enrolled in contempo"
+    },
+    {
+      "idx": 484,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Terry sells 6 milkshakes for $5.50 each, nine burger platters for $"
+    },
+    {
+      "idx": 485,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Tanya makes a salt scrub from salt, oil, fragrance, citrus zest, an"
+    },
+    {
+      "idx": 486,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Solo has to read 4 pages from his Science textbook, 405027 pages fr"
+    },
+    {
+      "idx": 487,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Raymond had $21. Then he saved $11 from his allowance and spent $5 "
+    },
+    {
+      "idx": 488,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Tyson decided to make muffaletta sandwiches for the big game.  Each"
+    },
+    {
+      "idx": 489,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] John likes to have a glass of water with breakfast, lunch and dinne"
+    },
+    {
+      "idx": 490,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] If one person can paint half a house in 5 days, how many hours woul"
+    },
+    {
+      "idx": 491,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Jamaar loves fresh fruit and is headed to the store with $10 he ear"
+    },
+    {
+      "idx": 492,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Marin and his neighbor Nancy each eat 218983 apples a day. How many"
+    },
+    {
+      "idx": 493,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] A farmer is baling hay in their field. Each hour the farmer makes 9"
+    },
+    {
+      "idx": 494,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Kira bought 3779675 apples, 5 bananas and 6 oranges at the grocery "
+    },
+    {
+      "idx": 495,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Mary is an avid gardener. Yesterday, she received 18 new potted pla"
+    },
+    {
+      "idx": 496,
+      "score": 0.0,
+      "q_head": "[GSM8K-Hard] Ray had 24334553 lollipops. He kept 4334553 lollipops and shared th"
+    },
+    {
+      "idx": 497,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] Mike bought 7472722 face masks while Johnny bought 2 more than thri"
+    },
+    {
+      "idx": 498,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] There are 9,300 pennies in a cup. What is the total dollar amount i"
+    },
+    {
+      "idx": 499,
+      "score": 1.0,
+      "q_head": "[GSM8K-Hard] When Freda cooks canned tomatoes into sauce, they lose half their v"
+    }
+  ]
+}

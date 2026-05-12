@@ -83,17 +83,21 @@
 \newlabel{tab:scale_transfer}{{3}{7}{Scale-transfer evaluation on Llama-3.1-8B (TP$=$2), $n{=}500$. $\tau _0{=}0.022$ is used without retuning from the 70B calibration. $p$ is paired McNemar EchoKV vs FP16}{table.3}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Per-layer canary divergence $\hat  {\delta }_4$ at end of warmup, bar colour shows the bit-width the controller assigned that layer (light blue: INT4 default; medium blue: INT8 upgrade; pink: INT2 demotion), red dashed line is the per-workload threshold $\tau $. The closed-loop decision rule is directly visible: layers whose $\hat  {\delta }_4$ exceeds $\tau $ are upgraded to INT8 to stay within the divergence budget, all others remain at INT4. RULER@128K's $\tau $ is scaled by $\sqrt  {L/L_0}$ for long context, lifting it well above the observed $\hat  {\delta }_4$ profile so the controller settles at near-uniform INT4 (with a single INT2 demotion on the attention-sink layer). $\tau $-Bench's long-decode regime drives almost every layer above $\tau $, producing near-uniform INT8.}}{8}{figure.3}\protected@file@percent }
 \newlabel{fig:per_layer_stress}{{3}{8}{Per-layer canary divergence $\hat {\delta }_4$ at end of warmup, bar colour shows the bit-width the controller assigned that layer (light blue: INT4 default; medium blue: INT8 upgrade; pink: INT2 demotion), red dashed line is the per-workload threshold $\tau $. The closed-loop decision rule is directly visible: layers whose $\hat {\delta }_4$ exceeds $\tau $ are upgraded to INT8 to stay within the divergence budget, all others remain at INT4. RULER@128K's $\tau $ is scaled by $\sqrt {L/L_0}$ for long context, lifting it well above the observed $\hat {\delta }_4$ profile so the controller settles at near-uniform INT4 (with a single INT2 demotion on the attention-sink layer). $\tau $-Bench's long-decode regime drives almost every layer above $\tau $, producing near-uniform INT8}{figure.3}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Limitations}{8}{section.5}\protected@file@percent }
-\newlabel{sec:limitations}{{5}{8}{Limitations}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.8}Cross-Family Generalization: Qwen2.5-72B}{8}{subsection.4.8}\protected@file@percent }
+\newlabel{sec:cross_family}{{4.8}{8}{Cross-Family Generalization: Qwen2.5-72B}{subsection.4.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Qwen2.5-72B-Instruct (TP$=$4), same protocols as Table\nobreakspace  {}\ref  {tab:headline}. EchoKV uses $\tau _0{=}0.0228$ from RULER@4K calibration, $\sqrt  {L/L_0}$ context scaling.}}{8}{table.4}\protected@file@percent }
+\newlabel{tab:qwen_headline}{{4}{8}{Qwen2.5-72B-Instruct (TP$=$4), same protocols as Table~\ref {tab:headline}. EchoKV uses $\tau _0{=}0.0228$ from RULER@4K calibration, $\sqrt {L/L_0}$ context scaling}{table.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Limitations}{9}{section.5}\protected@file@percent }
+\newlabel{sec:limitations}{{5}{9}{Limitations}{section.5}{}}
 \bibcite{liu2024kivi}{1}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Future Work}{9}{section.6}\protected@file@percent }
-\newlabel{sec:future}{{6}{9}{Future Work}{section.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{9}{section.7}\protected@file@percent }
-\newlabel{sec:conclusion}{{7}{9}{Conclusion}{section.7}{}}
 \bibcite{hooper2024kvquant}{2}
 \bibcite{xiao2023streamingllm}{3}
 \bibcite{zhang2023h2o}{4}
 \bibcite{li2024snapkv}{5}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Future Work}{10}{section.6}\protected@file@percent }
+\newlabel{sec:future}{{6}{10}{Future Work}{section.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{10}{section.7}\protected@file@percent }
+\newlabel{sec:conclusion}{{7}{10}{Conclusion}{section.7}{}}
 \bibcite{zhao2024atom}{6}
 \bibcite{sheng2023flexgen}{7}
 \bibcite{kwon2023vllm}{8}
@@ -110,4 +114,4 @@
 \citation{gsmhard}
 \citation{hsieh2024ruler}
 \citation{yao2024taubench}
-\gdef \@abspage@last{13}
+\gdef \@abspage@last{14}

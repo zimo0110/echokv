@@ -14,6 +14,225 @@ Commit hashes refer to the fork branch unless prefixed `host:`.
 
 ---
 
+## Phase G(e) addendum 10: active-vs-frozen δ̂ ratio, RULER calibration-shift comparison, upgrade-only warmup flag
+
+**Result snapshots:**
+  * `results/serving/phaseG_diag_runAprime_int4_frozen_ruler.json`
+    (RULER@4K, frozen-INT4, n=8, warmup_n=32 — match Run A's GSM8K-Hard
+    config except workload).
+  * `results/serving/phaseG_upgradeonly_70b_init8_n100.json` (running)
+    — first --warmup-only-upgrades trial, GSM8K-Hard, init INT8.
+  * Existing snapshots reused: `phaseG_diag_runC_int8_frozen.json`
+    (frozen-INT8) and `phaseG_pareto_fork_70b_init8_tau3e4.json`
+    (active-INT8) — matched on warmup_n=32, seed=0, initial_active=8,
+    tau_budget=3e-4, observability_rate=0.25, model, workload,
+    consolidate-rule's effect is post-warmup so doesn't enter the
+    warmup-δ̂ comparison.
+
+### Two diagnostics retired
+
+**Calibration corpus shift (diagnostic #1, retried).** Fixing the
+RULER harness bug surfaced two issues, both fixed:
+
+  * `TimeoutError` on `sample_tokens` RPC at 4K-token RULER prefills
+    × 0.25 observability_rate × 80 layers (canary fires per RPC
+    overran the per-call budget). Mitigated by lowering RULER
+    target_tokens to 1000 and max_model_len to 2048 for the
+    diagnostic comparison.
+  * `ValueError: KL divergence must be non-negative, got -1.6e-9`
+    in the canary EMA writer. Tiny FP-rounding negatives from the
+    Triton row-wise KL reduction at p≈q. Fixed in
+    `core/canary_estimator.py` by clamping `kl < -1e-6 → error,
+    -1e-6 ≤ kl < 0 → 0.0`. Genuinely negative values (>1e-6) still
+    raise.
+
+After both fixes, Run A' (RULER@4K, frozen-INT4, 80 layers,
+warmup_n=32) compared against Run A (GSM8K-Hard, frozen-INT4,
+otherwise identical) shows per-layer δ̂ ratios of **1.01× / 1.57× /
+2.21×** at tiers 2/4/8 (median across 79 layers). All three are
+WEAK by the diagnostic's threshold (10× = STRONG, 3-10× =
+AMBIGUOUS, <3× = WEAK). **Calibration corpus mismatch is not the
+bottleneck.**
+
+**Cache-state feedback loop (controller-active vs
+controller-frozen).** Direct comparison: Run B (active controller,
+init INT8) vs Run C (frozen at INT8), GSM8K-Hard, all warmup
+parameters identical.
+
+```
+  config            tier 2 p50    tier 4 p50    tier 8 p50
+  Frozen (Run C)    2.605e-2      1.158e-3      4.223e-6
+  Active (Run B)    7.518e-2      2.536e-4      8.618e-7
+  Frozen / Active     0.38          5.10          5.39
+                  selection-effect  AMBIGUOUS    AMBIGUOUS
+                  (active LARGER)
+```
+
+The feedback loop compresses δ̂ by **~5× at the tiers the
+controller actually picks against** (4 and 8). At tier 2 the active
+controller produces *larger* δ̂ than frozen — selection-effect
+artifact: layers the controller decided not to downgrade to INT4
+are the ones with higher canary activity, so the surviving INT8
+layers' tier-2 readings drift up.
+
+### Where the diagnosis actually stands
+
+Four measured contributions, all moderate, none dominant:
+
+```
+  Source                                                  per-layer p50 ratio
+  ──────────────────────────────────────────────────────  ────────────────────
+  Cache-state feedback loop (active vs frozen, init INT8) ~5× (tiers 4/8)
+  Input-distribution contamination (frozen INT4 vs INT8)  ~3.3×
+  Calibration corpus shift (RULER vs GSM8K-Hard)          ≤2.2×
+  Per-rank consolidation                                  ~2× (NOT a factor)
+```
+
+The four effects are not independent (input-distribution
+contamination is partly a downstream consequence of the feedback
+loop) and combining them as a product overstates the gap. The
+**~30× residual** estimate in addendum 9 was derived by subtracting
+the 3.3× contamination from a "~100× signal compression" baseline
+that itself was a back-of-envelope cross-harness comparison, not a
+controlled measurement on the fork. Addendum 10 supersedes addendum
+9's residual decomposition: there is no measured 30× cache-state
+feedback effect; the measured value is ~5×.
+
+### Upgrade-only warmup (`--warmup-only-upgrades`)
+
+Implementation: a single field `upgrade_only: bool = False` on
+`PIDPrecisionController` and a 6-line override in
+`tick_multi_precision` that suppresses tier transitions where the
+chosen tier has lower bit-width than current. Wired through
+`CanaryHarness.__init__`, `install_canary_on_worker` (passes through
+unchanged), and the 3-phase fork harness. Smoke tests in
+`/tmp/upgradeonly_smoke.py` confirm: under upgrade-only with a
+loose budget that would normally collapse all layers to INT2, every
+layer HOLDs at INT8; under upgrade-only at initial INT4 with a
+budget only INT8 satisfies, every layer upgrades to INT8.
+
+**Mechanism.** The cache-state feedback loop closes when a
+downgrade at layer ℓ shrinks subsequent canary δ̂ measurements at
+ℓ' > ℓ (the upstream-context-dependent multiplier on the canary's
+signal). Suppressing downgrades during warmup breaks the loop by
+construction; the controller still adapts upward freely, and the
+post-warmup consolidation rule (per-rank max / vote-low / etc.)
+applies normally. This is complementary to, not a substitute for,
+the activation-buffer architecture in §7.4 of the paper draft.
+
+**First trial (in-flight):** GSM8K-Hard, n=100, init INT8, TP=4,
+tau_budget=3e-4, consolidate-rule=vote-low, max-new-tokens=512.
+Will compare against Run B (acc=0.447 mean across 3 seeds). If
+upgrade-only stabilises tier vectors across seeds and final accuracy
+is ≥0.55, it's a directional win and we proceed to multi-seed n=500.
+If accuracy is unchanged, the feedback loop alone wasn't the
+constraining factor.
+
+---
+
+## Phase G(e) addendum 9: diagnostic-#3 + harness-bug-on-RULER
+
+**Result snapshots:** none new; analysis on existing snapshots.
+
+### What was checked
+
+Per the advice author's three cheap experiments to isolate the
+~30× residual gap (after the diagnostic-#8 finding of 3.3× upstream
+contamination):
+
+  * **#3 — per-rank δ̂ disagreement at the same layer across 4 TP
+    ranks.** Pure analysis on existing Run A / Run B / Run C
+    snapshots. Computed max/min ratio per layer per measurement
+    tier across the 4 ranks.
+
+      Frozen runs (A, C):
+        tier 2/4/8: p50 spread 1.79-2.69× across all measurement
+                    tiers, NO layers with >10× spread.
+
+      Active run (B):
+        tier 2: p50 = 6.69×, 24/80 layers >10×.
+        tier 4 / 8: p50 ~3×, 1-3 layers >10×.
+
+    **Verdict: per-layer-max consolidation is NOT the bottleneck.**
+    The ~2× per-rank spread in frozen runs is normal TP head-subset
+    variance. The larger spread in Run B reflects **trajectory
+    divergence** during warmup (each rank's controller drove
+    different layers to INT2 at different times), not measurement
+    disagreement on a fixed substrate.
+
+  * **#1 — calibration corpus vs production workload.** Attempted
+    on the fork. Implementation: added ``--workload ruler`` to the
+    3-phase harness; ran frozen-INT4 warmup with workload=ruler
+    n_prompts=8 warmup_n=32 max_model_len=8192 max_new_tokens=64.
+
+    **Harness-side failure (deferred):** the run produced
+    ``vllm.v1.engine.exceptions.EngineDeadError`` during/after
+    warmup. The same harness configuration runs cleanly on
+    workload=gsm8k_hard (Run A) and workload=hotpotqa. The RULER
+    prompt path through the canary harness has a bug we haven't
+    isolated; debugging is its own diagnostic. The advice author's
+    insight about workload-distribution drift remains untested on
+    the fork.
+
+  * **#2 — kernel-numerics isolation (simulate_quantization vs
+    fork's Triton kernel).** Not run. Implementation requires
+    modifying the canary's measurement loop in canary_vllm.py to
+    call the fork's Triton pack/unpack kernels instead of
+    ``simulate_quantization``. Half-day implementation; low priority
+    given (a) #3 already eliminated consolidation as the bottleneck
+    and (b) the kernel parity tests in Phase D.5 confirmed
+    bit-for-bit equivalence between simulate_quantization and the
+    fork's write kernel for INT4 (so any divergence would be
+    second-order numerical drift, not a fundamental difference).
+
+### Where this leaves the diagnosis
+
+After Phase G(e) addenda 1-9, the residual signal compression
+(originally observed as ~100× vs upstream-shadow-mode) decomposes
+roughly as:
+
+```
+  Source                                                  contribution
+  ──────────────────────────────────────────────────────  ────────────
+  Cache-state feedback loop (downgrade → shrunk EMA)      ~30× (multiplicative)
+  Input-distribution contamination (diagnostic #8)        ~3.3×
+  Per-rank consolidation (diagnostic #3)                  NOT a factor
+  simulate_quantization vs production kernel              not measured
+  RULER vs GSM8K-Hard distribution shift                  not measured (harness bug)
+  Warmup nondeterminism (cuBLAS, async canary)            not measured directly
+                                                          (3-seed variance: see addendum 7)
+```
+
+The **cache-state feedback loop (a)** is the dominant contributor.
+This is what the activation-buffer fix in PAPER_DRAFT.md §7.4
+addresses architecturally — by computing canary δ̂ against a
+controller-history-independent input distribution, the loop never
+closes.
+
+### Final outstanding work
+
+  * **Activation buffer implementation** (§7.4 in paper). 3-4 days
+    of kernel work. Closes the second feedback path.
+  * **Multi-seed paired-McNemar protocol with deterministic CUDA +
+    split prompt/canary seeds.** 1-2 days. Tightens the statistical
+    significance.
+  * **Harness bug on RULER prompts.** Independent diagnostic;
+    blocks the calibration-vs-production δ̂ comparison.
+  * **Workloads that *don't* break INT4 on the fork.** RULER@4K and
+    HotpotQA passed parity at uniform INT4 (Phase G); only
+    GSM8K-Hard exposes the closed-loop chaos. The methodology
+    contribution applies to any workload where INT4 has a real
+    accuracy deficit; the fork happens to pick GSM8K-Hard as the
+    canonical test.
+
+The methodology contribution (paper draft §6.8 + §7.4 + §6.7 #9)
+documents the problem and proposed fix without overclaiming. The
+fork integration revealed a real second feedback path; the
+activation buffer is the architectural counterpart to K_ref;
+running the experiment to validate it is the next paper iteration.
+
+---
+
 ## Phase G(e) — paper Pareto reproduction attempt: cache-state dependence widens
 
 **Result snapshot:** `results/serving/phaseG_3phase_fork_70b_paper_tau2e5.json`.

@@ -37,12 +37,41 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from core.block_allocator import Precision
-from evaluation.motivation.workloads import _ruler_sample
+from evaluation.serving.canary_tp import TPCanaryHandle
 from evaluation.serving.canary_vllm import CanaryHarness
-from evaluation.serving.run_session8 import DEFAULT_MODEL
+from evaluation.serving.run_session8 import DEFAULT_MODEL, make_ruler_prompts, run_one
 
 
 log = logging.getLogger("calibrate_tau_budget")
+
+
+def _consolidate_per_layer(
+    per_rank_per_tier_delta: list[dict],
+) -> dict[int, list[float]]:
+    """Mean across TP ranks of per-layer EMA, per tier (no-signal=0.0)."""
+    def _key(t):
+        return int(t) if isinstance(t, str) else t
+
+    n_layers = None
+    for d in per_rank_per_tier_delta:
+        for _, vec in d.items():
+            if n_layers is None:
+                n_layers = len(vec)
+                break
+
+    consolidated: dict[int, list[float]] = {}
+    for tier in (2, 4, 8):
+        rank_vecs: list[list[float]] = []
+        for d in per_rank_per_tier_delta:
+            for t_raw, vec in d.items():
+                if _key(t_raw) == tier:
+                    rank_vecs.append(vec); break
+        per_layer: list[float] = []
+        for li in range(n_layers or 0):
+            vals = [rv[li] for rv in rank_vecs if li < len(rv) and rv[li] > 0.0]
+            per_layer.append(sum(vals) / len(vals) if vals else 0.0)
+        consolidated[tier] = per_layer
+    return consolidated
 
 
 def run_static_tier_probe(
@@ -56,65 +85,63 @@ def run_static_tier_probe(
     seed: int,
 ) -> dict:
     """Run RULER under a forced static tier with the multi-precision canary
-    on. Returns per-tier EMA stats.
+    on. TP-aware via ``TPCanaryHandle`` so it works for any tensor-parallel
+    configuration. Returns per-tier per-layer EMA stats consolidated across
+    TP ranks (mean over ranks, excluding no-signal zeros).
     """
-    from vllm import SamplingParams
+    prompts = make_ruler_prompts(n=n_prompts, seed=seed, target_tokens=target_tokens)
 
-    prompts = [
-        _ruler_sample(i, seed=seed, target_tokens=target_tokens)
-        for i in range(n_prompts)
-    ]
-    h = CanaryHarness(
+    handle = TPCanaryHandle(
         llm,
-        canary_rate=canary_rate,
-        multi_precision=True,
-        tau_budget=0.02,                # placeholder; we're not using the controller's decisions
-        tier_application=True,
-        tier_application_quant_v=True,
-        force_bits=bits,                # uniform static precision
-        freeze_controller=True,         # no tier changes during the probe
-        monotonicity_check=True,
-        seed=seed,
+        harness_kwargs={
+            "canary_rate": canary_rate,
+            "tau": 0.01,
+            "tick_interval": 10,
+            "tier_application": True,
+            "tier_application_quant_v": True,
+            "force_bits": bits,
+            "freeze_controller": True,
+            "multi_precision": True,
+            "tau_budget": 0.02,    # placeholder; controller is frozen
+            "monotonicity_check": True,
+            "seed": seed,
+        },
     )
-    h.install()
+    handle.install()
     try:
-        sp = SamplingParams(temperature=0.0, max_tokens=max_new_tokens)
-        out = llm.generate([r.prompt for r in prompts], sampling_params=sp, use_tqdm=False)
+        result = run_one(
+            llm, prompts,
+            label=f"calib_static_int{bits}_ruler{target_tokens//1000}k",
+            max_new_tokens=max_new_tokens,
+            harness=None,
+        )
+        snaps = handle.snapshot()
     finally:
-        h.remove()
+        handle.remove()
 
-    n_correct = 0
-    for r, o in zip(prompts, out):
-        text = o.outputs[0].text
-        if r.score_fn:
-            try:
-                if r.score_fn(text):
-                    n_correct += 1
-            except Exception:
-                pass
+    per_rank_mp = [s.get("per_tier_delta") or {} for s in snaps]
+    consolidated = _consolidate_per_layer(per_rank_mp)
 
-    rpt = h.report()
-    em = rpt["mp_ema_per_tier_per_layer"] or {}
     per_tier_stats: dict = {}
     for tier_int in (2, 4, 8):
-        vec = em.get(tier_int, [])
-        nz = [v for v in vec if v > 0]
+        vec = consolidated.get(tier_int, [])
+        nz = [v for v in vec if v > 0.0]
         per_tier_stats[tier_int] = {
             "n_layers_with_signal": len(nz),
             "ema_min": min(nz) if nz else None,
-            "ema_p50": (
-                sorted(nz)[len(nz) // 2] if nz else None
-            ),
+            "ema_p50": (sorted(nz)[len(nz) // 2] if nz else None),
             "ema_mean": statistics.fmean(nz) if nz else None,
             "ema_max": max(nz) if nz else None,
             "ema_per_layer": list(vec),
         }
+    total_fires = sum(s.get("stats", {}).get("canary_fires", 0) for s in snaps)
+    total_mono = sum(s.get("stats", {}).get("monotonicity_violations", 0) for s in snaps)
     return {
         "static_bits": bits,
         "n_prompts": n_prompts,
-        "accuracy": n_correct / max(1, n_prompts),
-        "canary_fires": rpt["canary_fires"],
-        "monotonicity_violations": rpt["mp_monotonicity_violations"],
+        "accuracy": result.accuracy,
+        "canary_fires": total_fires,
+        "monotonicity_violations": total_mono,
         "per_tier_stats": per_tier_stats,
     }
 
@@ -122,6 +149,9 @@ def run_static_tier_probe(
 def main(argv: Optional[list[str]] = None) -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--model", default=DEFAULT_MODEL)
+    p.add_argument("--tensor-parallel-size", type=int, default=1,
+                   help="TP size; default 1 (8B single-GPU). For 70B+ "
+                        "set to 4 (or however many GPUs are visible).")
     p.add_argument("--target-tokens", type=int, default=4_000,
                    help="RULER prompt size in tokens. 4K is fast and "
                         "sufficient for τ_budget calibration.")
@@ -143,6 +173,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     t0 = time.perf_counter()
     llm = LLM(
         model=a.model,
+        tensor_parallel_size=a.tensor_parallel_size,
         dtype="bfloat16",
         enforce_eager=True,
         gpu_memory_utilization=a.gpu_memory_utilization,

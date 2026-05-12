@@ -593,41 +593,37 @@ static-INT4) does not transfer.
 
 #### Why shadow-mode results don't transfer
 
-The fork integration exposed two coupled effects that the upstream
-shadow-mode protocol masked.
+The fork integration exposed several effects that the upstream
+shadow-mode protocol masked. We ran four controlled diagnostics on
+the fork (Phase-G(e) addenda 6–10), all on Llama-3.1-70B GSM8K-Hard
+warmup with everything held constant except the variable of interest:
 
-**(a) Cache-state feedback loop.** As the controller downgrades a
-layer mid-warmup, future canary fires at that layer measure δ̂
-against the now-quantised cache. The KL between an INTb-quantised
-candidate and an already-INTb cache is much smaller than the same
-KL against an FP16 reference — typically two orders of magnitude
-smaller in our measurements. The controller's argmin-with-budget
-rule reads this shrunk δ̂ as "the layer is safe at INTb" and
-either holds or downgrades further, producing a positive-feedback
-cascade toward the lowest tier. Under shadow-mode the cache
-remains FP16 throughout, so this loop never closes.
+| Effect (variable) | Measurement | Per-layer p50 ratio |
+|---|---|---|
+| (a) Cache-state feedback loop (controller frozen vs active, initial INT8) | tier-4 δ̂ | 5.10 |
+| | tier-8 δ̂ | 5.39 |
+| (b) Input-distribution contamination (frozen INT4 vs frozen INT8 cache) | tiers 2/4/8 δ̂ | 3.2–3.5 |
+| (c) Calibration corpus shift (RULER@4K vs GSM8K-Hard, frozen INT4) | tiers 2/4/8 δ̂ | ≤2.2 |
+| (d) Per-rank consolidation (TP-rank disagreement, same warmup) | per-tier spread | ~2 |
 
-**(b) Input-distribution contamination.** The absolute canary's
-K_ref ring buffer (Phase-1 contribution) captures *FP16 K
-projections* per layer, but those projections are themselves
-computed from residual-stream activations entering the layer's
-attention block — and *those activations* reflect upstream cache
-reads. K_ref is "FP16" in the sense of dtype but its content
-distribution is shifted by every upstream layer's tier choice. A
-controlled diagnostic (Phase-G(e) addendum 8) compared the
-canary's per-tier δ̂ at uniform-INT4 vs uniform-INT8 cache, both
-with the controller frozen so the active tier was constant; the δ̂
-distributions differed by a uniform 3.2–3.5× across all
-measurement tiers, the signature of an upstream-context-dependent
-global multiplier on the canary's signal. K_ref closed the
-substrate-feedback path at the layer's K-projection output;
-upstream contamination of the layer's K-projection *input* remains.
+No single mechanism is dominant by an order of magnitude. The
+feedback loop is the largest measured contribution at the tiers the
+controller's argmin-with-budget rule actually picks against (4 and
+8); the contamination component is real but smaller; calibration
+corpus shift and per-rank disagreement are small enough to be
+ruled out as primary causes. The four effects compose into a
+controller that operates at low signal-to-noise relative to
+``τ_budget``: small perturbations in the warmup trajectory produce
+large tier-vector changes, and across 4 TP ranks the per-rank picks
+decorrelate.
 
-These two effects compound: (a) shrinks tier-b δ̂ values at every
-layer that has already downgraded; (b) shrinks them globally as
-upstream layers' input distributions drift. Together they explain
-the ~100× signal compression we see vs the shadow-mode calibration
-distribution and the controller's resulting tier-vector chaos.
+We do not assign a single "total residual" multiplier; the four
+effects are not independent (contamination is partly a downstream
+consequence of feedback) and combining them as a product overstates
+the gap. Earlier drafts of this section claimed a "~100× signal
+compression vs shadow-mode" derived from cross-harness comparisons
+that were not directly controlled; we have removed that number as
+not load-bearing on a measured quantity.
 
 #### What we don't claim about the fork
 
@@ -644,10 +640,15 @@ distribution and the controller's resulting tier-vector chaos.
   * Conversely, the fork's failure **does** narrow the deployment
     claim. EchoKV-3C as deployed on the fork at the protocols we
     tested does not, today, beat uniform INT4 on Llama-3.1-70B
-    GSM8K-Hard. To make the deployment claim we need (a) the
-    activation-buffer fix proposed in §7.4 below, or (b) a
-    different controller protocol that doesn't depend on
-    contamination-free per-tier δ̂ measurements.
+    GSM8K-Hard. The diagnostic table above identifies multiple
+    candidate fixes, none of which alone is guaranteed to recover
+    the §6.3 result: an upgrade-only warmup rule that breaks the
+    feedback loop by construction (§7.5); a per-layer activation
+    buffer that closes the input-distribution contamination path
+    (§7.4); per-rank consolidation rule changes; or a different
+    controller protocol that doesn't depend on contamination-free
+    per-tier δ̂ measurements. The honest framing is that fork-side
+    deployment of EchoKV-3C remains under investigation.
 
 The fork integration is therefore best understood as a
 methodological contribution in its own right: it surfaces a
@@ -874,20 +875,20 @@ amortised. Per-fire compute adds two single-row matmuls (W_Q · x
 and W_K · x), small relative to the existing canary stream.
 
 **Why it's framed as future work.** The Phase-G(e) addendum-8
-diagnostic confirmed contamination is real but partial (~3.3×
-signature in the cleanest comparison; the residual ~30× of the
-100× signal compression from §6.8 must come from other sources
-including warmup nondeterminism and the simulate_quantization vs
-production-kernel-rounding mismatch). The activation buffer
-addresses (b) cleanly but won't on its own resolve (a) the
-cache-state feedback loop or the warmup nondeterminism.
-Implementing it is a 3–4 day kernel change; running the
-multi-seed paired-McNemar protocol against static-INT4 on the
-new substrate is another 1–2 days. Both are noted as Open
-Questions for the next paper iteration; we expect the
-combination of the activation buffer and a deterministic-CUDA +
-split-seed protocol to recover the §6.3 Pareto cell on the fork,
-but the experiment hasn't been run yet.
+diagnostic confirmed input-distribution contamination is real
+with a ~3.3× per-layer per-tier δ̂ signature between uniform-INT4
+and uniform-INT8 cache states (controller frozen in both runs).
+The activation buffer addresses this contamination directly. It
+does not, by itself, address the cache-state feedback loop
+(addendum 10: ~5× δ̂ compression at tiers 4/8 between active and
+frozen controllers) or per-rank consolidation noise. The honest
+framing is that the activation buffer is one of several
+architectural extensions that could narrow the fork-vs-shadow-mode
+gap; the upgrade-only warmup rule (§7.5) is another, and the two
+are complementary rather than substitutable. Implementing the
+activation buffer is a 3–4 day kernel change; the multi-seed
+paired-McNemar protocol against static-INT4 on the new substrate
+is another 1–2 days.
 
 **Two-feedback-path framing.** The K_ref contribution closes one
 feedback path (substrate); the activation buffer closes a second
@@ -895,11 +896,34 @@ feedback path (substrate); the activation buffer closes a second
 absolute canary"; an honest expanded version would separate them
 and credit the fork integration as the work that exposed the
 second path. We have not made this expansion in the current draft
-because the activation-buffer experiment is not yet run; if the
-fix recovers the Pareto cell, the framing earns its place in the
-contributions list, and the paper's headline claim sharpens to
-"workload-adaptive per-layer KV quantization, validated on a
-real-cache serving substrate."
+because neither the activation-buffer experiment nor the
+upgrade-only warmup experiment have produced a Pareto-recovery
+result on the fork yet; if either does, the framing earns its
+place in the contributions list, and the paper's headline claim
+sharpens to "workload-adaptive per-layer KV quantization,
+validated on a real-cache serving substrate."
+
+### 7.5 Upgrade-only warmup (breaks the cache-state feedback loop)
+
+The cache-state feedback loop quantified in §6.8 (controller-active
+vs controller-frozen δ̂ ratio of ~5× at tiers 4 and 8) admits a
+construction-level fix: during warmup, the controller is permitted
+to *upgrade* a layer's tier (higher bit-width) but downgrades are
+suppressed. A layer that the canary judges safe at INTb continues
+to operate at INTb′ ≥ b for the remainder of warmup, so the cache
+state never feeds smaller-magnitude δ̂ measurements back into the
+controller. The argmin-with-budget rule's normal behaviour is
+unchanged for upgrade decisions; it is overridden only when the
+chosen tier would be a downgrade. Consolidation across TP ranks
+applies as before. The implementation is a single-line override in
+the controller's tier-application path (``--warmup-only-upgrades``
+on the fork harness). This is complementary to the activation
+buffer of §7.4: upgrade-only addresses the substrate feedback loop
+by construction, the activation buffer addresses input-distribution
+contamination by separating canary inputs from upstream cache
+state. Whether either alone — or only their combination —
+recovers the §6.3 Pareto cell on the fork is a question for the
+next experimental round.
 
 ---
 

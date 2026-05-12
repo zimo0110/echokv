@@ -1,0 +1,15 @@
+{
+  "label_a": "fork_fp16",
+  "label_b": "fork_int4",
+  "n": 500,
+  "acc_a": 0.524,
+  "acc_b": 0.504,
+  "delta_acc": 0.020000000000000018,
+  "a_wins": 22,
+  "b_wins": 12,
+  "both_right": 240,
+  "both_wrong": 226,
+  "concordant": 466,
+  "chi2_yates": 2.3823529411764706,
+  "p_value": 0.12271259472816963
+}

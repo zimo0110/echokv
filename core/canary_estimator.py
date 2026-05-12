@@ -157,10 +157,11 @@ class CanaryEstimator:
             raise ValueError("kl must be provided when is_canary=True")
         if not isinstance(kl, (int, float)) or kl != kl:  # NaN check
             raise ValueError(f"kl must be a finite float, got {kl!r}")
-        if kl < 0:
+        # Tiny negatives from FP rounding (typical magnitude ≈1e-9) are
+        # clamped to 0; only genuinely negative values are an error.
+        if kl < -1e-6:
             raise ValueError(f"KL divergence must be non-negative, got {kl}")
-
-        kl_f = float(kl)
+        kl_f = max(float(kl), 0.0)
         with self._lock:
             if self._initialized[layer_id]:
                 self._ema[layer_id] = (

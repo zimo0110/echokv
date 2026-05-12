@@ -126,6 +126,8 @@ class PIDPrecisionController:
     hysteresis_band: float = DEFAULT_HYSTERESIS_BAND
     min_dwell_ticks: int = DEFAULT_MIN_DWELL_TICKS
     initial_level: Precision = Precision.INT4
+    upgrade_only: bool = False
+    grace_ticks: int = 0
 
     _levels: List[Precision] = field(default_factory=list)
     _last_change_tick: List[int] = field(default_factory=list)
@@ -302,6 +304,12 @@ class PIDPrecisionController:
             raise ValueError("tau_budget must be > 0")
 
         self._tick += 1
+        # Grace period: hold every layer for the first ``grace_ticks``
+        # ticks so the per-tier EMA has a chance to absorb samples
+        # against the substrate's current state before the controller
+        # acts on transient early values. EMAs continue to update
+        # (they're owned by the estimator, not the controller).
+        in_grace = self._tick <= self.grace_ticks
         decisions: List[PrecisionDecision] = []
         for layer_id in range(self.num_layers):
             current = self._levels[layer_id]
@@ -319,7 +327,7 @@ class PIDPrecisionController:
 
             target = current
             direction = ControllerDirection.HOLD
-            if since_last >= self.min_dwell_ticks:
+            if not in_grace and since_last >= self.min_dwell_ticks:
                 # Pick the lowest-bit tier whose EMA is within budget.
                 # A missing / zero EMA is "no signal yet" — skip.
                 chosen: Optional[Precision] = None
@@ -330,6 +338,16 @@ class PIDPrecisionController:
                     if ema_val < tau_budget:
                         chosen = tier
                         break
+                # Upgrade-only: suppress downgrade transitions during warmup
+                # so the cache state never feeds back into δ̂ measurements
+                # at lower bit-widths.
+                if (
+                    chosen is not None
+                    and chosen is not current
+                    and self.upgrade_only
+                    and int(chosen) < int(current)
+                ):
+                    chosen = None
                 if chosen is not None and chosen is not current:
                     target = chosen
                     if int(chosen) > int(current):

@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We are back in the clearing, and we've already examined the pile of leaves",
+    "explanation": "Let's try to open the egg to see if there's anything inside",
+    "commands": [
+        {
+            "keystrokes": "open egg\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

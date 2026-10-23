@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We have moved into a dark place and are likely to be eaten by a grue",
+    "explanation": "Let's try to light up the area to see what's around us",
+    "commands": [
+        {
+            "keystrokes": "light\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

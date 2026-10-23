@@ -1,0 +1,81 @@
+/opt/conda/lib/python3.10/site-packages/transformers/utils/hub.py:110: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
+  warnings.warn(
+2026-04-26 05:12:18,775 INFO loading meta-llama/Llama-3.1-8B-Instruct on cuda:0 (torch.bfloat16)
+`torch_dtype` is deprecated! Use `dtype` instead!
+2026-04-26 05:12:22,022 WARNING Skipping import of cpp extensions due to incompatible torch version 2.9.0+cu128 for torchao version 0.15.0             Please see https://github.com/pytorch/ao/issues/2919 for more info
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00, 208.53it/s]
+hooked 32 attention layers
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+[00] gsm8k_cot:694                   δ_KL=0.00723  δ_OUT=0.00598  ΔNLL=+0.0214
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[01] gsm8k_cot:151                   δ_KL=0.00899  δ_OUT=0.00618  ΔNLL=+0.0072
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[02] gsm8k_cot:185                   δ_KL=0.00671  δ_OUT=0.00583  ΔNLL=+0.0071
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[03] gsm8k_cot:1105                  δ_KL=0.00740  δ_OUT=0.00590  ΔNLL=+0.0214
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[04] gsm8k_cot:582                   δ_KL=0.00726  δ_OUT=0.00593  ΔNLL=+0.0208
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[05] gsm8k_cot:728                   δ_KL=0.00730  δ_OUT=0.00601  ΔNLL=+0.0012
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[06] gsm8k_cot:276                   δ_KL=0.00802  δ_OUT=0.00608  ΔNLL=+0.0046
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[07] gsm8k_cot:288                   δ_KL=0.00719  δ_OUT=0.00585  ΔNLL=+0.0122
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[08] gsm8k_cot:538                   δ_KL=0.00799  δ_OUT=0.00611  ΔNLL=+0.0134
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[09] gsm8k_cot:375                   δ_KL=0.00745  δ_OUT=0.00611  ΔNLL=+0.0231
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[10] gsm8k_cot:596                   δ_KL=0.00830  δ_OUT=0.00588  ΔNLL=+0.0084
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[11] gsm8k_cot:913                   δ_KL=0.00842  δ_OUT=0.00626  ΔNLL=+0.0010
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[12] gsm8k_cot:927                   δ_KL=0.00783  δ_OUT=0.00603  ΔNLL=+0.0086
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[13] gsm8k_cot:61                    δ_KL=0.00750  δ_OUT=0.00592  ΔNLL=+0.0118
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[14] gsm8k_cot:1067                  δ_KL=0.00740  δ_OUT=0.00592  ΔNLL=+0.0161
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[15] gsm8k_cot:1132                  δ_KL=0.00682  δ_OUT=0.00587  ΔNLL=+0.0113
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[16] gsm8k_cot:186                   δ_KL=0.00955  δ_OUT=0.00608  ΔNLL=+0.0230
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[17] gsm8k_cot:423                   δ_KL=0.00944  δ_OUT=0.00598  ΔNLL=+0.0141
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[18] gsm8k_cot:449                   δ_KL=0.00728  δ_OUT=0.00605  ΔNLL=+0.0162
+The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+Setting `pad_token_id` to `eos_token_id`:128001 for open-end generation.
+[19] gsm8k_cot:306                   δ_KL=0.00733  δ_OUT=0.00602  ΔNLL=+0.0204
+
+==============================================================
+n = 20 (GSM8K, seed=99)
+  ρ(δ_KL,  ΔNLL) = -0.110
+  ρ(δ_OUT, ΔNLL) = +0.011
+  mean δ_KL  = 0.00777
+  mean δ_OUT = 0.00600
+  mean ΔNLL  = +0.0132
+  σ    ΔNLL  = 0.0069
+
+rows written -> results/motivation/diagnostic_attn_out.tsv
+[W426 05:14:27.801765072 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())

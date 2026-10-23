@@ -1,0 +1,40 @@
+│  ├─ scikit-learn 1.0.2 would require
+│  │  └─ python_abi =3.9 *_cp39, which can be installed;
+│  ├─ scikit-learn 1.0.2 would require
+│  │  └─ python >=3.8,<3.9.0a0 *, which can be installed;
+│  └─ scikit-learn 1.0.2 would require
+│     └─ python >=3.9,<3.10.0a0 *, which can be installed;
+└─ tensorflow =2.8.0 * is not installable because there are no viable options
+   ├─ tensorflow 2.8.0 would require
+   │  └─ tensorflow-base [==2.8.0 cpu_py37h4373017_0|==2.8.0 cpu_py38hdf8f09a_0|==2.8.0 cpu_py39h7e02d9e_0], which requires
+   │     └─ libprotobuf >=3.19.4,<3.20.0a0 *, which conflicts with any installable versions previously reported;
+   ├─ tensorflow 2.8.0 would require
+   │  ├─ python_abi =3.10 *_cp310 but there are no viable options
+   │  │  ├─ python_abi 3.10, which cannot be installed (as previously explained);
+   │  │  ├─ python_abi 3.10 conflicts with any installable versions previously reported;
+   │  │  └─ python_abi 3.10, which cannot be installed (as previously explained);
+   │  ├─ tensorflow-base ==2.8.0 cpu_py310h75e90da_0, which cannot be installed (as previously explained);
+   │  └─ tensorflow-estimator ==2.8.0 cpu_py310had6d012_0, which requires
+   │     └─ python_abi =3.10 *_cp310 but there are no viable options
+   │        ├─ python_abi 3.10, which cannot be installed (as previously explained);
+   │        ├─ python_abi 3.10 conflicts with any installable versions previously reported;
+   │        └─ python_abi 3.10, which cannot be installed (as previously explained);
+   └─ tensorflow 2.8.0 would require
+      └─ __cuda =* *, which is missing on the system.
+
+root@15af50598b00:/app/project# sed -i 's/scikit-learn=1.0.2/scikit-learn=1.0.1/' environment.yml; tmux wait -S done
+root@15af50598b00:/app/project# sed -i '/tensorflow/d' environment.yml; tmux wait -S done
+root@15af50598b00:/app/project# cat environment.yml; tmux wait -S done
+name: datasci
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - numpy=1.20.0
+  - scipy=1.9.0
+  - pandas=1.4.0
+  - pytorch=1.12.0
+  - cudatoolkit=11.3
+  - scikit-learn=1.0.1
+  - transformers=4.18.0 root@15af50598b00:/app/project#

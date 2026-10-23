@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We have examined the lunch and it's nothing special",
+    "explanation": "Let's examine the clove of garlic to see if it's useful for anything",
+    "commands": [
+        {
+            "keystrokes": "examine garlic\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

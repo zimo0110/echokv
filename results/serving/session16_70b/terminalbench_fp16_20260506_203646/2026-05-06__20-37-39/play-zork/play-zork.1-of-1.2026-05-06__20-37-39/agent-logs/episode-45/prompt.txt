@@ -1,0 +1,40 @@
+ Kitchen                                                                                                                          Score: 15       Moves: 37
+>examine lunch
+There's nothing special about the lunch.
+
+>examine garlic
+There's nothing special about the clove of garlic.
+
+>go up
+You have moved into a dark place.
+It is pitch black. You are likely to be eaten by a grue.
+
+>light
+What do you want to light?
+
+>light garlic
+It's too dark to see!
+
+>drink water
+It's too dark to see!
+
+>feel
+What do you want to feel?
+
+>feel around
+That sentence isn't one I recognize.
+
+>go down
+Kitchen
+A bottle is sitting on the table.
+The glass bottle contains:
+  A quantity of water
+There is a brown sack here.
+The brown sack contains:
+  A lunch
+  A clove of garlic
+
+>examine bottle more closely
+I don't know the word "more".
+
+>

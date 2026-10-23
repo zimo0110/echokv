@@ -1,0 +1,838 @@
+[?2004hroot@06103092c99e:/app# asciinema rec --stdin /logs/agent.cast
+[?2004l[0;32masciinema: recording asciicast to /logs/agent.cast[0m
+[0;32masciinema: press <ctrl-d> or type "exit" when you're done[0m
+[?2004hroot@06103092c99e:/app# clear
+[?2004l[H[J[3J[?2004hroot@06103092c99e:/app# git clone https://github.com/wjn1996/UPET.git; tmux wait -S done
+[?2004lCloning into 'UPET'...
+remote: Enumerating objects: 384, done.[K
+remote: Counting objects:   5% (1/19)[Kremote: Counting objects:  10% (2/19)[Kremote: Counting objects:  15% (3/19)[Kremote: Counting objects:  21% (4/19)[Kremote: Counting objects:  26% (5/19)[Kremote: Counting objects:  31% (6/19)[Kremote: Counting objects:  36% (7/19)[Kremote: Counting objects:  42% (8/19)[Kremote: Counting objects:  47% (9/19)[Kremote: Counting objects:  52% (10/19)[Kremote: Counting objects:  57% (11/19)[Kremote: Counting objects:  63% (12/19)[Kremote: Counting objects:  68% (13/19)[Kremote: Counting objects:  73% (14/19)[Kremote: Counting objects:  78% (15/19)[Kremote: Counting objects:  84% (16/19)[Kremote: Counting objects:  89% (17/19)[Kremote: Counting objects:  94% (18/19)[Kremote: Counting objects: 100% (19/19)[Kremote: Counting objects: 100% (19/19), done.[K
+remote: Compressing objects:   5% (1/17)[Kremote: Compressing objects:  11% (2/17)[Kremote: Compressing objects:  17% (3/17)[Kremote: Compressing objects:  23% (4/17)[Kremote: Compressing objects:  29% (5/17)[Kremote: Compressing objects:  35% (6/17)[Kremote: Compressing objects:  41% (7/17)[Kremote: Compressing objects:  47% (8/17)[Kremote: Compressing objects:  52% (9/17)[Kremote: Compressing objects:  58% (10/17)[Kremote: Compressing objects:  64% (11/17)[Kremote: Compressing objects:  70% (12/17)[Kremote: Compressing objects:  76% (13/17)[Kremote: Compressing objects:  82% (14/17)[Kremote: Compressing objects:  88% (15/17)[Kremote: Compressing objects:  94% (16/17)[Kremote: Compressing objects: 100% (17/17)[Kremote: Compressing objects: 100% (17/17), done.[K
+Receiving objects:   0% (1/384)Receiving objects:   1% (4/384)Receiving objects:   2% (8/384)Receiving objects:   3% (12/384)Receiving objects:   4% (16/384)Receiving objects:   5% (20/384)Receiving objects:   6% (24/384)Receiving objects:   7% (27/384)Receiving objects:   8% (31/384)Receiving objects:   9% (35/384)Receiving objects:  10% (39/384)Receiving objects:  11% (43/384)Receiving objects:  12% (47/384)Receiving objects:  13% (50/384)Receiving objects:  14% (54/384)Receiving objects:  15% (58/384)Receiving objects:  16% (62/384)Receiving objects:  17% (66/384)Receiving objects:  18% (70/384)Receiving objects:  19% (73/384)Receiving objects:  20% (77/384)Receiving objects:  21% (81/384)Receiving objects:  22% (85/384)Receiving objects:  23% (89/384)Receiving objects:  24% (93/384)Receiving objects:  25% (96/384)Receiving objects:  26% (100/384)Receiving objects:  27% (104/384)Receiving objects:  28% (108/384)Receiving objects:  29% (112/384)Receiving objects:  30% (116/384)Receiving objects:  31% (120/384)Receiving objects:  32% (123/384)Receiving objects:  33% (127/384)Receiving objects:  34% (131/384)Receiving objects:  35% (135/384)Receiving objects:  36% (139/384)Receiving objects:  37% (143/384)Receiving objects:  38% (146/384)Receiving objects:  39% (150/384)Receiving objects:  40% (154/384)Receiving objects:  41% (158/384)Receiving objects:  42% (162/384)Receiving objects:  43% (166/384)Receiving objects:  44% (169/384)Receiving objects:  45% (173/384)Receiving objects:  46% (177/384)Receiving objects:  47% (181/384)Receiving objects:  48% (185/384)Receiving objects:  49% (189/384)Receiving objects:  50% (192/384)Receiving objects:  51% (196/384)Receiving objects:  52% (200/384)Receiving objects:  53% (204/384)Receiving objects:  54% (208/384)Receiving objects:  55% (212/384)Receiving objects:  56% (216/384)Receiving objects:  57% (219/384)Receiving objects:  58% (223/384)Receiving objects:  59% (227/384)Receiving objects:  60% (231/384)Receiving objects:  61% (235/384)Receiving objects:  62% (239/384)Receiving objects:  63% (242/384)Receiving objects:  64% (246/384)Receiving objects:  65% (250/384)Receiving objects:  66% (254/384)Receiving objects:  67% (258/384)Receiving objects:  68% (262/384)Receiving objects:  69% (265/384)Receiving objects:  70% (269/384)Receiving objects:  71% (273/384)Receiving objects:  72% (277/384)Receiving objects:  73% (281/384)Receiving objects:  74% (285/384)Receiving objects:  75% (288/384)Receiving objects:  76% (292/384)Receiving objects:  77% (296/384)Receiving objects:  78% (300/384)Receiving objects:  79% (304/384)Receiving objects:  80% (308/384)Receiving objects:  81% (312/384)Receiving objects:  82% (315/384)Receiving objects:  83% (319/384)Receiving objects:  84% (323/384)Receiving objects:  85% (327/384)Receiving objects:  86% (331/384)Receiving objects:  87% (335/384)Receiving objects:  88% (338/384)remote: Total 384 (delta 5), reused 2 (delta 2), pack-reused 365 (from 1)[K
+Receiving objects:  89% (342/384)Receiving objects:  90% (346/384)Receiving objects:  91% (350/384)Receiving objects:  92% (354/384)Receiving objects:  93% (358/384)Receiving objects:  94% (361/384)Receiving objects:  95% (365/384)Receiving objects:  96% (369/384)Receiving objects:  97% (373/384)Receiving objects:  98% (377/384)Receiving objects:  99% (381/384)Receiving objects: 100% (384/384)Receiving objects: 100% (384/384), 576.99 KiB | 5.60 MiB/s, done.
+Resolving deltas:   0% (0/72)Resolving deltas:   1% (1/72)Resolving deltas:   2% (2/72)Resolving deltas:   4% (3/72)Resolving deltas:   5% (4/72)Resolving deltas:   6% (5/72)Resolving deltas:   8% (6/72)Resolving deltas:   9% (7/72)Resolving deltas:  11% (8/72)Resolving deltas:  12% (9/72)Resolving deltas:  13% (10/72)Resolving deltas:  15% (11/72)Resolving deltas:  16% (12/72)Resolving deltas:  18% (13/72)Resolving deltas:  19% (14/72)Resolving deltas:  20% (15/72)Resolving deltas:  22% (16/72)Resolving deltas:  23% (17/72)Resolving deltas:  25% (18/72)Resolving deltas:  26% (19/72)Resolving deltas:  27% (20/72)Resolving deltas:  29% (21/72)Resolving deltas:  30% (22/72)Resolving deltas:  34% (25/72)Resolving deltas:  37% (27/72)Resolving deltas:  40% (29/72)Resolving deltas:  41% (30/72)Resolving deltas:  43% (31/72)Resolving deltas:  44% (32/72)Resolving deltas:  45% (33/72)Resolving deltas:  47% (34/72)Resolving deltas:  48% (35/72)Resolving deltas:  54% (39/72)Resolving deltas:  55% (40/72)Resolving deltas:  56% (41/72)Resolving deltas:  58% (42/72)Resolving deltas:  59% (43/72)Resolving deltas:  61% (44/72)Resolving deltas:  62% (45/72)Resolving deltas:  63% (46/72)Resolving deltas:  65% (47/72)Resolving deltas:  68% (49/72)Resolving deltas:  69% (50/72)Resolving deltas:  70% (51/72)Resolving deltas:  72% (52/72)Resolving deltas:  73% (53/72)Resolving deltas:  75% (54/72)Resolving deltas:  76% (55/72)Resolving deltas:  79% (57/72)Resolving deltas:  80% (58/72)Resolving deltas:  81% (59/72)Resolving deltas:  83% (60/72)Resolving deltas:  84% (61/72)Resolving deltas:  86% (62/72)Resolving deltas:  87% (63/72)Resolving deltas:  88% (64/72)Resolving deltas:  90% (65/72)Resolving deltas:  91% (66/72)Resolving deltas:  93% (67/72)Resolving deltas:  94% (68/72)Resolving deltas:  95% (69/72)Resolving deltas:  97% (70/72)Resolving deltas:  98% (71/72)Resolving deltas: 100% (72/72)Resolving deltas: 100% (72/72), done.
+[?2004hroot@06103092c99e:/app# cd UPET; tmux wait -S done
+[?2004l[?2004hroot@06103092c99e:/app/UPET# git checkout 4701c3c62441077cc44a6553bf6ae909d99b8351; tmux wait -S done
+[?2004lNote: switching to '4701c3c62441077cc44a6553bf6ae909d99b8351'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 4701c3c Merge pull request #1 from wjn1996/wjn-pr
+[?2004hroot@06103092c99e:/app/UPET# pip install -r requirements.txt; tmux wait -S done
+[?2004lCollecting datasets==1.15.1
+  Downloading datasets-1.15.1-py3-none-any.whl (290 kB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/290.6 kB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;204m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m [32m286.7/290.6 kB[0m [31m8.9 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m290.6/290.6 kB[0m [31m7.7 MB/s[0m eta [36m0:00:00[0m
+[?25hCollecting numpy==1.19.2
+  Downloading numpy-1.19.2.zip (7.3 MB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/7.3 MB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;204m━━━━━━━━━━━━━━━━━━[0m[38;5;204m╸[0m[38;5;237m━━━━━━━━━━━━━━━━━━━━━[0m [32m3.5/7.3 MB[0m [31m104.0 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;204m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;204m╸[0m [32m7.3/7.3 MB[0m [31m137.0 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m7.3/7.3 MB[0m [31m101.2 MB/s[0m eta [36m0:00:00[0m
+[?25h  Installing build dependencies ... [?25l- \ | / - done
+[?25h  Getting requirements to build wheel ... [?25l- done
+[?25h  Preparing metadata (pyproject.toml) ... [?25l- \ error
+  [1;31merror[0m: [1msubprocess-exited-with-error[0m
+  
+  [31m×[0m [32mPreparing metadata [0m[1;32m([0m[32mpyproject.toml[0m[1;32m)[0m did not run successfully.
+  [31m│[0m exit code: [1;36m1[0m
+  [31m╰─>[0m [31m[53 lines of output][0m
+  [31m   [0m Running from numpy source directory.
+  [31m   [0m setup.py:470: UserWarning: Unrecognized setuptools command, proceeding with generating Cython sources and expanding templates
+  [31m   [0m   run_build = parse_setuppy_commands()
+  [31m   [0m 
+  [31m   [0m Error compiling Cython file:
+  [31m   [0m ------------------------------------------------------------
+  [31m   [0m ...
+  [31m   [0m             self.rng_state.ctr.v[i] = counter[i]
+  [31m   [0m 
+  [31m   [0m         self._reset_state_variables()
+  [31m   [0m 
+  [31m   [0m         self._bitgen.state = <void *>&self.rng_state
+  [31m   [0m         self._bitgen.next_uint64 = &philox_uint64
+  [31m   [0m                                    ^
+  [31m   [0m ------------------------------------------------------------
+  [31m   [0m _philox.pyx:195:35: Cannot assign type 'uint64_t (*)(void *) except? -1LL nogil' to 'uint64_t (*)(void *) noexcept nogil'. Exception values are incompatible. Suggest adding 'noexcept' to the type of the value being assigned.
+  [31m   [0m Processing numpy/random/_bounded_integers.pxd.in
+  [31m   [0m Processing numpy/random/_philox.pyx
+  [31m   [0m Traceback (most recent call last):
+  [31m   [0m   File "/tmp/pip-install-_spuy03u/numpy_3cb9ef486c33435da754d0b005bc3052/tools/cythonize.py", line 235, in <module>
+  [31m   [0m     main()
+  [31m   [0m   File "/tmp/pip-install-_spuy03u/numpy_3cb9ef486c33435da754d0b005bc3052/tools/cythonize.py", line 231, in main
+  [31m   [0m     find_process_files(root_dir)
+  [31m   [0m   File "/tmp/pip-install-_spuy03u/numpy_3cb9ef486c33435da754d0b005bc3052/tools/cythonize.py", line 222, in find_process_files
+  [31m   [0m     process(root_dir, fromfile, tofile, function, hash_db)
+  [31m   [0m   File "/tmp/pip-install-_spuy03u/numpy_3cb9ef486c33435da754d0b005bc3052/tools/cythonize.py", line 188, in process
+  [31m   [0m     processor_function(fromfile, tofile)
+  [31m   [0m   File "/tmp/pip-install-_spuy03u/numpy_3cb9ef486c33435da754d0b005bc3052/tools/cythonize.py", line 77, in process_pyx
+  [31m   [0m     subprocess.check_call(
+  [31m   [0m   File "/usr/local/lib/python3.10/subprocess.py", line 369, in check_call
+  [31m   [0m     raise CalledProcessError(retcode, cmd)
+  [31m   [0m subprocess.CalledProcessError: Command '['/usr/local/bin/python3.10', '-m', 'cython', '-3', '--fast-fail', '-o', '_philox.c', '_philox.pyx']' returned non-zero exit status 1.
+  [31m   [0m Cythonizing sources
+  [31m   [0m Traceback (most recent call last):
+  [31m   [0m   File "/usr/local/lib/python3.10/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 353, in <module>
+  [31m   [0m     main()
+  [31m   [0m   File "/usr/local/lib/python3.10/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 335, in main
+  [31m   [0m     json_out['return_val'] = hook(**hook_input['kwargs'])
+  [31m   [0m   File "/usr/local/lib/python3.10/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 149, in prepare_metadata_for_build_wheel
+  [31m   [0m     return hook(metadata_directory, config_settings)
+  [31m   [0m   File "/tmp/pip-build-env-c8wnf6qa/overlay/lib/python3.10/site-packages/setuptools/build_meta.py", line 157, in prepare_metadata_for_build_wheel
+  [31m   [0m     self.run_setup()
+  [31m   [0m   File "/tmp/pip-build-env-c8wnf6qa/overlay/lib/python3.10/site-packages/setuptools/build_meta.py", line 248, in run_setup
+  [31m   [0m     super(_BuildMetaLegacyBackend,
+  [31m   [0m   File "/tmp/pip-build-env-c8wnf6qa/overlay/lib/python3.10/site-packages/setuptools/build_meta.py", line 142, in run_setup
+  [31m   [0m     exec(compile(code, __file__, 'exec'), locals())
+  [31m   [0m   File "setup.py", line 499, in <module>
+  [31m   [0m     setup_package()
+  [31m   [0m   File "setup.py", line 479, in setup_package
+  [31m   [0m     generate_cython()
+  [31m   [0m   File "setup.py", line 274, in generate_cython
+  [31m   [0m     raise RuntimeError("Running cythonize failed!")
+  [31m   [0m RuntimeError: Running cythonize failed!
+  [31m   [0m [31m[end of output][0m
+  
+  [1;35mnote[0m: This error originates from a subprocess, and is likely not a problem with pip.
+[1;31merror[0m: [1mmetadata-generation-failed[0m
+
+[31m×[0m Encountered error while generating package metadata.
+[31m╰─>[0m See above for output.
+
+[1;35mnote[0m: This is an issue with the package mentioned above, not pip.
+[1;36mhint[0m: See above for details.
+
+[1m[[0m[34;49mnotice[0m[1;39;49m][0m[39;49m A new release of pip is available: [0m[31;49m23.0.1[0m[39;49m -> [0m[32;49m26.1.1[0m
+[1m[[0m[34;49mnotice[0m[1;39;49m][0m[39;49m To update, run: [0m[32;49mpip install --upgrade pip[0m
+[?25h[?2004hroot@06103092c99e:/app/UPET# python run.py --model_name roberta-base --task RTE --num_train_epochs 1 --examples_per_label 5 --seed 42; tmux wait -S done
+[?2004lTraceback (most recent call last):
+  File "/app/UPET/run.py", line 7, in <module>
+    import datasets
+ModuleNotFoundError: No module named 'datasets'
+[?2004hroot@06103092c99e:/app/UPET# pip install datasets; tmux wait -S done
+[?2004lCollecting datasets
+  Downloading datasets-4.8.5-py3-none-any.whl (528 kB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/529.0 kB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;204m━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━[0m [32m317.4/529.0 kB[0m [31m9.6 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m529.0/529.0 kB[0m [31m11.6 MB/s[0m eta [36m0:00:00[0m
+[?25hCollecting multiprocess<0.70.20
+  Downloading multiprocess-0.70.19-py310-none-any.whl (134 kB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/134.9 kB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m134.9/134.9 kB[0m [31m39.4 MB/s[0m eta [36m0:00:00[0m
+[?25hRequirement already satisfied: fsspec[http]<=2026.2.0,>=2023.1.0 in /usr/local/lib/python3.10/site-packages (from datasets) (2023.6.0)
+Requirement already satisfied: pandas in /usr/local/lib/python3.10/site-packages (from datasets) (2.0.3)
+Collecting xxhash
+  Downloading xxhash-3.7.0-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (193 kB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/193.3 kB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m193.3/193.3 kB[0m [31m42.1 MB/s[0m eta [36m0:00:00[0m
+[?25hRequirement already satisfied: pyyaml>=5.1 in /usr/local/lib/python3.10/site-packages (from datasets) (6.0.3)
+Collecting pyarrow>=21.0.0
+  Downloading pyarrow-24.0.0-cp310-cp310-manylinux_2_28_x86_64.whl (48.8 MB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/48.8 MB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;204m━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m5.2/48.8 MB[0m [31m157.2 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;204m━━━━━━━━━━━━[0m[38;5;204m╸[0m[38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m15.4/48.8 MB[0m [31m293.0 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;204m━━━━━━━━━━━━━━━━━━━━[0m[38;5;204m╸[0m[38;5;237m━━━━━━━━━━━━━━━━━━━[0m [32m25.5/48.8 MB[0m [31m287.5 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;204m━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━[0m [32m31.8/48.8 MB[0m [31m217.8 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;204m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;204m╸[0m[38;5;237m━━━━━━[0m [32m41.2/48.8 MB[0m [31m275.8 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;204m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;204m╸[0m [32m48.8/48.8 MB[0m [31m277.5 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;204m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;204m╸[0m [32m48.8/48.8 MB[0m [31m277.5 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;204m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;204m╸[0m [32m48.8/48.8 MB[0m [31m277.5 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;204m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;204m╸[0m [32m48.8/48.8 MB[0m [31m277.5 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;204m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;204m╸[0m [32m48.8/48.8 MB[0m [31m277.5 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m48.8/48.8 MB[0m [31m48.7 MB/s[0m eta [36m0:00:00[0m
+[?25hRequirement already satisfied: filelock in /usr/local/lib/python3.10/site-packages (from datasets) (3.29.0)
+Collecting dill<0.4.2,>=0.3.0
+  Downloading dill-0.4.1-py3-none-any.whl (120 kB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/120.0 kB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m120.0/120.0 kB[0m [31m14.1 MB/s[0m eta [36m0:00:00[0m
+[?25hRequirement already satisfied: huggingface-hub<2.0,>=0.25.0 in /usr/local/lib/python3.10/site-packages (from datasets) (0.36.2)
+Requirement already satisfied: packaging in /usr/local/lib/python3.10/site-packages (from datasets) (26.2)
+Collecting httpx<1.0.0
+  Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/73.5 kB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m73.5/73.5 kB[0m [31m20.7 MB/s[0m eta [36m0:00:00[0m
+[?25hCollecting requests>=2.32.2
+  Using cached requests-2.33.1-py3-none-any.whl (64 kB)
+Requirement already satisfied: numpy>=1.17 in /usr/local/lib/python3.10/site-packages (from datasets) (1.25.2)
+Requirement already satisfied: tqdm>=4.66.3 in /usr/local/lib/python3.10/site-packages (from datasets) (4.66.4)
+Collecting aiohttp!=4.0.0a0,!=4.0.0a1
+  Downloading aiohttp-3.13.5-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.7 MB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/1.7 MB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m1.7/1.7 MB[0m [31m123.4 MB/s[0m eta [36m0:00:00[0m
+[?25hCollecting httpcore==1.*
+  Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/78.8 kB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m78.8/78.8 kB[0m [31m22.6 MB/s[0m eta [36m0:00:00[0m
+[?25hCollecting anyio
+  Downloading anyio-4.13.0-py3-none-any.whl (114 kB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/114.4 kB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m114.4/114.4 kB[0m [31m34.1 MB/s[0m eta [36m0:00:00[0m
+[?25hRequirement already satisfied: idna in /usr/local/lib/python3.10/site-packages (from httpx<1.0.0->datasets) (3.13)
+Requirement already satisfied: certifi in /usr/local/lib/python3.10/site-packages (from httpx<1.0.0->datasets) (2026.4.22)
+Collecting h11>=0.16
+  Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Requirement already satisfied: hf-xet<2.0.0,>=1.1.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<2.0,>=0.25.0->datasets) (1.5.0)
+Requirement already satisfied: typing-extensions>=3.7.4.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<2.0,>=0.25.0->datasets) (4.15.0)
+Requirement already satisfied: urllib3<3,>=1.26 in /usr/local/lib/python3.10/site-packages (from requests>=2.32.2->datasets) (2.0.7)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.10/site-packages (from requests>=2.32.2->datasets) (3.4.7)
+Requirement already satisfied: python-dateutil>=2.8.2 in /usr/local/lib/python3.10/site-packages (from pandas->datasets) (2.9.0.post0)
+Requirement already satisfied: pytz>=2020.1 in /usr/local/lib/python3.10/site-packages (from pandas->datasets) (2026.2)
+Requirement already satisfied: tzdata>=2022.1 in /usr/local/lib/python3.10/site-packages (from pandas->datasets) (2026.2)
+Collecting yarl<2.0,>=1.17.0
+  Downloading yarl-1.23.0-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (102 kB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/102.8 kB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m102.8/102.8 kB[0m [31m24.7 MB/s[0m eta [36m0:00:00[0m
+[?25hCollecting attrs>=17.3.0
+  Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/67.5 kB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m67.5/67.5 kB[0m [31m16.6 MB/s[0m eta [36m0:00:00[0m
+[?25hCollecting propcache>=0.2.0
+  Downloading propcache-0.4.1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (196 kB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/196.9 kB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m196.9/196.9 kB[0m [31m47.6 MB/s[0m eta [36m0:00:00[0m
+[?25hCollecting async-timeout<6.0,>=4.0
+  Downloading async_timeout-5.0.1-py3-none-any.whl (6.2 kB)
+Collecting aiosignal>=1.4.0
+  Downloading aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+Collecting aiohappyeyeballs>=2.5.0
+  Downloading aiohappyeyeballs-2.6.1-py3-none-any.whl (15 kB)
+Collecting multidict<7.0,>=4.5
+  Downloading multidict-6.7.1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (243 kB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/243.3 kB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m243.3/243.3 kB[0m [31m50.7 MB/s[0m eta [36m0:00:00[0m
+[?25hCollecting frozenlist>=1.1.1
+  Downloading frozenlist-1.8.0-cp310-cp310-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (219 kB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/219.5 kB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m219.5/219.5 kB[0m [31m48.7 MB/s[0m eta [36m0:00:00[0m
+[?25hRequirement already satisfied: six>=1.5 in /usr/local/lib/python3.10/site-packages (from python-dateutil>=2.8.2->pandas->datasets) (1.17.0)
+Collecting exceptiongroup>=1.0.2
+  Downloading exceptiongroup-1.3.1-py3-none-any.whl (16 kB)
+Installing collected packages: xxhash, requests, pyarrow, propcache, multidict, h11, frozenlist, exceptiongroup, dill, attrs, async-timeout, aiohappyeyeballs, yarl, multiprocess, httpcore, anyio, aiosignal, httpx, aiohttp, datasets
+  Attempting uninstall: requests
+    Found existing installation: requests 2.31.0
+    Uninstalling requests-2.31.0:
+      Successfully uninstalled requests-2.31.0
+Successfully installed aiohappyeyeballs-2.6.1 aiohttp-3.13.5 aiosignal-1.4.0 anyio-4.13.0 async-timeout-5.0.1 attrs-26.1.0 datasets-4.8.5 dill-0.4.1 exceptiongroup-1.3.1 frozenlist-1.8.0 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 multidict-6.7.1 multiprocess-0.70.19 propcache-0.4.1 pyarrow-24.0.0 requests-2.33.1 xxhash-3.7.0 yarl-1.23.0
+[33mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv[0m[33m
+[0m
+[1m[[0m[34;49mnotice[0m[1;39;49m][0m[39;49m A new release of pip is available: [0m[31;49m23.0.1[0m[39;49m -> [0m[32;49m26.1.1[0m
+[1m[[0m[34;49mnotice[0m[1;39;49m][0m[39;49m To update, run: [0m[32;49mpip install --upgrade pip[0m
+[?2004hroot@06103092c99e:/app/UPET# python -m pip install -r requirements.txt; tmux wait -S done
+[?2004lCollecting datasets==1.15.1
+  Using cached datasets-1.15.1-py3-none-any.whl (290 kB)
+Collecting numpy==1.19.2
+  Using cached numpy-1.19.2.zip (7.3 MB)
+  Installing build dependencies ... [?25l- \ | / done
+[?25h  Getting requirements to build wheel ... [?25l- done
+[?25h  Preparing metadata (pyproject.toml) ... [?25l- \ error
+  [1;31merror[0m: [1msubprocess-exited-with-error[0m
+  
+  [31m×[0m [32mPreparing metadata [0m[1;32m([0m[32mpyproject.toml[0m[1;32m)[0m did not run successfully.
+  [31m│[0m exit code: [1;36m1[0m
+  [31m╰─>[0m [31m[53 lines of output][0m
+  [31m   [0m Running from numpy source directory.
+  [31m   [0m setup.py:470: UserWarning: Unrecognized setuptools command, proceeding with generating Cython sources and expanding templates
+  [31m   [0m   run_build = parse_setuppy_commands()
+  [31m   [0m 
+  [31m   [0m Error compiling Cython file:
+  [31m   [0m ------------------------------------------------------------
+  [31m   [0m ...
+  [31m   [0m             self.rng_state.ctr.v[i] = counter[i]
+  [31m   [0m 
+  [31m   [0m         self._reset_state_variables()
+  [31m   [0m 
+  [31m   [0m         self._bitgen.state = <void *>&self.rng_state
+  [31m   [0m         self._bitgen.next_uint64 = &philox_uint64
+  [31m   [0m                                    ^
+  [31m   [0m ------------------------------------------------------------
+  [31m   [0m _philox.pyx:195:35: Cannot assign type 'uint64_t (*)(void *) except? -1LL nogil' to 'uint64_t (*)(void *) noexcept nogil'. Exception values are incompatible. Suggest adding 'noexcept' to the type of the value being assigned.
+  [31m   [0m Processing numpy/random/_bounded_integers.pxd.in
+  [31m   [0m Processing numpy/random/_philox.pyx
+  [31m   [0m Traceback (most recent call last):
+  [31m   [0m   File "/tmp/pip-install-xvzpeupb/numpy_955882c80dca42b5a19eb20e56ff7b97/tools/cythonize.py", line 235, in <module>
+  [31m   [0m     main()
+  [31m   [0m   File "/tmp/pip-install-xvzpeupb/numpy_955882c80dca42b5a19eb20e56ff7b97/tools/cythonize.py", line 231, in main
+  [31m   [0m     find_process_files(root_dir)
+  [31m   [0m   File "/tmp/pip-install-xvzpeupb/numpy_955882c80dca42b5a19eb20e56ff7b97/tools/cythonize.py", line 222, in find_process_files
+  [31m   [0m     process(root_dir, fromfile, tofile, function, hash_db)
+  [31m   [0m   File "/tmp/pip-install-xvzpeupb/numpy_955882c80dca42b5a19eb20e56ff7b97/tools/cythonize.py", line 188, in process
+  [31m   [0m     processor_function(fromfile, tofile)
+  [31m   [0m   File "/tmp/pip-install-xvzpeupb/numpy_955882c80dca42b5a19eb20e56ff7b97/tools/cythonize.py", line 77, in process_pyx
+  [31m   [0m     subprocess.check_call(
+  [31m   [0m   File "/usr/local/lib/python3.10/subprocess.py", line 369, in check_call
+  [31m   [0m     raise CalledProcessError(retcode, cmd)
+  [31m   [0m subprocess.CalledProcessError: Command '['/usr/local/bin/python', '-m', 'cython', '-3', '--fast-fail', '-o', '_philox.c', '_philox.pyx']' returned non-zero exit status 1.
+  [31m   [0m Cythonizing sources
+  [31m   [0m Traceback (most recent call last):
+  [31m   [0m   File "/usr/local/lib/python3.10/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 353, in <module>
+  [31m   [0m     main()
+  [31m   [0m   File "/usr/local/lib/python3.10/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 335, in main
+  [31m   [0m     json_out['return_val'] = hook(**hook_input['kwargs'])
+  [31m   [0m   File "/usr/local/lib/python3.10/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py", line 149, in prepare_metadata_for_build_wheel
+  [31m   [0m     return hook(metadata_directory, config_settings)
+  [31m   [0m   File "/tmp/pip-build-env-ldbpg6zr/overlay/lib/python3.10/site-packages/setuptools/build_meta.py", line 157, in prepare_metadata_for_build_wheel
+  [31m   [0m     self.run_setup()
+  [31m   [0m   File "/tmp/pip-build-env-ldbpg6zr/overlay/lib/python3.10/site-packages/setuptools/build_meta.py", line 248, in run_setup
+  [31m   [0m     super(_BuildMetaLegacyBackend,
+  [31m   [0m   File "/tmp/pip-build-env-ldbpg6zr/overlay/lib/python3.10/site-packages/setuptools/build_meta.py", line 142, in run_setup
+  [31m   [0m     exec(compile(code, __file__, 'exec'), locals())
+  [31m   [0m   File "setup.py", line 499, in <module>
+  [31m   [0m     setup_package()
+  [31m   [0m   File "setup.py", line 479, in setup_package
+  [31m   [0m     generate_cython()
+  [31m   [0m   File "setup.py", line 274, in generate_cython
+  [31m   [0m     raise RuntimeError("Running cythonize failed!")
+  [31m   [0m RuntimeError: Running cythonize failed!
+  [31m   [0m [31m[end of output][0m
+  
+  [1;35mnote[0m: This error originates from a subprocess, and is likely not a problem with pip.
+[1;31merror[0m: [1mmetadata-generation-failed[0m
+
+[31m×[0m Encountered error while generating package metadata.
+[31m╰─>[0m See above for output.
+
+[1;35mnote[0m: This is an issue with the package mentioned above, not pip.
+[1;36mhint[0m: See above for details.
+
+[1m[[0m[34;49mnotice[0m[1;39;49m][0m[39;49m A new release of pip is available: [0m[31;49m23.0.1[0m[39;49m -> [0m[32;49m26.1.1[0m
+[1m[[0m[34;49mnotice[0m[1;39;49m][0m[39;49m To update, run: [0m[32;49mpip install --upgrade pip[0m
+[?25h[?2004hroot@06103092c99e:/app/UPET# pip install --upgrade pip; tmux wait -S done
+[?2004lRequirement already satisfied: pip in /usr/local/lib/python3.10/site-packages (23.0.1)
+Collecting pip
+  Downloading pip-26.1.1-py3-none-any.whl (1.8 MB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/1.8 MB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;204m━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.4/1.8 MB[0m [31m11.0 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m1.8/1.8 MB[0m [31m27.9 MB/s[0m eta [36m0:00:00[0m
+[?25hInstalling collected packages: pip
+  Attempting uninstall: pip
+    Found existing installation: pip 23.0.1
+    Uninstalling pip-23.0.1:
+      Successfully uninstalled pip-23.0.1
+Successfully installed pip-26.1.1
+[33mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv[0m[33m
+[0m[?2004hroot@06103092c99e:/app/UPET# python -m pip install torch; tmux wait -S done
+[?2004lRequirement already satisfied: torch in /usr/local/lib/python3.10/site-packages (2.2.1+cpu)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/site-packages (from torch) (3.29.0)
+Requirement already satisfied: typing-extensions>=4.8.0 in /usr/local/lib/python3.10/site-packages (from torch) (4.15.0)
+Requirement already satisfied: sympy in /usr/local/lib/python3.10/site-packages (from torch) (1.12)
+Requirement already satisfied: networkx in /usr/local/lib/python3.10/site-packages (from torch) (3.4.2)
+Requirement already satisfied: jinja2 in /usr/local/lib/python3.10/site-packages (from torch) (3.1.6)
+Requirement already satisfied: fsspec in /usr/local/lib/python3.10/site-packages (from torch) (2023.6.0)
+Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/lib/python3.10/site-packages (from jinja2->torch) (3.0.3)
+Requirement already satisfied: mpmath>=0.19 in /usr/local/lib/python3.10/site-packages (from sympy->torch) (1.4.1)
+[33mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.[0m[33m
+[0m[?2004hroot@06103092c99e:/app/UPET# python -m pip install transformers; tmux wait -S done
+[?2004lRequirement already satisfied: transformers in /usr/local/lib/python3.10/site-packages (4.40.2)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/site-packages (from transformers) (3.29.0)
+Requirement already satisfied: huggingface-hub<1.0,>=0.19.3 in /usr/local/lib/python3.10/site-packages (from transformers) (0.36.2)
+Requirement already satisfied: numpy>=1.17 in /usr/local/lib/python3.10/site-packages (from transformers) (1.25.2)
+Requirement already satisfied: packaging>=20.0 in /usr/local/lib/python3.10/site-packages (from transformers) (26.2)
+Requirement already satisfied: pyyaml>=5.1 in /usr/local/lib/python3.10/site-packages (from transformers) (6.0.3)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/site-packages (from transformers) (2023.12.25)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/site-packages (from transformers) (2.33.1)
+Requirement already satisfied: tokenizers<0.20,>=0.19 in /usr/local/lib/python3.10/site-packages (from transformers) (0.19.1)
+Requirement already satisfied: safetensors>=0.4.1 in /usr/local/lib/python3.10/site-packages (from transformers) (0.7.0)
+Requirement already satisfied: tqdm>=4.27 in /usr/local/lib/python3.10/site-packages (from transformers) (4.66.4)
+Requirement already satisfied: fsspec>=2023.5.0 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.19.3->transformers) (2023.6.0)
+Requirement already satisfied: hf-xet<2.0.0,>=1.1.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.19.3->transformers) (1.5.0)
+Requirement already satisfied: typing-extensions>=3.7.4.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.19.3->transformers) (4.15.0)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.10/site-packages (from requests->transformers) (3.4.7)
+Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/site-packages (from requests->transformers) (3.13)
+Requirement already satisfied: urllib3<3,>=1.26 in /usr/local/lib/python3.10/site-packages (from requests->transformers) (2.0.7)
+Requirement already satisfied: certifi>=2023.5.7 in /usr/local/lib/python3.10/site-packages (from requests->transformers) (2026.4.22)
+[33mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.[0m[33m
+[0m[?2004hroot@06103092c99e:/app/UPET# python run.py --model_name roberta-base --task RTE --num_train_epochs 1 --examples_per_label 5 --seed 42; tmux wait -S done
+[?2004lTraceback (most recent call last):
+  File "/app/UPET/run.py", line 12, in <module>
+    from arguments import get_args
+  File "/app/UPET/arguments.py", line 9, in <module>
+    from tasks.utils import *
+  File "/app/UPET/tasks/utils.py", line 1, in <module>
+    from tasks.glue.dataset import task_to_keys as glue_tasks
+  File "/app/UPET/tasks/glue/dataset.py", line 5, in <module>
+    from datasets.load import load_dataset, load_metric
+ImportError: cannot import name 'load_metric' from 'datasets.load' (/usr/local/lib/python3.10/site-packages/datasets/load.py)
+[?2004hroot@06103092c99e:/app/UPET# python -m pip install datasets==2.9.0; tmux wait -S done
+[?2004lCollecting datasets==2.9.0
+  Downloading datasets-2.9.0-py3-none-any.whl.metadata (19 kB)
+Requirement already satisfied: numpy>=1.17 in /usr/local/lib/python3.10/site-packages (from datasets==2.9.0) (1.25.2)
+Requirement already satisfied: pyarrow>=6.0.0 in /usr/local/lib/python3.10/site-packages (from datasets==2.9.0) (24.0.0)
+Collecting dill<0.3.7 (from datasets==2.9.0)
+  Downloading dill-0.3.6-py3-none-any.whl.metadata (9.8 kB)
+Requirement already satisfied: pandas in /usr/local/lib/python3.10/site-packages (from datasets==2.9.0) (2.0.3)
+Requirement already satisfied: requests>=2.19.0 in /usr/local/lib/python3.10/site-packages (from datasets==2.9.0) (2.33.1)
+Requirement already satisfied: tqdm>=4.62.1 in /usr/local/lib/python3.10/site-packages (from datasets==2.9.0) (4.66.4)
+Requirement already satisfied: xxhash in /usr/local/lib/python3.10/site-packages (from datasets==2.9.0) (3.7.0)
+Requirement already satisfied: multiprocess in /usr/local/lib/python3.10/site-packages (from datasets==2.9.0) (0.70.19)
+Requirement already satisfied: fsspec>=2021.11.1 in /usr/local/lib/python3.10/site-packages (from fsspec[http]>=2021.11.1->datasets==2.9.0) (2023.6.0)
+Requirement already satisfied: aiohttp in /usr/local/lib/python3.10/site-packages (from datasets==2.9.0) (3.13.5)
+Requirement already satisfied: huggingface-hub<1.0.0,>=0.2.0 in /usr/local/lib/python3.10/site-packages (from datasets==2.9.0) (0.36.2)
+Requirement already satisfied: packaging in /usr/local/lib/python3.10/site-packages (from datasets==2.9.0) (26.2)
+Collecting responses<0.19 (from datasets==2.9.0)
+  Downloading responses-0.18.0-py3-none-any.whl.metadata (29 kB)
+Requirement already satisfied: pyyaml>=5.1 in /usr/local/lib/python3.10/site-packages (from datasets==2.9.0) (6.0.3)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0.0,>=0.2.0->datasets==2.9.0) (3.29.0)
+Requirement already satisfied: hf-xet<2.0.0,>=1.1.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0.0,>=0.2.0->datasets==2.9.0) (1.5.0)
+Requirement already satisfied: typing-extensions>=3.7.4.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0.0,>=0.2.0->datasets==2.9.0) (4.15.0)
+Requirement already satisfied: urllib3>=1.25.10 in /usr/local/lib/python3.10/site-packages (from responses<0.19->datasets==2.9.0) (2.0.7)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.10/site-packages (from requests>=2.19.0->datasets==2.9.0) (3.4.7)
+Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/site-packages (from requests>=2.19.0->datasets==2.9.0) (3.13)
+Requirement already satisfied: certifi>=2023.5.7 in /usr/local/lib/python3.10/site-packages (from requests>=2.19.0->datasets==2.9.0) (2026.4.22)
+Requirement already satisfied: aiohappyeyeballs>=2.5.0 in /usr/local/lib/python3.10/site-packages (from aiohttp->datasets==2.9.0) (2.6.1)
+Requirement already satisfied: aiosignal>=1.4.0 in /usr/local/lib/python3.10/site-packages (from aiohttp->datasets==2.9.0) (1.4.0)
+Requirement already satisfied: async-timeout<6.0,>=4.0 in /usr/local/lib/python3.10/site-packages (from aiohttp->datasets==2.9.0) (5.0.1)
+Requirement already satisfied: attrs>=17.3.0 in /usr/local/lib/python3.10/site-packages (from aiohttp->datasets==2.9.0) (26.1.0)
+Requirement already satisfied: frozenlist>=1.1.1 in /usr/local/lib/python3.10/site-packages (from aiohttp->datasets==2.9.0) (1.8.0)
+Requirement already satisfied: multidict<7.0,>=4.5 in /usr/local/lib/python3.10/site-packages (from aiohttp->datasets==2.9.0) (6.7.1)
+Requirement already satisfied: propcache>=0.2.0 in /usr/local/lib/python3.10/site-packages (from aiohttp->datasets==2.9.0) (0.4.1)
+Requirement already satisfied: yarl<2.0,>=1.17.0 in /usr/local/lib/python3.10/site-packages (from aiohttp->datasets==2.9.0) (1.23.0)
+INFO: pip is looking at multiple versions of multiprocess to determine which version is compatible with other requirements. This could take a while.
+Collecting multiprocess (from datasets==2.9.0)
+  Downloading multiprocess-0.70.18-py310-none-any.whl.metadata (7.5 kB)
+  Downloading multiprocess-0.70.17-py310-none-any.whl.metadata (7.2 kB)
+  Downloading multiprocess-0.70.16-py310-none-any.whl.metadata (7.2 kB)
+  Downloading multiprocess-0.70.15-py310-none-any.whl.metadata (7.2 kB)
+  Downloading multiprocess-0.70.14-py310-none-any.whl.metadata (6.6 kB)
+Requirement already satisfied: python-dateutil>=2.8.2 in /usr/local/lib/python3.10/site-packages (from pandas->datasets==2.9.0) (2.9.0.post0)
+Requirement already satisfied: pytz>=2020.1 in /usr/local/lib/python3.10/site-packages (from pandas->datasets==2.9.0) (2026.2)
+Requirement already satisfied: tzdata>=2022.1 in /usr/local/lib/python3.10/site-packages (from pandas->datasets==2.9.0) (2026.2)
+Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.10/site-packages (from python-dateutil>=2.8.2->pandas->datasets==2.9.0) (1.17.0)
+Downloading datasets-2.9.0-py3-none-any.whl (462 kB)
+Downloading dill-0.3.6-py3-none-any.whl (110 kB)
+Downloading responses-0.18.0-py3-none-any.whl (38 kB)
+Downloading multiprocess-0.70.14-py310-none-any.whl (134 kB)
+Installing collected packages: dill, responses, multiprocess, datasets
+[?25l[2K  Attempting uninstall: dill
+[2K    Found existing installation: dill 0.4.1
+[2K    Uninstalling dill-0.4.1:
+[2K      Successfully uninstalled dill-0.4.1
+[2K  Attempting uninstall: multiprocess
+[2K    Found existing installation: multiprocess 0.70.19
+[2K    Uninstalling multiprocess-0.70.19:
+[2K      Successfully uninstalled multiprocess-0.70.19
+[2K   [38;5;197m━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━━[0m [32m2/4[0m [multiprocess][2K  Attempting uninstall: datasets
+   [38;5;197m━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━━[0m [32m2/4[0m [multiprocess][2K    Found existing installation: datasets 4.8.5
+   [38;5;197m━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━━[0m [32m2/4[0m [multiprocess][2K    Uninstalling datasets-4.8.5:
+   [38;5;197m━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━━[0m [32m2/4[0m [multiprocess][2K      Successfully uninstalled datasets-4.8.5
+   [38;5;197m━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━━[0m [32m2/4[0m [multiprocess][2K   [38;5;197m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━[0m [32m3/4[0m [datasets][2K   [38;5;70m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m4/4[0m [datasets]
+[?25h[1A[2KSuccessfully installed datasets-2.9.0 dill-0.3.6 multiprocess-0.70.14 responses-0.18.0
+[33mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.[0m[33m
+[0m[?2004hroot@06103092c99e:/app/UPET# python run.py --model_name roberta-base --task RTE --num_train_epochs 1 --examples_per_label 5 --seed 42; tmux wait -S done
+[?2004lTraceback (most recent call last):
+  File "/app/UPET/run.py", line 7, in <module>
+    import datasets
+  File "/usr/local/lib/python3.10/site-packages/datasets/__init__.py", line 43, in <module>
+    from .arrow_dataset import Dataset
+  File "/usr/local/lib/python3.10/site-packages/datasets/arrow_dataset.py", line 66, in <module>
+    from .arrow_writer import ArrowWriter, OptimizedTypedSequence
+  File "/usr/local/lib/python3.10/site-packages/datasets/arrow_writer.py", line 27, in <module>
+    from .features import Features, Image, Value
+  File "/usr/local/lib/python3.10/site-packages/datasets/features/__init__.py", line 18, in <module>
+    from .features import Array2D, Array3D, Array4D, Array5D, ClassLabel, Features, Sequence, Value
+  File "/usr/local/lib/python3.10/site-packages/datasets/features/features.py", line 630, in <module>
+    class _ArrayXDExtensionType(pa.PyExtensionType):
+AttributeError: module 'pyarrow' has no attribute 'PyExtensionType'. Did you mean: 'ExtensionType'?
+[?2004hroot@06103092c99e:/app/UPET# python -m pip install pyarrow==10.0.1; tmux wait -S done
+[?2004lCollecting pyarrow==10.0.1
+  Downloading pyarrow-10.0.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (3.0 kB)
+Requirement already satisfied: numpy>=1.16.6 in /usr/local/lib/python3.10/site-packages (from pyarrow==10.0.1) (1.25.2)
+Downloading pyarrow-10.0.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (35.9 MB)
+[?25l   [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/35.9 MB[0m [31m?[0m eta [36m-:--:--[0m[2K   [38;5;197m━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m1.8/35.9 MB[0m [31m11.0 MB/s[0m eta [36m0:00:04[0m[2K   [38;5;197m━━━━━━━[0m[38;5;197m╸[0m[38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m6.8/35.9 MB[0m [31m18.7 MB/s[0m eta [36m0:00:02[0m[2K   [38;5;197m━━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━[0m [32m18.9/35.9 MB[0m [31m33.5 MB/s[0m eta [36m0:00:01[0m[2K   [38;5;197m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;197m╸[0m [32m35.7/35.9 MB[0m [31m51.2 MB/s[0m eta [36m0:00:01[0m[2K   [38;5;70m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m35.9/35.9 MB[0m [31m45.5 MB/s[0m  [33m0:00:00[0m
+[?25hInstalling collected packages: pyarrow
+  Attempting uninstall: pyarrow
+    Found existing installation: pyarrow 24.0.0
+    Uninstalling pyarrow-24.0.0:
+      Successfully uninstalled pyarrow-24.0.0
+Successfully installed pyarrow-10.0.1
+[33mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.[0m[33m
+[0m[?2004hroot@06103092c99e:/app/UPET# python run.py --model_name roberta-base --task RTE --num_train_epochs 1 --examples_per_label 5 --seed 42; tmux wait -S done
+[?2004lusage: run.py [-h] --model_name_or_path MODEL_NAME_OR_PATH [--config_name CONFIG_NAME] [--tokenizer_name TOKENIZER_NAME] [--cache_dir CACHE_DIR]
+              [--use_fast_tokenizer [USE_FAST_TOKENIZER]] [--no_use_fast_tokenizer] [--model_revision MODEL_REVISION] [--use_auth_token [USE_AUTH_TOKEN]]
+              [--use_pe [USE_PE]] [--head_prefix [HEAD_PREFIX]] [--prompt_prefix [PROMPT_PREFIX]] [--head_only [HEAD_ONLY]] [--prompt_only [PROMPT_ONLY]]
+              [--head_ptuning [HEAD_PTUNING]] [--prompt_ptuning [PROMPT_PTUNING]] [--head_adapter [HEAD_ADAPTER]] [--prompt_adapter [PROMPT_ADAPTER]]
+              [--adapter_choice ADAPTER_CHOICE] [--adapter_dim ADAPTER_DIM] [--pre_seq_len PRE_SEQ_LEN] [--prefix_projection [PREFIX_PROJECTION]]
+              [--prefix_hidden_size PREFIX_HIDDEN_SIZE] [--hidden_dropout_prob HIDDEN_DROPOUT_PROB] --task_name {glue,superglue,ner,srl,qa,other_cls}
+              --dataset_name
+              {cola,mnli,mrpc,qnli,qqp,rte,sst2,stsb,wnli,boolq,cb,rte,wic,wsc,copa,record,multirc,conll2003,conll2004,ontonotes,conll2005,conll2012,squad,squad_v2,movie_rationales,cr,snli,trec,ag_news,yelp_polarity}
+              [--num_examples_per_label NUM_EXAMPLES_PER_LABEL] [--dataset_config_name DATASET_CONFIG_NAME] [--max_seq_length MAX_SEQ_LENGTH]
+              [--overwrite_cache [OVERWRITE_CACHE]] [--pad_to_max_length [PAD_TO_MAX_LENGTH]] [--no_pad_to_max_length] [--max_train_samples MAX_TRAIN_SAMPLES]
+              [--max_eval_samples MAX_EVAL_SAMPLES] [--max_predict_samples MAX_PREDICT_SAMPLES] [--train_file TRAIN_FILE] [--validation_file VALIDATION_FILE]
+              [--test_file TEST_FILE] [--template_id TEMPLATE_ID] --output_dir OUTPUT_DIR [--overwrite_output_dir [OVERWRITE_OUTPUT_DIR]]
+              [--do_train [DO_TRAIN]] [--do_eval [DO_EVAL]] [--do_predict [DO_PREDICT]] [--evaluation_strategy {no,steps,epoch}]
+              [--prediction_loss_only [PREDICTION_LOSS_ONLY]] [--per_device_train_batch_size PER_DEVICE_TRAIN_BATCH_SIZE]
+              [--per_device_eval_batch_size PER_DEVICE_EVAL_BATCH_SIZE] [--per_gpu_train_batch_size PER_GPU_TRAIN_BATCH_SIZE]
+              [--per_gpu_eval_batch_size PER_GPU_EVAL_BATCH_SIZE] [--gradient_accumulation_steps GRADIENT_ACCUMULATION_STEPS]
+              [--eval_accumulation_steps EVAL_ACCUMULATION_STEPS] [--eval_delay EVAL_DELAY] [--learning_rate LEARNING_RATE] [--weight_decay WEIGHT_DECAY]
+              [--adam_beta1 ADAM_BETA1] [--adam_beta2 ADAM_BETA2] [--adam_epsilon ADAM_EPSILON] [--max_grad_norm MAX_GRAD_NORM]
+              [--num_train_epochs NUM_TRAIN_EPOCHS] [--max_steps MAX_STEPS]
+              [--lr_scheduler_type {linear,cosine,cosine_with_restarts,polynomial,constant,constant_with_warmup,inverse_sqrt,reduce_lr_on_plateau,cosine_with_min_lr}]
+              [--lr_scheduler_kwargs LR_SCHEDULER_KWARGS] [--warmup_ratio WARMUP_RATIO] [--warmup_steps WARMUP_STEPS]
+              [--log_level {detail,debug,info,warning,error,critical,passive}] [--log_level_replica {detail,debug,info,warning,error,critical,passive}]
+              [--log_on_each_node [LOG_ON_EACH_NODE]] [--no_log_on_each_node] [--logging_dir LOGGING_DIR] [--logging_strategy {no,steps,epoch}]
+              [--logging_first_step [LOGGING_FIRST_STEP]] [--logging_steps LOGGING_STEPS] [--logging_nan_inf_filter [LOGGING_NAN_INF_FILTER]]
+              [--no_logging_nan_inf_filter] [--save_strategy {no,steps,epoch}] [--save_steps SAVE_STEPS] [--save_total_limit SAVE_TOTAL_LIMIT]
+              [--save_safetensors [SAVE_SAFETENSORS]] [--no_save_safetensors] [--save_on_each_node [SAVE_ON_EACH_NODE]] [--save_only_model [SAVE_ONLY_MODEL]]
+              [--no_cuda [NO_CUDA]] [--use_cpu [USE_CPU]] [--use_mps_device [USE_MPS_DEVICE]] [--seed SEED] [--data_seed DATA_SEED]
+              [--jit_mode_eval [JIT_MODE_EVAL]] [--use_ipex [USE_IPEX]] [--bf16 [BF16]] [--fp16 [FP16]] [--fp16_opt_level FP16_OPT_LEVEL]
+              [--half_precision_backend {auto,apex,cpu_amp}] [--bf16_full_eval [BF16_FULL_EVAL]] [--fp16_full_eval [FP16_FULL_EVAL]] [--tf32 TF32]
+              [--local_rank LOCAL_RANK] [--ddp_backend {nccl,gloo,mpi,ccl,hccl,cncl}] [--tpu_num_cores TPU_NUM_CORES]
+              [--tpu_metrics_debug [TPU_METRICS_DEBUG]] [--debug DEBUG [DEBUG ...]] [--dataloader_drop_last [DATALOADER_DROP_LAST]] [--eval_steps EVAL_STEPS]
+              [--dataloader_num_workers DATALOADER_NUM_WORKERS] [--dataloader_prefetch_factor DATALOADER_PREFETCH_FACTOR] [--past_index PAST_INDEX]
+              [--run_name RUN_NAME] [--disable_tqdm DISABLE_TQDM] [--remove_unused_columns [REMOVE_UNUSED_COLUMNS]] [--no_remove_unused_columns]
+              [--label_names LABEL_NAMES [LABEL_NAMES ...]] [--load_best_model_at_end [LOAD_BEST_MODEL_AT_END]]
+              [--metric_for_best_model METRIC_FOR_BEST_MODEL] [--greater_is_better GREATER_IS_BETTER] [--ignore_data_skip [IGNORE_DATA_SKIP]] [--fsdp FSDP]
+              [--fsdp_min_num_params FSDP_MIN_NUM_PARAMS] [--fsdp_config FSDP_CONFIG]
+              [--fsdp_transformer_layer_cls_to_wrap FSDP_TRANSFORMER_LAYER_CLS_TO_WRAP] [--accelerator_config ACCELERATOR_CONFIG] [--deepspeed DEEPSPEED]
+              [--label_smoothing_factor LABEL_SMOOTHING_FACTOR]
+              [--optim {adamw_hf,adamw_torch,adamw_torch_fused,adamw_torch_xla,adamw_torch_npu_fused,adamw_apex_fused,adafactor,adamw_anyprecision,sgd,adagrad,adamw_bnb_8bit,adamw_8bit,lion_8bit,lion_32bit,paged_adamw_32bit,paged_adamw_8bit,paged_lion_32bit,paged_lion_8bit,rmsprop,rmsprop_bnb,rmsprop_bnb_8bit,rmsprop_bnb_32bit,galore_adamw,galore_adamw_8bit,galore_adafactor,galore_adamw_layerwise,galore_adamw_8bit_layerwise,galore_adafactor_layerwise}]
+              [--optim_args OPTIM_ARGS] [--adafactor [ADAFACTOR]] [--group_by_length [GROUP_BY_LENGTH]] [--length_column_name LENGTH_COLUMN_NAME]
+              [--report_to REPORT_TO] [--ddp_find_unused_parameters DDP_FIND_UNUSED_PARAMETERS] [--ddp_bucket_cap_mb DDP_BUCKET_CAP_MB]
+              [--ddp_broadcast_buffers DDP_BROADCAST_BUFFERS] [--dataloader_pin_memory [DATALOADER_PIN_MEMORY]] [--no_dataloader_pin_memory]
+              [--dataloader_persistent_workers [DATALOADER_PERSISTENT_WORKERS]] [--skip_memory_metrics [SKIP_MEMORY_METRICS]] [--no_skip_memory_metrics]
+              [--use_legacy_prediction_loop [USE_LEGACY_PREDICTION_LOOP]] [--push_to_hub [PUSH_TO_HUB]] [--resume_from_checkpoint RESUME_FROM_CHECKPOINT]
+              [--hub_model_id HUB_MODEL_ID] [--hub_strategy {end,every_save,checkpoint,all_checkpoints}] [--hub_token HUB_TOKEN]
+              [--hub_private_repo [HUB_PRIVATE_REPO]] [--hub_always_push [HUB_ALWAYS_PUSH]] [--gradient_checkpointing [GRADIENT_CHECKPOINTING]]
+              [--gradient_checkpointing_kwargs GRADIENT_CHECKPOINTING_KWARGS] [--include_inputs_for_metrics [INCLUDE_INPUTS_FOR_METRICS]]
+              [--eval_do_concat_batches [EVAL_DO_CONCAT_BATCHES]] [--no_eval_do_concat_batches] [--fp16_backend {auto,apex,cpu_amp}]
+              [--push_to_hub_model_id PUSH_TO_HUB_MODEL_ID] [--push_to_hub_organization PUSH_TO_HUB_ORGANIZATION] [--push_to_hub_token PUSH_TO_HUB_TOKEN]
+              [--mp_parameters MP_PARAMETERS] [--auto_find_batch_size [AUTO_FIND_BATCH_SIZE]] [--full_determinism [FULL_DETERMINISM]]
+              [--torchdynamo TORCHDYNAMO] [--ray_scope RAY_SCOPE] [--ddp_timeout DDP_TIMEOUT] [--torch_compile [TORCH_COMPILE]]
+              [--torch_compile_backend TORCH_COMPILE_BACKEND] [--torch_compile_mode TORCH_COMPILE_MODE] [--dispatch_batches DISPATCH_BATCHES]
+              [--split_batches SPLIT_BATCHES] [--include_tokens_per_second [INCLUDE_TOKENS_PER_SECOND]]
+              [--include_num_input_tokens_seen [INCLUDE_NUM_INPUT_TOKENS_SEEN]] [--neftune_noise_alpha NEFTUNE_NOISE_ALPHA]
+              [--optim_target_modules OPTIM_TARGET_MODULES] [--use_semi [USE_SEMI]] [--unlabeled_data_num UNLABELED_DATA_NUM]
+              [--unlabeled_data_batch_size UNLABELED_DATA_BATCH_SIZE] [--pseudo_sample_num_or_ratio PSEUDO_SAMPLE_NUM_OR_RATIO]
+              [--teacher_training_epoch TEACHER_TRAINING_EPOCH] [--teacher_tuning_epoch TEACHER_TUNING_EPOCH]
+              [--student_training_epoch STUDENT_TRAINING_EPOCH] [--student_learning_rate STUDENT_LEARNING_RATE] [--self_training_epoch SELF_TRAINING_EPOCH]
+              [--post_student_train [POST_STUDENT_TRAIN]] [--student_pre_seq_len STUDENT_PRE_SEQ_LEN] [--n_best_size N_BEST_SIZE]
+              [--max_answer_length MAX_ANSWER_LENGTH] [--version_2_with_negative [VERSION_2_WITH_NEGATIVE]]
+              [--null_score_diff_threshold NULL_SCORE_DIFF_THRESHOLD]
+run.py: error: argument --task_name: invalid choice: 'RTE' (choose from 'glue', 'superglue', 'ner', 'srl', 'qa', 'other_cls')
+[?2004hroot@06103092c99e:/app/UPET# python run.py --model_name roberta-base --task_name glue --num_train_epochs 1 --examples_per_label 5 --seed 42; tmux wait -S done
+[?2004lusage: run.py [-h] --model_name_or_path MODEL_NAME_OR_PATH [--config_name CONFIG_NAME] [--tokenizer_name TOKENIZER_NAME] [--cache_dir CACHE_DIR]
+              [--use_fast_tokenizer [USE_FAST_TOKENIZER]] [--no_use_fast_tokenizer] [--model_revision MODEL_REVISION] [--use_auth_token [USE_AUTH_TOKEN]]
+              [--use_pe [USE_PE]] [--head_prefix [HEAD_PREFIX]] [--prompt_prefix [PROMPT_PREFIX]] [--head_only [HEAD_ONLY]] [--prompt_only [PROMPT_ONLY]]
+              [--head_ptuning [HEAD_PTUNING]] [--prompt_ptuning [PROMPT_PTUNING]] [--head_adapter [HEAD_ADAPTER]] [--prompt_adapter [PROMPT_ADAPTER]]
+              [--adapter_choice ADAPTER_CHOICE] [--adapter_dim ADAPTER_DIM] [--pre_seq_len PRE_SEQ_LEN] [--prefix_projection [PREFIX_PROJECTION]]
+              [--prefix_hidden_size PREFIX_HIDDEN_SIZE] [--hidden_dropout_prob HIDDEN_DROPOUT_PROB] --task_name {glue,superglue,ner,srl,qa,other_cls}
+              --dataset_name
+              {cola,mnli,mrpc,qnli,qqp,rte,sst2,stsb,wnli,boolq,cb,rte,wic,wsc,copa,record,multirc,conll2003,conll2004,ontonotes,conll2005,conll2012,squad,squad_v2,movie_rationales,cr,snli,trec,ag_news,yelp_polarity}
+              [--num_examples_per_label NUM_EXAMPLES_PER_LABEL] [--dataset_config_name DATASET_CONFIG_NAME] [--max_seq_length MAX_SEQ_LENGTH]
+              [--overwrite_cache [OVERWRITE_CACHE]] [--pad_to_max_length [PAD_TO_MAX_LENGTH]] [--no_pad_to_max_length] [--max_train_samples MAX_TRAIN_SAMPLES]
+              [--max_eval_samples MAX_EVAL_SAMPLES] [--max_predict_samples MAX_PREDICT_SAMPLES] [--train_file TRAIN_FILE] [--validation_file VALIDATION_FILE]
+              [--test_file TEST_FILE] [--template_id TEMPLATE_ID] --output_dir OUTPUT_DIR [--overwrite_output_dir [OVERWRITE_OUTPUT_DIR]]
+              [--do_train [DO_TRAIN]] [--do_eval [DO_EVAL]] [--do_predict [DO_PREDICT]] [--evaluation_strategy {no,steps,epoch}]
+              [--prediction_loss_only [PREDICTION_LOSS_ONLY]] [--per_device_train_batch_size PER_DEVICE_TRAIN_BATCH_SIZE]
+              [--per_device_eval_batch_size PER_DEVICE_EVAL_BATCH_SIZE] [--per_gpu_train_batch_size PER_GPU_TRAIN_BATCH_SIZE]
+              [--per_gpu_eval_batch_size PER_GPU_EVAL_BATCH_SIZE] [--gradient_accumulation_steps GRADIENT_ACCUMULATION_STEPS]
+              [--eval_accumulation_steps EVAL_ACCUMULATION_STEPS] [--eval_delay EVAL_DELAY] [--learning_rate LEARNING_RATE] [--weight_decay WEIGHT_DECAY]
+              [--adam_beta1 ADAM_BETA1] [--adam_beta2 ADAM_BETA2] [--adam_epsilon ADAM_EPSILON] [--max_grad_norm MAX_GRAD_NORM]
+              [--num_train_epochs NUM_TRAIN_EPOCHS] [--max_steps MAX_STEPS]
+              [--lr_scheduler_type {linear,cosine,cosine_with_restarts,polynomial,constant,constant_with_warmup,inverse_sqrt,reduce_lr_on_plateau,cosine_with_min_lr}]
+              [--lr_scheduler_kwargs LR_SCHEDULER_KWARGS] [--warmup_ratio WARMUP_RATIO] [--warmup_steps WARMUP_STEPS]
+              [--log_level {detail,debug,info,warning,error,critical,passive}] [--log_level_replica {detail,debug,info,warning,error,critical,passive}]
+              [--log_on_each_node [LOG_ON_EACH_NODE]] [--no_log_on_each_node] [--logging_dir LOGGING_DIR] [--logging_strategy {no,steps,epoch}]
+              [--logging_first_step [LOGGING_FIRST_STEP]] [--logging_steps LOGGING_STEPS] [--logging_nan_inf_filter [LOGGING_NAN_INF_FILTER]]
+              [--no_logging_nan_inf_filter] [--save_strategy {no,steps,epoch}] [--save_steps SAVE_STEPS] [--save_total_limit SAVE_TOTAL_LIMIT]
+              [--save_safetensors [SAVE_SAFETENSORS]] [--no_save_safetensors] [--save_on_each_node [SAVE_ON_EACH_NODE]] [--save_only_model [SAVE_ONLY_MODEL]]
+              [--no_cuda [NO_CUDA]] [--use_cpu [USE_CPU]] [--use_mps_device [USE_MPS_DEVICE]] [--seed SEED] [--data_seed DATA_SEED]
+              [--jit_mode_eval [JIT_MODE_EVAL]] [--use_ipex [USE_IPEX]] [--bf16 [BF16]] [--fp16 [FP16]] [--fp16_opt_level FP16_OPT_LEVEL]
+              [--half_precision_backend {auto,apex,cpu_amp}] [--bf16_full_eval [BF16_FULL_EVAL]] [--fp16_full_eval [FP16_FULL_EVAL]] [--tf32 TF32]
+              [--local_rank LOCAL_RANK] [--ddp_backend {nccl,gloo,mpi,ccl,hccl,cncl}] [--tpu_num_cores TPU_NUM_CORES]
+              [--tpu_metrics_debug [TPU_METRICS_DEBUG]] [--debug DEBUG [DEBUG ...]] [--dataloader_drop_last [DATALOADER_DROP_LAST]] [--eval_steps EVAL_STEPS]
+              [--dataloader_num_workers DATALOADER_NUM_WORKERS] [--dataloader_prefetch_factor DATALOADER_PREFETCH_FACTOR] [--past_index PAST_INDEX]
+              [--run_name RUN_NAME] [--disable_tqdm DISABLE_TQDM] [--remove_unused_columns [REMOVE_UNUSED_COLUMNS]] [--no_remove_unused_columns]
+              [--label_names LABEL_NAMES [LABEL_NAMES ...]] [--load_best_model_at_end [LOAD_BEST_MODEL_AT_END]]
+              [--metric_for_best_model METRIC_FOR_BEST_MODEL] [--greater_is_better GREATER_IS_BETTER] [--ignore_data_skip [IGNORE_DATA_SKIP]] [--fsdp FSDP]
+              [--fsdp_min_num_params FSDP_MIN_NUM_PARAMS] [--fsdp_config FSDP_CONFIG]
+              [--fsdp_transformer_layer_cls_to_wrap FSDP_TRANSFORMER_LAYER_CLS_TO_WRAP] [--accelerator_config ACCELERATOR_CONFIG] [--deepspeed DEEPSPEED]
+              [--label_smoothing_factor LABEL_SMOOTHING_FACTOR]
+              [--optim {adamw_hf,adamw_torch,adamw_torch_fused,adamw_torch_xla,adamw_torch_npu_fused,adamw_apex_fused,adafactor,adamw_anyprecision,sgd,adagrad,adamw_bnb_8bit,adamw_8bit,lion_8bit,lion_32bit,paged_adamw_32bit,paged_adamw_8bit,paged_lion_32bit,paged_lion_8bit,rmsprop,rmsprop_bnb,rmsprop_bnb_8bit,rmsprop_bnb_32bit,galore_adamw,galore_adamw_8bit,galore_adafactor,galore_adamw_layerwise,galore_adamw_8bit_layerwise,galore_adafactor_layerwise}]
+              [--optim_args OPTIM_ARGS] [--adafactor [ADAFACTOR]] [--group_by_length [GROUP_BY_LENGTH]] [--length_column_name LENGTH_COLUMN_NAME]
+              [--report_to REPORT_TO] [--ddp_find_unused_parameters DDP_FIND_UNUSED_PARAMETERS] [--ddp_bucket_cap_mb DDP_BUCKET_CAP_MB]
+              [--ddp_broadcast_buffers DDP_BROADCAST_BUFFERS] [--dataloader_pin_memory [DATALOADER_PIN_MEMORY]] [--no_dataloader_pin_memory]
+              [--dataloader_persistent_workers [DATALOADER_PERSISTENT_WORKERS]] [--skip_memory_metrics [SKIP_MEMORY_METRICS]] [--no_skip_memory_metrics]
+              [--use_legacy_prediction_loop [USE_LEGACY_PREDICTION_LOOP]] [--push_to_hub [PUSH_TO_HUB]] [--resume_from_checkpoint RESUME_FROM_CHECKPOINT]
+              [--hub_model_id HUB_MODEL_ID] [--hub_strategy {end,every_save,checkpoint,all_checkpoints}] [--hub_token HUB_TOKEN]
+              [--hub_private_repo [HUB_PRIVATE_REPO]] [--hub_always_push [HUB_ALWAYS_PUSH]] [--gradient_checkpointing [GRADIENT_CHECKPOINTING]]
+              [--gradient_checkpointing_kwargs GRADIENT_CHECKPOINTING_KWARGS] [--include_inputs_for_metrics [INCLUDE_INPUTS_FOR_METRICS]]
+              [--eval_do_concat_batches [EVAL_DO_CONCAT_BATCHES]] [--no_eval_do_concat_batches] [--fp16_backend {auto,apex,cpu_amp}]
+              [--push_to_hub_model_id PUSH_TO_HUB_MODEL_ID] [--push_to_hub_organization PUSH_TO_HUB_ORGANIZATION] [--push_to_hub_token PUSH_TO_HUB_TOKEN]
+              [--mp_parameters MP_PARAMETERS] [--auto_find_batch_size [AUTO_FIND_BATCH_SIZE]] [--full_determinism [FULL_DETERMINISM]]
+              [--torchdynamo TORCHDYNAMO] [--ray_scope RAY_SCOPE] [--ddp_timeout DDP_TIMEOUT] [--torch_compile [TORCH_COMPILE]]
+              [--torch_compile_backend TORCH_COMPILE_BACKEND] [--torch_compile_mode TORCH_COMPILE_MODE] [--dispatch_batches DISPATCH_BATCHES]
+              [--split_batches SPLIT_BATCHES] [--include_tokens_per_second [INCLUDE_TOKENS_PER_SECOND]]
+              [--include_num_input_tokens_seen [INCLUDE_NUM_INPUT_TOKENS_SEEN]] [--neftune_noise_alpha NEFTUNE_NOISE_ALPHA]
+              [--optim_target_modules OPTIM_TARGET_MODULES] [--use_semi [USE_SEMI]] [--unlabeled_data_num UNLABELED_DATA_NUM]
+              [--unlabeled_data_batch_size UNLABELED_DATA_BATCH_SIZE] [--pseudo_sample_num_or_ratio PSEUDO_SAMPLE_NUM_OR_RATIO]
+              [--teacher_training_epoch TEACHER_TRAINING_EPOCH] [--teacher_tuning_epoch TEACHER_TUNING_EPOCH]
+              [--student_training_epoch STUDENT_TRAINING_EPOCH] [--student_learning_rate STUDENT_LEARNING_RATE] [--self_training_epoch SELF_TRAINING_EPOCH]
+              [--post_student_train [POST_STUDENT_TRAIN]] [--student_pre_seq_len STUDENT_PRE_SEQ_LEN] [--n_best_size N_BEST_SIZE]
+              [--max_answer_length MAX_ANSWER_LENGTH] [--version_2_with_negative [VERSION_2_WITH_NEGATIVE]]
+              [--null_score_diff_threshold NULL_SCORE_DIFF_THRESHOLD]
+run.py: error: the following arguments are required: --dataset_name, --output_dir
+[?2004hroot@06103092c99e:/app/UPET# python run.py --model_name roberta-base --task_name glue --dataset_name glue-rte --output_dir /app/UPET/output --num_train_epochs 1 --examples_per_label 5 --seed 42; tmux wait -S done
+[?2004lusage: run.py [-h] --model_name_or_path MODEL_NAME_OR_PATH [--config_name CONFIG_NAME] [--tokenizer_name TOKENIZER_NAME] [--cache_dir CACHE_DIR]
+              [--use_fast_tokenizer [USE_FAST_TOKENIZER]] [--no_use_fast_tokenizer] [--model_revision MODEL_REVISION] [--use_auth_token [USE_AUTH_TOKEN]]
+              [--use_pe [USE_PE]] [--head_prefix [HEAD_PREFIX]] [--prompt_prefix [PROMPT_PREFIX]] [--head_only [HEAD_ONLY]] [--prompt_only [PROMPT_ONLY]]
+              [--head_ptuning [HEAD_PTUNING]] [--prompt_ptuning [PROMPT_PTUNING]] [--head_adapter [HEAD_ADAPTER]] [--prompt_adapter [PROMPT_ADAPTER]]
+              [--adapter_choice ADAPTER_CHOICE] [--adapter_dim ADAPTER_DIM] [--pre_seq_len PRE_SEQ_LEN] [--prefix_projection [PREFIX_PROJECTION]]
+              [--prefix_hidden_size PREFIX_HIDDEN_SIZE] [--hidden_dropout_prob HIDDEN_DROPOUT_PROB] --task_name {glue,superglue,ner,srl,qa,other_cls}
+              --dataset_name
+              {cola,mnli,mrpc,qnli,qqp,rte,sst2,stsb,wnli,boolq,cb,rte,wic,wsc,copa,record,multirc,conll2003,conll2004,ontonotes,conll2005,conll2012,squad,squad_v2,movie_rationales,cr,snli,trec,ag_news,yelp_polarity}
+              [--num_examples_per_label NUM_EXAMPLES_PER_LABEL] [--dataset_config_name DATASET_CONFIG_NAME] [--max_seq_length MAX_SEQ_LENGTH]
+              [--overwrite_cache [OVERWRITE_CACHE]] [--pad_to_max_length [PAD_TO_MAX_LENGTH]] [--no_pad_to_max_length] [--max_train_samples MAX_TRAIN_SAMPLES]
+              [--max_eval_samples MAX_EVAL_SAMPLES] [--max_predict_samples MAX_PREDICT_SAMPLES] [--train_file TRAIN_FILE] [--validation_file VALIDATION_FILE]
+              [--test_file TEST_FILE] [--template_id TEMPLATE_ID] --output_dir OUTPUT_DIR [--overwrite_output_dir [OVERWRITE_OUTPUT_DIR]]
+              [--do_train [DO_TRAIN]] [--do_eval [DO_EVAL]] [--do_predict [DO_PREDICT]] [--evaluation_strategy {no,steps,epoch}]
+              [--prediction_loss_only [PREDICTION_LOSS_ONLY]] [--per_device_train_batch_size PER_DEVICE_TRAIN_BATCH_SIZE]
+              [--per_device_eval_batch_size PER_DEVICE_EVAL_BATCH_SIZE] [--per_gpu_train_batch_size PER_GPU_TRAIN_BATCH_SIZE]
+              [--per_gpu_eval_batch_size PER_GPU_EVAL_BATCH_SIZE] [--gradient_accumulation_steps GRADIENT_ACCUMULATION_STEPS]
+              [--eval_accumulation_steps EVAL_ACCUMULATION_STEPS] [--eval_delay EVAL_DELAY] [--learning_rate LEARNING_RATE] [--weight_decay WEIGHT_DECAY]
+              [--adam_beta1 ADAM_BETA1] [--adam_beta2 ADAM_BETA2] [--adam_epsilon ADAM_EPSILON] [--max_grad_norm MAX_GRAD_NORM]
+              [--num_train_epochs NUM_TRAIN_EPOCHS] [--max_steps MAX_STEPS]
+              [--lr_scheduler_type {linear,cosine,cosine_with_restarts,polynomial,constant,constant_with_warmup,inverse_sqrt,reduce_lr_on_plateau,cosine_with_min_lr}]
+              [--lr_scheduler_kwargs LR_SCHEDULER_KWARGS] [--warmup_ratio WARMUP_RATIO] [--warmup_steps WARMUP_STEPS]
+              [--log_level {detail,debug,info,warning,error,critical,passive}] [--log_level_replica {detail,debug,info,warning,error,critical,passive}]
+              [--log_on_each_node [LOG_ON_EACH_NODE]] [--no_log_on_each_node] [--logging_dir LOGGING_DIR] [--logging_strategy {no,steps,epoch}]
+              [--logging_first_step [LOGGING_FIRST_STEP]] [--logging_steps LOGGING_STEPS] [--logging_nan_inf_filter [LOGGING_NAN_INF_FILTER]]
+              [--no_logging_nan_inf_filter] [--save_strategy {no,steps,epoch}] [--save_steps SAVE_STEPS] [--save_total_limit SAVE_TOTAL_LIMIT]
+              [--save_safetensors [SAVE_SAFETENSORS]] [--no_save_safetensors] [--save_on_each_node [SAVE_ON_EACH_NODE]] [--save_only_model [SAVE_ONLY_MODEL]]
+              [--no_cuda [NO_CUDA]] [--use_cpu [USE_CPU]] [--use_mps_device [USE_MPS_DEVICE]] [--seed SEED] [--data_seed DATA_SEED]
+              [--jit_mode_eval [JIT_MODE_EVAL]] [--use_ipex [USE_IPEX]] [--bf16 [BF16]] [--fp16 [FP16]] [--fp16_opt_level FP16_OPT_LEVEL]
+              [--half_precision_backend {auto,apex,cpu_amp}] [--bf16_full_eval [BF16_FULL_EVAL]] [--fp16_full_eval [FP16_FULL_EVAL]] [--tf32 TF32]
+              [--local_rank LOCAL_RANK] [--ddp_backend {nccl,gloo,mpi,ccl,hccl,cncl}] [--tpu_num_cores TPU_NUM_CORES]
+              [--tpu_metrics_debug [TPU_METRICS_DEBUG]] [--debug DEBUG [DEBUG ...]] [--dataloader_drop_last [DATALOADER_DROP_LAST]] [--eval_steps EVAL_STEPS]
+              [--dataloader_num_workers DATALOADER_NUM_WORKERS] [--dataloader_prefetch_factor DATALOADER_PREFETCH_FACTOR] [--past_index PAST_INDEX]
+              [--run_name RUN_NAME] [--disable_tqdm DISABLE_TQDM] [--remove_unused_columns [REMOVE_UNUSED_COLUMNS]] [--no_remove_unused_columns]
+              [--label_names LABEL_NAMES [LABEL_NAMES ...]] [--load_best_model_at_end [LOAD_BEST_MODEL_AT_END]]
+              [--metric_for_best_model METRIC_FOR_BEST_MODEL] [--greater_is_better GREATER_IS_BETTER] [--ignore_data_skip [IGNORE_DATA_SKIP]] [--fsdp FSDP]
+              [--fsdp_min_num_params FSDP_MIN_NUM_PARAMS] [--fsdp_config FSDP_CONFIG]
+              [--fsdp_transformer_layer_cls_to_wrap FSDP_TRANSFORMER_LAYER_CLS_TO_WRAP] [--accelerator_config ACCELERATOR_CONFIG] [--deepspeed DEEPSPEED]
+              [--label_smoothing_factor LABEL_SMOOTHING_FACTOR]
+              [--optim {adamw_hf,adamw_torch,adamw_torch_fused,adamw_torch_xla,adamw_torch_npu_fused,adamw_apex_fused,adafactor,adamw_anyprecision,sgd,adagrad,adamw_bnb_8bit,adamw_8bit,lion_8bit,lion_32bit,paged_adamw_32bit,paged_adamw_8bit,paged_lion_32bit,paged_lion_8bit,rmsprop,rmsprop_bnb,rmsprop_bnb_8bit,rmsprop_bnb_32bit,galore_adamw,galore_adamw_8bit,galore_adafactor,galore_adamw_layerwise,galore_adamw_8bit_layerwise,galore_adafactor_layerwise}]
+              [--optim_args OPTIM_ARGS] [--adafactor [ADAFACTOR]] [--group_by_length [GROUP_BY_LENGTH]] [--length_column_name LENGTH_COLUMN_NAME]
+              [--report_to REPORT_TO] [--ddp_find_unused_parameters DDP_FIND_UNUSED_PARAMETERS] [--ddp_bucket_cap_mb DDP_BUCKET_CAP_MB]
+              [--ddp_broadcast_buffers DDP_BROADCAST_BUFFERS] [--dataloader_pin_memory [DATALOADER_PIN_MEMORY]] [--no_dataloader_pin_memory]
+              [--dataloader_persistent_workers [DATALOADER_PERSISTENT_WORKERS]] [--skip_memory_metrics [SKIP_MEMORY_METRICS]] [--no_skip_memory_metrics]
+              [--use_legacy_prediction_loop [USE_LEGACY_PREDICTION_LOOP]] [--push_to_hub [PUSH_TO_HUB]] [--resume_from_checkpoint RESUME_FROM_CHECKPOINT]
+              [--hub_model_id HUB_MODEL_ID] [--hub_strategy {end,every_save,checkpoint,all_checkpoints}] [--hub_token HUB_TOKEN]
+              [--hub_private_repo [HUB_PRIVATE_REPO]] [--hub_always_push [HUB_ALWAYS_PUSH]] [--gradient_checkpointing [GRADIENT_CHECKPOINTING]]
+              [--gradient_checkpointing_kwargs GRADIENT_CHECKPOINTING_KWARGS] [--include_inputs_for_metrics [INCLUDE_INPUTS_FOR_METRICS]]
+              [--eval_do_concat_batches [EVAL_DO_CONCAT_BATCHES]] [--no_eval_do_concat_batches] [--fp16_backend {auto,apex,cpu_amp}]
+              [--push_to_hub_model_id PUSH_TO_HUB_MODEL_ID] [--push_to_hub_organization PUSH_TO_HUB_ORGANIZATION] [--push_to_hub_token PUSH_TO_HUB_TOKEN]
+              [--mp_parameters MP_PARAMETERS] [--auto_find_batch_size [AUTO_FIND_BATCH_SIZE]] [--full_determinism [FULL_DETERMINISM]]
+              [--torchdynamo TORCHDYNAMO] [--ray_scope RAY_SCOPE] [--ddp_timeout DDP_TIMEOUT] [--torch_compile [TORCH_COMPILE]]
+              [--torch_compile_backend TORCH_COMPILE_BACKEND] [--torch_compile_mode TORCH_COMPILE_MODE] [--dispatch_batches DISPATCH_BATCHES]
+              [--split_batches SPLIT_BATCHES] [--include_tokens_per_second [INCLUDE_TOKENS_PER_SECOND]]
+              [--include_num_input_tokens_seen [INCLUDE_NUM_INPUT_TOKENS_SEEN]] [--neftune_noise_alpha NEFTUNE_NOISE_ALPHA]
+              [--optim_target_modules OPTIM_TARGET_MODULES] [--use_semi [USE_SEMI]] [--unlabeled_data_num UNLABELED_DATA_NUM]
+              [--unlabeled_data_batch_size UNLABELED_DATA_BATCH_SIZE] [--pseudo_sample_num_or_ratio PSEUDO_SAMPLE_NUM_OR_RATIO]
+              [--teacher_training_epoch TEACHER_TRAINING_EPOCH] [--teacher_tuning_epoch TEACHER_TUNING_EPOCH]
+              [--student_training_epoch STUDENT_TRAINING_EPOCH] [--student_learning_rate STUDENT_LEARNING_RATE] [--self_training_epoch SELF_TRAINING_EPOCH]
+              [--post_student_train [POST_STUDENT_TRAIN]] [--student_pre_seq_len STUDENT_PRE_SEQ_LEN] [--n_best_size N_BEST_SIZE]
+              [--max_answer_length MAX_ANSWER_LENGTH] [--version_2_with_negative [VERSION_2_WITH_NEGATIVE]]
+              [--null_score_diff_threshold NULL_SCORE_DIFF_THRESHOLD]
+run.py: error: argument --dataset_name: invalid choice: 'glue-rte' (choose from 'cola', 'mnli', 'mrpc', 'qnli', 'qqp', 'rte', 'sst2', 'stsb', 'wnli', 'boolq', 'cb', 'rte', 'wic', 'wsc', 'copa', 'record', 'multirc', 'conll2003', 'conll2004', 'ontonotes', 'conll2005', 'conll2012', 'squad', 'squad_v2', 'movie_rationales', 'cr', 'snli', 'trec', 'ag_news', 'yelp_polarity')
+[?2004hroot@06103092c99e:/app/UPET# python run.py --model_name roberta-base --task_name glue --dataset_name rte --output_dir /app/UPET/output --num_train_epochs 1 --examples_per_label 5 --seed 42; tmux wait -S done
+[?2004lTraceback (most recent call last):
+  File "/app/UPET/run.py", line 71, in <module>
+    args = get_args()
+  File "/app/UPET/arguments.py", line 326, in get_args
+    args = parser.parse_args_into_dataclasses()
+  File "/usr/local/lib/python3.10/site-packages/transformers/hf_argparser.py", line 339, in parse_args_into_dataclasses
+    obj = dtype(**inputs)
+  File "<string>", line 125, in __init__
+  File "/usr/local/lib/python3.10/site-packages/transformers/training_args.py", line 1605, in __post_init__
+    and (self.device.type != "cuda")
+  File "/usr/local/lib/python3.10/site-packages/transformers/training_args.py", line 2094, in device
+    return self._setup_devices
+  File "/usr/local/lib/python3.10/site-packages/transformers/utils/generic.py", line 63, in __get__
+    cached = self.fget(obj)
+  File "/usr/local/lib/python3.10/site-packages/transformers/training_args.py", line 2000, in _setup_devices
+    raise ImportError(
+ImportError: Using the `Trainer` with `PyTorch` requires `accelerate>=0.21.0`: Please run `pip install transformers[torch]` or `pip install accelerate -U`
+[?2004hroot@06103092c99e:/app/UPET# python -m pip install accelerate; tmux wait -S done
+[?2004lCollecting accelerate
+  Downloading accelerate-1.13.0-py3-none-any.whl.metadata (19 kB)
+Requirement already satisfied: numpy>=1.17 in /usr/local/lib/python3.10/site-packages (from accelerate) (1.25.2)
+Requirement already satisfied: packaging>=20.0 in /usr/local/lib/python3.10/site-packages (from accelerate) (26.2)
+Collecting psutil (from accelerate)
+  Downloading psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl.metadata (22 kB)
+Requirement already satisfied: pyyaml in /usr/local/lib/python3.10/site-packages (from accelerate) (6.0.3)
+Requirement already satisfied: torch>=2.0.0 in /usr/local/lib/python3.10/site-packages (from accelerate) (2.2.1+cpu)
+Requirement already satisfied: huggingface_hub>=0.21.0 in /usr/local/lib/python3.10/site-packages (from accelerate) (0.36.2)
+Requirement already satisfied: safetensors>=0.4.3 in /usr/local/lib/python3.10/site-packages (from accelerate) (0.7.0)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/site-packages (from huggingface_hub>=0.21.0->accelerate) (3.29.0)
+Requirement already satisfied: fsspec>=2023.5.0 in /usr/local/lib/python3.10/site-packages (from huggingface_hub>=0.21.0->accelerate) (2023.6.0)
+Requirement already satisfied: hf-xet<2.0.0,>=1.1.3 in /usr/local/lib/python3.10/site-packages (from huggingface_hub>=0.21.0->accelerate) (1.5.0)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/site-packages (from huggingface_hub>=0.21.0->accelerate) (2.33.1)
+Requirement already satisfied: tqdm>=4.42.1 in /usr/local/lib/python3.10/site-packages (from huggingface_hub>=0.21.0->accelerate) (4.66.4)
+Requirement already satisfied: typing-extensions>=3.7.4.3 in /usr/local/lib/python3.10/site-packages (from huggingface_hub>=0.21.0->accelerate) (4.15.0)
+Requirement already satisfied: sympy in /usr/local/lib/python3.10/site-packages (from torch>=2.0.0->accelerate) (1.12)
+Requirement already satisfied: networkx in /usr/local/lib/python3.10/site-packages (from torch>=2.0.0->accelerate) (3.4.2)
+Requirement already satisfied: jinja2 in /usr/local/lib/python3.10/site-packages (from torch>=2.0.0->accelerate) (3.1.6)
+Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/lib/python3.10/site-packages (from jinja2->torch>=2.0.0->accelerate) (3.0.3)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.10/site-packages (from requests->huggingface_hub>=0.21.0->accelerate) (3.4.7)
+Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/site-packages (from requests->huggingface_hub>=0.21.0->accelerate) (3.13)
+Requirement already satisfied: urllib3<3,>=1.26 in /usr/local/lib/python3.10/site-packages (from requests->huggingface_hub>=0.21.0->accelerate) (2.0.7)
+Requirement already satisfied: certifi>=2023.5.7 in /usr/local/lib/python3.10/site-packages (from requests->huggingface_hub>=0.21.0->accelerate) (2026.4.22)
+Requirement already satisfied: mpmath>=0.19 in /usr/local/lib/python3.10/site-packages (from sympy->torch>=2.0.0->accelerate) (1.4.1)
+Downloading accelerate-1.13.0-py3-none-any.whl (383 kB)
+Downloading psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl (155 kB)
+Installing collected packages: psutil, accelerate
+[?25l[2K   [38;5;197m━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━━[0m [32m1/2[0m [accelerate][2K   [38;5;70m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2/2[0m [accelerate]
+[?25h[1A[2KSuccessfully installed accelerate-1.13.0 psutil-7.2.2
+[33mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.[0m[33m
+[0m[?2004hroot@06103092c99e:/app/UPET# python run.py --model_name roberta-base --task_name glue --dataset_name rte --output_dir /app/UPET/output --num_train_epochs 1 --examples_per_label 5 --seed 42; tmux wait -S done
+[?2004lUsing the `WANDB_DISABLED` environment variable is deprecated and will be removed in v5. Use the --report_to flag to control the integrations used for logging result (for instance --report_to none).
+Traceback (most recent call last):
+  File "/app/UPET/run.py", line 71, in <module>
+    args = get_args()
+  File "/app/UPET/arguments.py", line 326, in get_args
+    args = parser.parse_args_into_dataclasses()
+  File "/usr/local/lib/python3.10/site-packages/transformers/hf_argparser.py", line 348, in parse_args_into_dataclasses
+    raise ValueError(f"Some specified arguments are not used by the HfArgumentParser: {remaining_args}")
+ValueError: Some specified arguments are not used by the HfArgumentParser: ['--examples_per_label', '5']
+[?2004hroot@06103092c99e:/app/UPET# python run.py --model_name roberta-base --task_name glue --dataset_name rte --output_dir /app/UPET/output --num_train_epochs 1 --seed 42; tmux wait -S done
+[?2004lUsing the `WANDB_DISABLED` environment variable is deprecated and will be removed in v5. Use the --report_to flag to control the integrations used for logging result (for instance --report_to none).
+05/06/2026 20:42:23 - WARNING - __main__ - Process rank: 0, device: cpu, n_gpu: 0distributed training: True, 16-bits training: False
+/usr/local/lib/python3.10/site-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+tokenizer_config.json:   0%|                                                                                                         | 0.00/25.0 [00:00<?, ?B/s]tokenizer_config.json: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████| 25.0/25.0 [00:00<00:00, 243kB/s]
+config.json:   0%|                                                                                                                    | 0.00/481 [00:00<?, ?B/s]config.json: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████| 481/481 [00:00<00:00, 5.83MB/s]
+vocab.json: 0.00B [00:00, ?B/s]vocab.json: 899kB [00:00, 15.0MB/s]
+merges.txt: 0.00B [00:00, ?B/s]merges.txt: 456kB [00:00, 22.6MB/s]
+tokenizer.json: 0.00B [00:00, ?B/s]tokenizer.json: 1.36MB [00:00, 27.7MB/s]
+Downloading readme: 0.00B [00:00, ?B/s]Downloading readme: 35.3kB [00:00, 86.2MB/s]
+05/06/2026 20:42:25 - WARNING - datasets.builder - Using custom data configuration ax-463e6525be82f7fe
+Downloading and preparing dataset None/ax to /root/.cache/huggingface/datasets/parquet/ax-463e6525be82f7fe/0.0.0/2a3b91fbd88a2c90d1dbbb32b460cf621d31bd5b05b934492fdef7d8d6f236ec...
+Downloading data files:   0%|                                                                                                             | 0/3 [00:00<?, ?it/s]
+Downloading data:   0%|                                                                                                              | 0.00/251k [00:00<?, ?B/s][ADownloading data: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 251k/251k [00:00<00:00, 8.45MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/52.2M [00:00<?, ?B/s][A
+Downloading data:  13%|█████████████▎                                                                                      | 6.96M/52.2M [00:00<00:00, 69.6MB/s][A
+Downloading data:  42%|██████████████████████████████████████████▌                                                          | 22.0M/52.2M [00:00<00:00, 117MB/s][A
+Downloading data:  72%|████████████████████████████████████████████████████████████████████████▍                            | 37.4M/52.2M [00:00<00:00, 134MB/s][ADownloading data: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 52.2M/52.2M [00:00<00:00, 132MB/s]
+
+Downloading data:   0%|                                                                                                              | 0.00/649k [00:00<?, ?B/s][ADownloading data: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 649k/649k [00:00<00:00, 14.9MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/17.5M [00:00<?, ?B/s][A
+Downloading data:  40%|███████████████████████████████████████▌                                                            | 6.94M/17.5M [00:00<00:00, 69.4MB/s][ADownloading data: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 17.5M/17.5M [00:00<00:00, 101MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/33.6M [00:00<?, ?B/s][A
+Downloading data:  20%|███████████████████▉                                                                                | 6.67M/33.6M [00:00<00:00, 66.7MB/s][A
+Downloading data:  61%|██████████████████████████████████████████████████████████████                                       | 20.6M/33.6M [00:00<00:00, 110MB/s][ADownloading data: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 33.6M/33.6M [00:00<00:00, 116MB/s]
+
+Downloading data:   0%|                                                                                                              | 0.00/584k [00:00<?, ?B/s][ADownloading data: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 584k/584k [00:00<00:00, 12.8MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/3.11M [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 3.11M/3.11M [00:00<00:00, 42.2MB/s]
+
+Downloading data:   0%|                                                                                                              | 0.00/502k [00:00<?, ?B/s][ADownloading data: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 502k/502k [00:00<00:00, 11.5MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/38.8k [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 38.8k/38.8k [00:00<00:00, 3.75MB/s]
+Downloading data files:  33%|█████████████████████████████████▋                                                                   | 1/3 [00:04<00:08,  4.13s/it]
+Downloading data:   0%|                                                                                                             | 0.00/80.8k [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 80.8k/80.8k [00:00<00:00, 5.82MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/37.7k [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 37.7k/37.7k [00:00<00:00, 3.95MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/1.22M [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 1.22M/1.22M [00:00<00:00, 23.0MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/1.26M [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 1.26M/1.26M [00:00<00:00, 23.3MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/1.22M [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 1.22M/1.22M [00:00<00:00, 21.7MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/1.26M [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 1.26M/1.26M [00:00<00:00, 23.3MB/s]
+
+Downloading data:   0%|                                                                                                              | 0.00/308k [00:00<?, ?B/s][ADownloading data: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 308k/308k [00:00<00:00, 9.44MB/s]
+
+Downloading data:   0%|                                                                                                              | 0.00/877k [00:00<?, ?B/s][ADownloading data: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 877k/877k [00:00<00:00, 18.1MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/36.7M [00:00<?, ?B/s][A
+Downloading data:  18%|█████████████████▌                                                                                  | 6.42M/36.7M [00:00<00:00, 64.2MB/s][A
+Downloading data:  58%|██████████████████████████████████████████████████████████                                           | 21.1M/36.7M [00:00<00:00, 113MB/s][A
+Downloading data:  96%|████████████████████████████████████████████████████████████████████████████████████████████████▋    | 35.1M/36.7M [00:00<00:00, 125MB/s][ADownloading data: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 36.7M/36.7M [00:00<00:00, 118MB/s]
+
+Downloading data:   0%|                                                                                                              | 0.00/621k [00:00<?, ?B/s][ADownloading data: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 621k/621k [00:00<00:00, 14.3MB/s]
+
+Downloading data:   0%|                                                                                                              | 0.00/148k [00:00<?, ?B/s][ADownloading data: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 148k/148k [00:00<00:00, 6.41MB/s]
+
+Downloading data:   0%|                                                                                                              | 0.00/114k [00:00<?, ?B/s][ADownloading data: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 114k/114k [00:00<00:00, 5.16MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/13.6k [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 13.6k/13.6k [00:00<00:00, 24.9MB/s]
+Downloading data files:  67%|███████████████████████████████████████████████████████████████████▎                                 | 2/3 [00:09<00:04,  4.80s/it]
+Downloading data:   0%|                                                                                                             | 0.00/37.6k [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 37.6k/37.6k [00:00<00:00, 3.74MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/1.21M [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 1.21M/1.21M [00:00<00:00, 20.9MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/1.25M [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 1.25M/1.25M [00:00<00:00, 21.1MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/1.21M [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 1.21M/1.21M [00:00<00:00, 23.1MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/1.25M [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 1.25M/1.25M [00:00<00:00, 22.9MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/75.7k [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 75.7k/75.7k [00:00<00:00, 5.91MB/s]
+
+Downloading data:   0%|                                                                                                              | 0.00/872k [00:00<?, ?B/s][ADownloading data: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 872k/872k [00:00<00:00, 15.9MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/3.73M [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 3.73M/3.73M [00:00<00:00, 50.6MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/69.0k [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 69.0k/69.0k [00:00<00:00, 5.76MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/72.8k [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 72.8k/72.8k [00:00<00:00, 5.26MB/s]
+
+Downloading data:   0%|                                                                                                              | 0.00/151k [00:00<?, ?B/s][ADownloading data: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 151k/151k [00:00<00:00, 5.55MB/s]
+
+Downloading data:   0%|                                                                                                             | 0.00/11.1k [00:00<?, ?B/s][ADownloading data: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 11.1k/11.1k [00:00<00:00, 51.3MB/s]
+Downloading data files: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 3/3 [00:13<00:00,  4.68s/it]Downloading data files: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 3/3 [00:13<00:00,  4.64s/it]
+Extracting data files:   0%|                                                                                                              | 0/3 [00:00<?, ?it/s]Extracting data files: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 3/3 [00:00<00:00, 391.56it/s]
+Traceback (most recent call last):
+  File "/app/UPET/run.py", line 128, in <module>
+    trainer, predict_dataset = get_trainer(args)
+  File "/app/UPET/tasks/glue/get_trainer.py", line 32, in get_trainer
+    dataset = GlueDataset(tokenizer, data_args, training_args, semi_training_args=semi_training_args, use_prompt=use_prompt)
+  File "/app/UPET/tasks/glue/dataset.py", line 100, in __init__
+    raw_datasets = load_dataset("glue", data_args.dataset_name)
+  File "/usr/local/lib/python3.10/site-packages/datasets/load.py", line 1758, in load_dataset
+    builder_instance.download_and_prepare(
+  File "/usr/local/lib/python3.10/site-packages/datasets/builder.py", line 860, in download_and_prepare
+    self._download_and_prepare(
+  File "/usr/local/lib/python3.10/site-packages/datasets/builder.py", line 953, in _download_and_prepare
+    self._prepare_split(split_generator, **prepare_split_kwargs)
+  File "/usr/local/lib/python3.10/site-packages/datasets/builder.py", line 1669, in _prepare_split
+    split_info = self.info.splits[split_generator.name]
+  File "/usr/local/lib/python3.10/site-packages/datasets/splits.py", line 530, in __getitem__
+    instructions = make_file_instructions(
+  File "/usr/local/lib/python3.10/site-packages/datasets/arrow_reader.py", line 112, in make_file_instructions
+    name2filenames = {
+  File "/usr/local/lib/python3.10/site-packages/datasets/arrow_reader.py", line 113, in <dictcomp>
+    info.name: filenames_for_dataset_split(
+  File "/usr/local/lib/python3.10/site-packages/datasets/naming.py", line 71, in filenames_for_dataset_split
+    prefix = filename_prefix_for_split(dataset_name, split)
+  File "/usr/local/lib/python3.10/site-packages/datasets/naming.py", line 54, in filename_prefix_for_split
+    if os.path.basename(name) != name:
+  File "/usr/local/lib/python3.10/posixpath.py", line 142, in basename
+    p = os.fspath(p)
+TypeError: expected str, bytes or os.PathLike object, not NoneType
+[?2004hroot@06103092c99e:/app/UPET# python run.py --model_name roberta-base --task_name glue --dataset_name mnli --output_dir /app/UPET/output --num_train_epochs 1 --seed 42; tmux wait -S done
+[?2004lUsing the `WANDB_DISABLED` environment variable is deprecated and will be removed in v5. Use the --report_to flag to control the integrations used for logging result (for instance --report_to none).
+05/06/2026 20:42:47 - WARNING - __main__ - Process rank: 0, device: cpu, n_gpu: 0distributed training: True, 16-bits training: False
+/usr/local/lib/python3.10/site-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+05/06/2026 20:42:48 - WARNING - datasets.builder - Using custom data configuration ax-463e6525be82f7fe
+Downloading and preparing dataset None/ax to /root/.cache/huggingface/datasets/parquet/ax-463e6525be82f7fe/0.0.0/2a3b91fbd88a2c90d1dbbb32b460cf621d31bd5b05b934492fdef7d8d6f236ec...
+Downloading data files:   0%|                                                                                                             | 0/3 [00:00<?, ?it/s]Downloading data files: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████| 3/3 [00:00<00:00, 3285.36it/s]
+Extracting data files:   0%|                                                                                                              | 0/3 [00:00<?, ?it/s]Extracting data files: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 3/3 [00:00<00:00, 459.50it/s]
+Traceback (most recent call last):
+  File "/app/UPET/run.py", line 128, in <module>
+    trainer, predict_dataset = get_trainer(args)
+  File "/app/UPET/tasks/glue/get_trainer.py", line 32, in get_trainer
+    dataset = GlueDataset(tokenizer, data_args, training_args, semi_training_args=semi_training_args, use_prompt=use_prompt)
+  File "/app/UPET/tasks/glue/dataset.py", line 100, in __init__
+    raw_datasets = load_dataset("glue", data_args.dataset_name)
+  File "/usr/local/lib/python3.10/site-packages/datasets/load.py", line 1758, in load_dataset
+    builder_instance.download_and_prepare(
+  File "/usr/local/lib/python3.10/site-packages/datasets/builder.py", line 860, in download_and_prepare
+    self._download_and_prepare(
+  File "/usr/local/lib/python3.10/site-packages/datasets/builder.py", line 953, in _download_and_prepare
+    self._prepare_split(split_generator, **prepare_split_kwargs)
+  File "/usr/local/lib/python3.10/site-packages/datasets/builder.py", line 1669, in _prepare_split
+    split_info = self.info.splits[split_generator.name]
+  File "/usr/local/lib/python3.10/site-packages/datasets/splits.py", line 530, in __getitem__
+    instructions = make_file_instructions(
+  File "/usr/local/lib/python3.10/site-packages/datasets/arrow_reader.py", line 112, in make_file_instructions
+    name2filenames = {
+  File "/usr/local/lib/python3.10/site-packages/datasets/arrow_reader.py", line 113, in <dictcomp>
+    info.name: filenames_for_dataset_split(
+  File "/usr/local/lib/python3.10/site-packages/datasets/naming.py", line 71, in filenames_for_dataset_split
+    prefix = filename_prefix_for_split(dataset_name, split)
+  File "/usr/local/lib/python3.10/site-packages/datasets/naming.py", line 54, in filename_prefix_for_split
+    if os.path.basename(name) != name:
+  File "/usr/local/lib/python3.10/posixpath.py", line 142, in basename
+    p = os.fspath(p)
+TypeError: expected str, bytes or os.PathLike object, not NoneType
+[?2004hroot@06103092c99e:/app/UPET# [?2004l
+exit
+[0;32masciinema: recording finished[0m
+[0;32masciinema: asciicast saved to /logs/agent.cast[0m
+[?2004hroot@06103092c99e:/app# 

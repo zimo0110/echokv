@@ -1,0 +1,16 @@
+['asciinema rec --stdin /logs/agent.cast', 'Enter']
+['clear', 'Enter']
+'cd /app/project\n'
+'cat environment.yml\n'
+"sed -i 's/cudatoolkit=11.2/cudatoolkit=11.3/' environment.yml\n"
+"sed -i 's/numpy=1.22.0/numpy=1.20.0/' environment.yml\n"
+'cat environment.yml\n'
+'conda env create -f environment.yml\n'
+"sed -i 's/scikit-learn=1.0.2/scikit-learn=1.0.1/' environment.yml\n"
+"sed -i '/tensorflow/d' environment.yml\n"
+'cat environment.yml\n'
+'conda env create -f environment.yml\n'
+"sed -i 's/python=3.10/python=3.9/' environment.yml\n"
+'cat environment.yml\n'
+'conda env create -f environment.yml\n'
+['C-d']

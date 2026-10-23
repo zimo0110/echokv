@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We have examined the garlic and it's nothing special",
+    "explanation": "Let's try to go up the staircase to see what's on the next floor",
+    "commands": [
+        {
+            "keystrokes": "go up\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

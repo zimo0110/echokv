@@ -1,0 +1,12 @@
+{
+    "state_analysis": "Current directory is /app, and the user is root.",
+    "explanation": "The first step is to evaluate the bge-small-en-v1.5 embedding model at the specified commit id using the mteb package. We need to execute the mteb command with the required arguments.",
+    "commands": [
+        {
+            "keystrokes": "mteb evaluate bge-small-en-v1.5 --commit_id 5c38ec7c405ec4b44b94cc5a9bb96e735b38267a --task_name STS12 --output_dir results --result_file_name {hf model org}__{hf model name}/{model commit id}/{task name}.json\n",
+            "is_blocking": true,
+            "timeout_sec": 300
+        }
+    ],
+    "is_task_complete": false
+}

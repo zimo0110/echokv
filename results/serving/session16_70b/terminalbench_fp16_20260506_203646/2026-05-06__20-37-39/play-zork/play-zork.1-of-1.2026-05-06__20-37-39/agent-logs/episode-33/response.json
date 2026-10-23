@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We have examined the bottle and its contents, and it's just water",
+    "explanation": "Let's examine the elongated brown sack to see if it contains anything interesting",
+    "commands": [
+        {
+            "keystrokes": "examine sack\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

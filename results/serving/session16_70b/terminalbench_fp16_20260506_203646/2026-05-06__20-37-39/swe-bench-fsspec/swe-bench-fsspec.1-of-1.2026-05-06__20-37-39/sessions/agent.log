@@ -1,0 +1,60 @@
+[?2004hroot@a62ff8798590:/app/filesystem_spec# asciinema rec --stdin /logs/agent.cast
+[?2004l[0;32masciinema: recording asciicast to /logs/agent.cast[0m
+[0;32masciinema: press <ctrl-d> or type "exit" when you're done[0m
+[?2004hroot@a62ff8798590:/app/filesystem_spec# clear
+[?2004l[H[J[3J[?2004hroot@a62ff8798590:/app/filesystem_spec# git status; tmux wait -S done
+[?2004lOn branch master
+nothing to commit, working tree clean
+[?2004hroot@a62ff8798590:/app/filesystem_spec# git checkout -b feature/add-open-async-method; tmux wait -S done
+[?2004lSwitched to a new branch 'feature/add-open-async-method'
+[?2004hroot@a62ff8798590:/app/filesystem_spec# nano fsspec/specs/dir.py
+[?2004lbash: nano: command not found
+[?2004hroot@a62ff8798590:/app/filesystem_spec# im fsspec/specs/dir.py
+[?2004lbash: im: command not found
+[?2004hroot@a62ff8798590:/app/filesystem_spec# /DirFileSystem
+[?2004lbash: /DirFileSystem: No such file or directory
+[?2004hroot@a62ff8798590:/app/filesystem_spec# o
+[?2004lbash: o: command not found
+[?2004hroot@a62ff8798590:/app/filesystem_spec# vim fsspec/specs/dir.py
+[?2004lbash: vim: command not found
+[?2004hroot@a62ff8798590:/app/filesystem_spec# cat fsspec/specs/dir.py; tmux wait -S done
+[?2004lcat: fsspec/specs/dir.py: No such file or directory
+[?2004hroot@a62ff8798590:/app/filesystem_spec# find . -name dir.py; tmux wait -S done
+[?2004l[?2004hroot@a62ff8798590:/app/filesystem_spec# grep -r DirFileSystem .; tmux wait -S done
+[?2004l./docs/source/api.rst:   fsspec.implementations.dirfs.DirFileSystem
+./docs/source/api.rst:.. autoclass:: fsspec.implementations.dirfs.DirFileSystem
+./fsspec/mapping.py:        from .implementations.dirfs import DirFileSystem
+./fsspec/mapping.py:        return DirFileSystem(path=self._root_key_to_str, fs=self.fs)
+./fsspec/tests/test_mapping.py:    assert isinstance(fs, fsspec.implementations.dirfs.DirFileSystem)
+./fsspec/implementations/tests/test_dirfs.py:from fsspec.implementations.dirfs import DirFileSystem
+./fsspec/implementations/tests/test_dirfs.py:        return DirFileSystem(PATH, fs, asynchronous=asynchronous)
+./fsspec/implementations/tests/test_dirfs.py:    DirFileSystem("path", fs)
+./fsspec/implementations/tests/test_dirfs.py:    DirFileSystem("path", asyncfs, asynchronous=True)
+./fsspec/implementations/tests/test_dirfs.py:        DirFileSystem("path", asyncfs)
+./fsspec/implementations/tests/test_dirfs.py:        DirFileSystem("path", fs, asynchronous=True)
+./fsspec/implementations/tests/test_dirfs.py:    dirfs = DirFileSystem(root, fs)
+./fsspec/implementations/tests/test_dirfs.py:    dirfs = DirFileSystem(root, fs)
+./fsspec/implementations/dirfs.py:class DirFileSystem(AsyncFileSystem):
+./fsspec/implementations/dirfs.py:    The DirFileSystem is a filesystem-wrapper. It assumes every path it is dealing with
+./fsspec/registry.py:    "dir": {"class": "fsspec.implementations.dirfs.DirFileSystem"},
+[?2004hroot@a62ff8798590:/app/filesystem_spec# echo "def open_async(self, path, mode='rb', encoding=None, errors=None, newline=None, **kwargs): pass" >> fsspec/implementations/dirfs.py; tmux wait -S done
+[?2004l[?2004hroot@a62ff8798590:/app/filesystem_spec# git add fsspec/implementations/dirfs.py; tmux wait -S done
+[?2004l[?2004hroot@a62ff8798590:/app/filesystem_spec# git commit -m 'Add open_async method to DirFileSystem'; tmux wait -S done
+[?2004lAuthor identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'root@a62ff8798590.(none)')
+[?2004hroot@a62ff8798590:/app/filesystem_spec# [?2004l
+exit
+[0;32masciinema: recording finished[0m
+[0;32masciinema: asciicast saved to /logs/agent.cast[0m
+[?2004hroot@a62ff8798590:/app/filesystem_spec# 

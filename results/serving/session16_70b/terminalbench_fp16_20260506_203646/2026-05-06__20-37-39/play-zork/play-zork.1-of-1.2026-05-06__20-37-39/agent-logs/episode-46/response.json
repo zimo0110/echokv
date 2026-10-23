@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We have examined the bottle again, and it still contains water",
+    "explanation": "Let's try to examine the brown sack again to see if we can find any clues",
+    "commands": [
+        {
+            "keystrokes": "examine sack\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

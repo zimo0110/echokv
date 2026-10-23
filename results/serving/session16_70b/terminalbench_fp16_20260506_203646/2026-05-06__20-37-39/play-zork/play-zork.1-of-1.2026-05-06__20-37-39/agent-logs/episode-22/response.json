@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We have read the leaflet, but it doesn't seem to contain any useful information for opening the egg",
+    "explanation": "Let's try to find another way to open the egg. We can try to examine the egg more closely",
+    "commands": [
+        {
+            "keystrokes": "examine egg\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

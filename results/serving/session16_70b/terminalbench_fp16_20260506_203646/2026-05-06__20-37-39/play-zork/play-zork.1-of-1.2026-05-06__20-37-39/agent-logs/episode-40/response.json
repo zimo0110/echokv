@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We can't see anything, even with the garlic",
+    "explanation": "Let's try to find another way to light up the area. We can try to use the water from the bottle to see if it has any special properties",
+    "commands": [
+        {
+            "keystrokes": "drink water\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

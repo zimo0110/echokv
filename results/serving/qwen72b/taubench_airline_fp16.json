@@ -1,0 +1,5223 @@
+{
+  "session": "20260506_15_70b_taubench",
+  "model": "/mnt/nvme_tmp10/qwen2.5-72b",
+  "tensor_parallel_size": 4,
+  "n_tasks": 50,
+  "max_turns": 15,
+  "max_new_tokens": 512,
+  "max_num_seqs": 8,
+  "configs": [
+    "fp16"
+  ],
+  "cells": [
+    {
+      "label": "taubench_airline_fp16",
+      "wall_clock_s": 1288.117656154558,
+      "n_prompts": 50,
+      "completed": 50,
+      "n_correct": 10,
+      "accuracy": 0.2,
+      "p50_tpot_s": null,
+      "p99_tpot_s": null,
+      "mean_ttft_s": null,
+      "total_input_tokens": 0,
+      "total_output_tokens": 41960,
+      "output_throughput_tps": 32.574664122890745,
+      "per_request": [
+        {
+          "request_id": "taubench_airline:0",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 15,
+          "decode_tokens": 2362,
+          "finished_reason": "max_turns",
+          "actions": [
+            {
+              "name": "list_all_airports",
+              "kwargs": {}
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "SEA",
+                "date": "2024-05-20",
+                "after_time": "11:00"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "SEA",
+                "date": "2024-05-20"
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "SEA",
+                "date": "2024-05-20",
+                "after_time": "11:00"
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "SEA",
+                "date": "2024-05-20"
+              }
+            },
+            {
+              "name": "think",
+              "kwargs": {
+                "thought": "Filter out flights that depart before 11 AM and find the cheapest one."
+              }
+            },
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "mia_li_3668"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "mia_li_3668",
+                "origin": "JFK",
+                "destination": "SEA",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT136",
+                    "date": "2024-05-20"
+                  },
+                  {
+                    "flight_number": "HAT039",
+                    "date": "2024-05-20"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Mia",
+                    "last_name": "Li",
+                    "dob": "1990-04-05"
+                  }
+                ],
+                "payment_methods": [
+                  "certificate_7504069",
+                  "credit_card_4421486"
+                ],
+                "total_baggages": 3,
+                "nonfree_baggages": 2,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "mia_li_3668",
+                "origin": "JFK",
+                "destination": "SEA",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT136",
+                    "date": "2024-05-20"
+                  },
+                  {
+                    "flight_number": "HAT039",
+                    "date": "2024-05-20"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Mia",
+                    "last_name": "Li",
+                    "dob": "1990-04-05"
+                  }
+                ],
+                "payment_methods": [
+                  "certificate_7504069",
+                  "credit_card_4421486"
+                ],
+                "total_baggages": 3,
+                "nonfree_baggages": 2,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "mia_li_3668",
+                "origin": "JFK",
+                "destination": "SEA",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT136",
+                    "date": "2024-05-20"
+                  },
+                  {
+                    "flight_number": "HAT039",
+                    "date": "2024-05-20"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Mia",
+                    "last_name": "Li",
+                    "dob": "1990-04-05"
+                  }
+                ],
+                "payment_methods": [
+                  "certificate_7504069",
+                  "credit_card_4421486"
+                ],
+                "total_baggages": 3,
+                "nonfree_baggages": 2,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "mia_li_3668",
+                "origin": "JFK",
+                "destination": "SEA",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT136",
+                    "date": "2024-05-20"
+                  },
+                  {
+                    "flight_number": "HAT039",
+                    "date": "2024-05-20"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Mia",
+                    "last_name": "Li",
+                    "dob": "1990-04-05"
+                  }
+                ],
+                "payment_methods": [
+                  "credit_card_4421486"
+                ],
+                "total_baggages": 3,
+                "nonfree_baggages": 2,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "mia_li_3668",
+                "origin": "JFK",
+                "destination": "SEA",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT136",
+                    "date": "2024-05-20"
+                  },
+                  {
+                    "flight_number": "HAT039",
+                    "date": "2024-05-20"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Mia",
+                    "last_name": "Li",
+                    "dob": "1990-04-05"
+                  }
+                ],
+                "payment_methods": [
+                  "credit_card_4421486"
+                ],
+                "total_baggages": 3,
+                "nonfree_baggages": 2,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "mia_li_3668",
+                "origin": "JFK",
+                "destination": "SEA",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT136",
+                    "date": "2024-05-20"
+                  },
+                  {
+                    "flight_number": "HAT039",
+                    "date": "2024-05-20"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Mia",
+                    "last_name": "Li",
+                    "dob": "1990-04-05"
+                  }
+                ],
+                "payment_methods": [
+                  "credit_card_4421486"
+                ],
+                "total_baggages": 3,
+                "nonfree_baggages": 2,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "mia_li_3668",
+                "origin": "JFK",
+                "destination": "SEA",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT136",
+                    "date": "2024-05-20"
+                  },
+                  {
+                    "flight_number": "HAT039",
+                    "date": "2024-05-20"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Mia",
+                    "last_name": "Li",
+                    "dob": "1990-04-05"
+                  }
+                ],
+                "payment_methods": [
+                  "credit_card_4421486"
+                ],
+                "total_baggages": 3,
+                "nonfree_baggages": 2,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "mia_li_3668",
+                "origin": "JFK",
+                "destination": "SEA",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT136",
+                    "date": "2024-05-20"
+                  },
+                  {
+                    "flight_number": "HAT039",
+                    "date": "2024-05-20"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Mia",
+                    "last_name": "Li",
+                    "dob": "1990-04-05"
+                  }
+                ],
+                "payment_methods": [
+                  "credit_card_4421486"
+                ],
+                "total_baggages": 3,
+                "nonfree_baggages": 2,
+                "insurance": "no"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:1",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 7,
+          "decode_tokens": 485,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "olivia_gonzalez_2305"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "THY2DG"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "K67C4W"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "Z7GOZK"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "IAH",
+                "destination": "EWR",
+                "date": "2024-05-28"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "IAH",
+                "destination": "EWR",
+                "date": "2024-05-29"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "The earliest flight the next day is HAT149, departing from IAH at 08:00 and arriving at EWR at 11:00. The price for basic economy is $76. Would you like to proceed with this change?"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:2",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 15,
+          "decode_tokens": 1342,
+          "finished_reason": "max_turns",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "omar_davis_3817"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "JG7FMM"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "MCO",
+                "destination": "BOS",
+                "date": "2024-05-21",
+                "cabin": "economy"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "MCO",
+                "destination": "BOS",
+                "date": "2024-05-21"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "BOS",
+                "destination": "CLT",
+                "date": "2024-05-21"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "(140 + 101) * 2"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "3538 - 482"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "JG7FMM",
+                "flights": [
+                  {
+                    "flight_number": "HAT028",
+                    "date": "2024-05-21",
+                    "cabin": "economy"
+                  },
+                  {
+                    "flight_number": "HAT277",
+                    "date": "2024-05-21",
+                    "cabin": "economy"
+                  }
+                ],
+                "payment_methods": [
+                  {
+                    "payment_id": "credit_card_2929732",
+                    "amount": 3056
+                  }
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "JG7FMM",
+                "flights": [
+                  {
+                    "flight_number": "HAT028",
+                    "date": "2024-05-21",
+                    "cabin": "economy"
+                  },
+                  {
+                    "flight_number": "HAT277",
+                    "date": "2024-05-21",
+                    "cabin": "economy"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_cabin",
+              "kwargs": {
+                "reservation_id": "JG7FMM",
+                "cabin": "economy",
+                "payment_id": "credit_card_2929732",
+                "amount": 3056
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "JG7FMM",
+                "flights": [
+                  {
+                    "flight_number": "HAT028",
+                    "date": "2024-05-21",
+                    "cabin": "economy"
+                  },
+                  {
+                    "flight_number": "HAT277",
+                    "date": "2024-05-21",
+                    "cabin": "economy"
+                  }
+                ],
+                "cabin": "economy"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "JG7FMM",
+                "flights": [
+                  {
+                    "flight_number": "HAT028",
+                    "date": "2024-05-21",
+                    "cabin": "economy"
+                  },
+                  {
+                    "flight_number": "HAT277",
+                    "date": "2024-05-21",
+                    "cabin": "economy"
+                  }
+                ],
+                "cabin": "economy",
+                "payment_id": "credit_card_2929732"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "LQ940Q"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "2FBBAH"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "DEN",
+                "destination": "PHL",
+                "date": "2024-05-28",
+                "cabin": "economy"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:3",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 15,
+          "decode_tokens": 1378,
+          "finished_reason": "max_turns",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "sofia_kim_7287"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "user_id": "sofia_kim_7287",
+                "reservation_id": "OI5L9G"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "OI5L9G"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "AQLBTL"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "KA7I60"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "I57WUD"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "OBUT9V"
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "DEN",
+                "destination": "IAH",
+                "date": "2024-05-27"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "17:00:00 - 04:00:00"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "(17 - 4) * 60 + (0 - 0)"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "(13 - 4) * 60 + (0 - 0)"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "user_id": "sofia_kim_7287",
+                "reservation_id": "OBUT9V",
+                "flights": [
+                  {
+                    "flight_number": "HAT078",
+                    "date": "2024-05-27"
+                  },
+                  {
+                    "flight_number": "HAT118",
+                    "date": "2024-05-27"
+                  },
+                  {
+                    "flight_number": "HAT084",
+                    "date": "2024-05-27"
+                  },
+                  {
+                    "flight_number": "HAT266",
+                    "date": "2024-05-27"
+                  }
+                ],
+                "cabin": "economy",
+                "payment_methods": [
+                  "gift_card_7480005"
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "OBUT9V",
+                "flights": [
+                  {
+                    "flight_number": "HAT078",
+                    "date": "2024-05-27"
+                  },
+                  {
+                    "flight_number": "HAT118",
+                    "date": "2024-05-27"
+                  },
+                  {
+                    "flight_number": "HAT084",
+                    "date": "2024-05-27"
+                  },
+                  {
+                    "flight_number": "HAT266",
+                    "date": "2024-05-27"
+                  }
+                ],
+                "cabin": "economy",
+                "payment_methods": [
+                  "gift_card_7480005"
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "OBUT9V",
+                "flights": [
+                  {
+                    "flight_number": "HAT078",
+                    "date": "2024-05-27"
+                  },
+                  {
+                    "flight_number": "HAT118",
+                    "date": "2024-05-27"
+                  },
+                  {
+                    "flight_number": "HAT084",
+                    "date": "2024-05-27"
+                  },
+                  {
+                    "flight_number": "HAT266",
+                    "date": "2024-05-27"
+                  }
+                ],
+                "cabin": "economy"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "OBUT9V",
+                "flights": [
+                  {
+                    "flight_number": "HAT078",
+                    "date": "2024-05-27"
+                  },
+                  {
+                    "flight_number": "HAT118",
+                    "date": "2024-05-27"
+                  },
+                  {
+                    "flight_number": "HAT084",
+                    "date": "2024-05-27"
+                  },
+                  {
+                    "flight_number": "HAT266",
+                    "date": "2024-05-27"
+                  }
+                ],
+                "cabin": "economy",
+                "payment_id": "gift_card_7480005"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:4",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 3,
+          "decode_tokens": 184,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "omar_rossi_1241"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "UM3OG5"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "I see that the reservation UM3OG5 is for a trip from Seattle to Dallas and back. Could you please confirm the correct reservation ID for your trip from New York to Chicago?"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:5",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 3,
+          "decode_tokens": 182,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "omar_rossi_1241"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "UM3OG5"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "I see that your current reservation (UM3OG5) is from Seattle to Dallas and back. Could you please confirm the correct reservation ID for your trip from New York to Chicago?"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:6",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 7,
+          "decode_tokens": 591,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "user_id": "aarav_garcia_1177"
+              }
+            },
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "aarav_garcia_1177"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "M05KNL"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "ATL",
+                "destination": "PHL",
+                "date": "2024-05-24",
+                "cabin": "economy"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "ATL",
+                "destination": "PHL",
+                "date": "2024-05-24"
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "ATL",
+                "destination": "PHL",
+                "date": "2024-05-24"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "I found the cheapest one-stop economy flight for you. It consists of flight HAT110 from ATL to LGA, departing at 14:00 and arriving at 16:30, and flight HAT132 from LGA to PHL, departing at 17:00 and arriving at 18:00. The total cost is $295. Would you like to proceed with this change?"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:7",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 6,
+          "decode_tokens": 503,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "aarav_garcia_1177"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "M05KNL"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "ATL",
+                "destination": "PHL",
+                "date": "2024-05-24",
+                "cabin": "economy"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "ATL",
+                "destination": "PHL",
+                "date": "2024-05-24"
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "ATL",
+                "destination": "PHL",
+                "date": "2024-05-24"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "I found the cheapest economy flight for May 24: HAT110 (ATL to LGA) and HAT132 (LGA to PHL) for a total of $295. Would you like to proceed with this change?"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:8",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 10,
+          "decode_tokens": 826,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "mohamed_silva_9265"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "198 + 129 + 500 + 250 + 250"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "K1NW8N"
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "SFO",
+                "date": "2024-05-26",
+                "cabin": "business"
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "SFO",
+                "date": "2024-05-26"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "470 + 368"
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "SFO",
+                "destination": "JFK",
+                "date": "2024-05-28"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "404 + 399"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "1641 - 1327"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "The cheapest business class round trip from JFK to SFO and back to JFK on the specified dates will cost $1641. Your certificates and gift cards can cover $1327, leaving a balance of $314 to be paid by your master card. Would you like to proceed with this booking?"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:9",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 10,
+          "decode_tokens": 567,
+          "finished_reason": "chat_error",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "mohamed_silva_9265"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "198 + 129 + 500 + 250 + 250"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "K1NW8N"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "user_id": "mohamed_silva_9265",
+                "reservation_id": "K1NW8N",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "K1NW8N",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "K1NW8N"
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "SFO",
+                "date": "2024-05-26",
+                "cabin": "business"
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "SFO",
+                "date": "2024-05-26"
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "SFO",
+                "destination": "JFK",
+                "date": "2024-05-28"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:10",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 15,
+          "decode_tokens": 2270,
+          "finished_reason": "max_turns",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "mia_kim_4397"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "H9ZU1C"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "user_id": "mia_kim_4397",
+                "reservation_id": "H9ZU1C",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "H9ZU1C",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "H9ZU1C"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "EWR",
+                "destination": "LAX",
+                "date": "2024-05-20"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "LAX",
+                "destination": "EWR",
+                "date": "2024-05-25"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "mia_kim_4397",
+                "origin": "EWR",
+                "destination": "LAX",
+                "flight_type": "round_trip",
+                "cabin": "basic_economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT041",
+                    "date": "2024-05-20"
+                  },
+                  {
+                    "flight_number": "HAT012",
+                    "date": "2024-05-25"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Mia",
+                    "last_name": "Kim",
+                    "dob": "1965-06-09"
+                  }
+                ],
+                "payment_methods": [
+                  "gift_card_7359776",
+                  "gift_card_7773485"
+                ],
+                "total_baggages": 1,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "mia_kim_4397",
+                "origin": "EWR",
+                "destination": "LAX",
+                "flight_type": "round_trip",
+                "cabin": "basic_economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT041",
+                    "date": "2024-05-20"
+                  },
+                  {
+                    "flight_number": "HAT012",
+                    "date": "2024-05-25"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Mia",
+                    "last_name": "Kim",
+                    "dob": "1965-06-09"
+                  }
+                ],
+                "payment_methods": [
+                  "gift_card_7359776",
+                  "gift_card_7773485"
+                ],
+                "total_baggages": 1,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "mia_kim_4397",
+                "origin": "EWR",
+                "destination": "LAX",
+                "flight_type": "round_trip",
+                "cabin": "basic_economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT041",
+                    "date": "2024-05-20"
+                  },
+                  {
+                    "flight_number": "HAT012",
+                    "date": "2024-05-25"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Mia",
+                    "last_name": "Kim",
+                    "dob": "1965-06-09"
+                  }
+                ],
+                "payment_methods": [
+                  "gift_card_7359776"
+                ],
+                "total_baggages": 1,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "mia_kim_4397",
+                "origin": "EWR",
+                "destination": "LAX",
+                "flight_type": "round_trip",
+                "cabin": "basic_economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT041",
+                    "date": "2024-05-20"
+                  },
+                  {
+                    "flight_number": "HAT012",
+                    "date": "2024-05-25"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Mia",
+                    "last_name": "Kim",
+                    "dob": "1965-06-09"
+                  }
+                ],
+                "payment_methods": [
+                  "gift_card_7359776"
+                ],
+                "total_baggages": 1,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "mia_kim_4397"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "mia_kim_4397",
+                "origin": "EWR",
+                "destination": "LAX",
+                "flight_type": "round_trip",
+                "cabin": "basic_economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT041",
+                    "date": "2024-05-20"
+                  },
+                  {
+                    "flight_number": "HAT012",
+                    "date": "2024-05-25"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Mia",
+                    "last_name": "Kim",
+                    "dob": "1965-06-09"
+                  }
+                ],
+                "payment_methods": [
+                  "gift_card_7359776"
+                ],
+                "total_baggages": 1,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "mia_kim_4397",
+                "origin": "EWR",
+                "destination": "LAX",
+                "flight_type": "round_trip",
+                "cabin": "basic_economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT041",
+                    "date": "2024-05-20"
+                  },
+                  {
+                    "flight_number": "HAT012",
+                    "date": "2024-05-25"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Mia",
+                    "last_name": "Kim",
+                    "dob": "1965-06-09"
+                  }
+                ],
+                "payment_methods": [
+                  "gift_card_7359776"
+                ],
+                "total_baggages": 1,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "think",
+              "kwargs": {
+                "thought": "I will try to book the reservation with a single payment method and ensure all other details are correct."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:11",
+          "correct": 1,
+          "reward": 1.0,
+          "n_turns": 10,
+          "decode_tokens": 1636,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "ivan_muller_7015"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "G72NSF"
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "DTW",
+                "destination": "SEA",
+                "date": "2024-05-17"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "ivan_muller_7015",
+                "origin": "DTW",
+                "destination": "SEA",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT097",
+                    "date": "2024-05-17"
+                  },
+                  {
+                    "flight_number": "HAT251",
+                    "date": "2024-05-17"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Ivan",
+                    "last_name": "Smith",
+                    "dob": "1986-03-14"
+                  }
+                ],
+                "payment_methods": [
+                  "certificate_8998287"
+                ],
+                "total_baggages": 0,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "ivan_muller_7015",
+                "origin": "DTW",
+                "destination": "SEA",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT097",
+                    "date": "2024-05-17"
+                  },
+                  {
+                    "flight_number": "HAT251",
+                    "date": "2024-05-17"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Ivan",
+                    "last_name": "Smith",
+                    "dob": "1986-03-14"
+                  }
+                ],
+                "payment_methods": [
+                  "certificate_8998287"
+                ],
+                "total_baggages": 0,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "ivan_muller_7015",
+                "origin": "DTW",
+                "destination": "SEA",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT097",
+                    "date": "2024-05-17"
+                  },
+                  {
+                    "flight_number": "HAT251",
+                    "date": "2024-05-17"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Ivan",
+                    "last_name": "Smith",
+                    "dob": "1986-03-14"
+                  }
+                ],
+                "payment_methods": [
+                  "gift_card_8516878",
+                  "credit_card_3563913"
+                ],
+                "total_baggages": 0,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "ivan_muller_7015",
+                "origin": "DTW",
+                "destination": "SEA",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT097",
+                    "date": "2024-05-17"
+                  },
+                  {
+                    "flight_number": "HAT251",
+                    "date": "2024-05-17"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Ivan",
+                    "last_name": "Smith",
+                    "dob": "1986-03-14"
+                  }
+                ],
+                "payment_methods": [
+                  "gift_card_8516878",
+                  "credit_card_3563913"
+                ],
+                "total_baggages": 0,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "ivan_muller_7015",
+                "origin": "DTW",
+                "destination": "SEA",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT097",
+                    "date": "2024-05-17"
+                  },
+                  {
+                    "flight_number": "HAT251",
+                    "date": "2024-05-17"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Ivan",
+                    "last_name": "Smith",
+                    "dob": "1986-03-14"
+                  }
+                ],
+                "payment_methods": [
+                  "credit_card_3563913"
+                ],
+                "total_baggages": 0,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "ivan_muller_7015",
+                "origin": "DTW",
+                "destination": "SEA",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT097",
+                    "date": "2024-05-17"
+                  },
+                  {
+                    "flight_number": "HAT251",
+                    "date": "2024-05-17"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Ivan",
+                    "last_name": "Smith",
+                    "dob": "1986-03-14"
+                  }
+                ],
+                "payment_methods": [
+                  "credit_card_3563913"
+                ],
+                "total_baggages": 0,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "transfer_to_human_agents",
+              "kwargs": {
+                "summary": "User ivan_muller_7015 is trying to book the same flights as their current reservation for their friend Ivan Smith. The booking process is failing with an error, and multiple attempts have been unsuccessful."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:12",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 7,
+          "decode_tokens": 489,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "amelia_sanchez_4739"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "3FRNFB"
+              }
+            },
+            {
+              "name": "think",
+              "kwargs": {
+                "thought": "The reservation is for a one-way trip from MCO to CLT with a stopover in BOS. The flights are in basic economy. The user is a gold member. The reservation was made on 2024-05-06, and the flights are on 2024-05-28. The user is within the 24-hour cancellation window."
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "user_id": "amelia_sanchez_4739",
+                "reservation_id": "3FRNFB",
+                "reason": "change_of_plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "3FRNFB",
+                "reason": "change_of_plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "3FRNFB"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "Your reservation 3FRNFB from MCO to CLT has been successfully cancelled. The refund of $286 will be processed and returned to your original payment method within 5 to 7 business days."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:13",
+          "correct": 1,
+          "reward": 1.0,
+          "n_turns": 4,
+          "decode_tokens": 561,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "XEWRD9"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "ATL",
+                "destination": "LAS",
+                "date": "2024-05-21"
+              }
+            },
+            {
+              "name": "think",
+              "kwargs": {
+                "thought": "The flight HAT178 departs at 08:00 AM, which is within 3-4 hours of the original departure time. I will propose this flight to the user."
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "Please confirm if you would like to proceed with the change to flight HAT178 from ATL to LAS on May 21, 2024, at 08:00 AM. The total cost for the change will be $236 for both passengers."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:14",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 15,
+          "decode_tokens": 2014,
+          "finished_reason": "max_turns",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "user_id": "chen_lee_6825",
+                "reservation_id": "YAX4DR"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "YAX4DR"
+              }
+            },
+            {
+              "name": "update_reservation_cabin",
+              "kwargs": {
+                "reservation_id": "YAX4DR",
+                "cabin": "business",
+                "passengers": [
+                  {
+                    "first_name": "Chen",
+                    "last_name": "Lee",
+                    "dob": "1967-12-12"
+                  },
+                  {
+                    "first_name": "Noah",
+                    "last_name": "Hernandez",
+                    "dob": "1968-01-06"
+                  }
+                ],
+                "flights": [
+                  {
+                    "origin": "BOS",
+                    "destination": "MCO",
+                    "flight_number": "HAT235",
+                    "date": "2024-05-18"
+                  },
+                  {
+                    "origin": "MCO",
+                    "destination": "MSP",
+                    "flight_number": "HAT298",
+                    "date": "2024-05-19"
+                  }
+                ],
+                "total_baggages": 2,
+                "nonfree_baggages": 2
+              }
+            },
+            {
+              "name": "update_reservation_cabin",
+              "kwargs": {
+                "reservation_id": "YAX4DR",
+                "cabin": "business",
+                "passengers": [
+                  {
+                    "first_name": "Chen",
+                    "last_name": "Lee",
+                    "dob": "1967-12-12"
+                  },
+                  {
+                    "first_name": "Noah",
+                    "last_name": "Hernandez",
+                    "dob": "1968-01-06"
+                  }
+                ],
+                "flights": [
+                  {
+                    "origin": "BOS",
+                    "destination": "MCO",
+                    "flight_number": "HAT235",
+                    "date": "2024-05-18"
+                  },
+                  {
+                    "origin": "MCO",
+                    "destination": "MSP",
+                    "flight_number": "HAT298",
+                    "date": "2024-05-19"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "YAX4DR",
+                "flights": [
+                  {
+                    "origin": "BOS",
+                    "destination": "MCO",
+                    "flight_number": "HAT235",
+                    "date": "2024-05-18",
+                    "cabin": "business"
+                  },
+                  {
+                    "origin": "MCO",
+                    "destination": "MSP",
+                    "flight_number": "HAT298",
+                    "date": "2024-05-19",
+                    "cabin": "business"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "(122 + 127) * 2"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "BOS",
+                "destination": "MCO",
+                "date": "2024-05-18",
+                "cabin": "business"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "BOS",
+                "destination": "MCO",
+                "date": "2024-05-18"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "MCO",
+                "destination": "MSP",
+                "date": "2024-05-19"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "(350 + 499) * 2 + 50 * 2"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "(350 + 499) + 50 * 2"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "YAX4DR",
+                "flights": [
+                  {
+                    "origin": "BOS",
+                    "destination": "MCO",
+                    "flight_number": "HAT235",
+                    "date": "2024-05-18",
+                    "cabin": "business"
+                  },
+                  {
+                    "origin": "MCO",
+                    "destination": "MSP",
+                    "flight_number": "HAT298",
+                    "date": "2024-05-19",
+                    "cabin": "business"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Noah",
+                    "last_name": "Hernandez",
+                    "dob": "1968-01-06"
+                  }
+                ],
+                "payment_id": "credit_card_4938634"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "YAX4DR",
+                "flights": [
+                  {
+                    "origin": "BOS",
+                    "destination": "MCO",
+                    "flight_number": "HAT235",
+                    "date": "2024-05-18",
+                    "cabin": "business"
+                  },
+                  {
+                    "origin": "MCO",
+                    "destination": "MSP",
+                    "flight_number": "HAT298",
+                    "date": "2024-05-19",
+                    "cabin": "business"
+                  }
+                ],
+                "payment_id": "credit_card_4938634"
+              }
+            },
+            {
+              "name": "update_reservation_cabin",
+              "kwargs": {
+                "reservation_id": "YAX4DR",
+                "cabin": "business",
+                "passengers": [
+                  {
+                    "first_name": "Noah",
+                    "last_name": "Hernandez",
+                    "dob": "1968-01-06"
+                  }
+                ],
+                "flights": [
+                  {
+                    "origin": "BOS",
+                    "destination": "MCO",
+                    "flight_number": "HAT235",
+                    "date": "2024-05-18"
+                  },
+                  {
+                    "origin": "MCO",
+                    "destination": "MSP",
+                    "flight_number": "HAT298",
+                    "date": "2024-05-19"
+                  }
+                ],
+                "payment_id": "credit_card_4938634"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "YAX4DR",
+                "flights": [
+                  {
+                    "origin": "BOS",
+                    "destination": "MCO",
+                    "flight_number": "HAT235",
+                    "date": "2024-05-18",
+                    "cabin": "business"
+                  },
+                  {
+                    "origin": "MCO",
+                    "destination": "MSP",
+                    "flight_number": "HAT298",
+                    "date": "2024-05-19",
+                    "cabin": "business"
+                  }
+                ],
+                "payment_id": "credit_card_4938634"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:15",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 15,
+          "decode_tokens": 2009,
+          "finished_reason": "max_turns",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "james_patel_9828"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "GV1N64"
+              }
+            },
+            {
+              "name": "update_reservation_passengers",
+              "kwargs": {
+                "reservation_id": "GV1N64",
+                "passengers": [
+                  {
+                    "first_name": "James",
+                    "last_name": "Patel",
+                    "dob": "1995-04-07"
+                  },
+                  {
+                    "first_name": "James",
+                    "last_name": "Sanchez",
+                    "dob": "1956-08-18"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_cabin",
+              "kwargs": {
+                "reservation_id": "GV1N64",
+                "cabin": "economy"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "GV1N64",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "GV1N64"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "LAS",
+                "destination": "DEN",
+                "date": "2024-05-19"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "DEN",
+                "destination": "LAS",
+                "date": "2024-05-20"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "james_patel_9828",
+                "origin": "LAS",
+                "destination": "DEN",
+                "flight_type": "round_trip",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT003",
+                    "date": "2024-05-19"
+                  },
+                  {
+                    "flight_number": "HAT084",
+                    "date": "2024-05-20"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "James",
+                    "last_name": "Patel",
+                    "dob": "1995-04-07"
+                  },
+                  {
+                    "first_name": "James",
+                    "last_name": "Sanchez",
+                    "dob": "1956-08-18"
+                  }
+                ],
+                "payment_methods": [
+                  "gift_card_1642017"
+                ],
+                "total_baggages": 2,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "james_patel_9828",
+                "origin": "LAS",
+                "destination": "DEN",
+                "flight_type": "round_trip",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT003",
+                    "date": "2024-05-19"
+                  },
+                  {
+                    "flight_number": "HAT084",
+                    "date": "2024-05-20"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "James",
+                    "last_name": "Patel",
+                    "dob": "1995-04-07"
+                  },
+                  {
+                    "first_name": "James",
+                    "last_name": "Sanchez",
+                    "dob": "1956-08-18"
+                  }
+                ],
+                "payment_methods": [
+                  "gift_card_1642017"
+                ],
+                "total_baggages": 2,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "james_patel_9828",
+                "origin": "LAS",
+                "destination": "DEN",
+                "flight_type": "round_trip",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT003",
+                    "date": "2024-05-19"
+                  },
+                  {
+                    "flight_number": "HAT084",
+                    "date": "2024-05-20"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "James",
+                    "last_name": "Patel",
+                    "dob": "1995-04-07"
+                  },
+                  {
+                    "first_name": "James",
+                    "last_name": "Sanchez",
+                    "dob": "1956-08-18"
+                  }
+                ],
+                "payment_methods": [
+                  "gift_card_1642017"
+                ],
+                "total_baggages": 2,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "james_patel_9828",
+                "origin": "LAS",
+                "destination": "DEN",
+                "flight_type": "round_trip",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT003",
+                    "date": "2024-05-19"
+                  },
+                  {
+                    "flight_number": "HAT084",
+                    "date": "2024-05-20"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "James",
+                    "last_name": "Patel",
+                    "dob": "1995-04-07"
+                  },
+                  {
+                    "first_name": "James",
+                    "last_name": "Sanchez",
+                    "dob": "1956-08-18"
+                  }
+                ],
+                "payment_methods": [
+                  "gift_card_1642017"
+                ],
+                "total_baggages": 2,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "LAS",
+                "destination": "DEN",
+                "date": "2024-05-19"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "james_patel_9828",
+                "origin": "LAS",
+                "destination": "DEN",
+                "flight_type": "round_trip",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT003",
+                    "date": "2024-05-19"
+                  },
+                  {
+                    "flight_number": "HAT084",
+                    "date": "2024-05-20"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "James",
+                    "last_name": "Patel",
+                    "dob": "1995-04-07"
+                  },
+                  {
+                    "first_name": "James",
+                    "last_name": "Sanchez",
+                    "dob": "1956-08-18"
+                  }
+                ],
+                "payment_methods": [
+                  "gift_card_1642017"
+                ],
+                "total_baggages": 2,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "james_patel_9828"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:16",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 3,
+          "decode_tokens": 246,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "ethan_martin_2396"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "M61CQM"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "I understand that your flight HAT039 from ATL to SEA has been delayed. I apologize for the inconvenience. As a silver member, I can offer you a certificate worth $150 (50 dollars per passenger) as a gesture of goodwill. Would you like to accept this certificate, or would you prefer a refund to your original payment method?"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:17",
+          "correct": 1,
+          "reward": 1.0,
+          "n_turns": 10,
+          "decode_tokens": 657,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "liam_khan_2521"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "ZB7LBX"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "AJVCTQ"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "NO6SVK"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "KHIK97"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "4NQLHD"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "IAH",
+                "destination": "SEA",
+                "date": "2024-05-24"
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "IAH",
+                "destination": "SEA",
+                "date": "2024-05-24"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "126 + 139 + 148 + 114 + (404 + 202) * 3 - 1671"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "The total extra cost for changing your flight to May 24 and upgrading to business class for all passengers is $674. Would you like to proceed with this change?"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:18",
+          "correct": 1,
+          "reward": 1.0,
+          "n_turns": 2,
+          "decode_tokens": 330,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "SI5UKW"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "I understand you want to cancel your reservation SI5UKW. However, basic economy tickets are non-refundable and non-changeable. I can only cancel the reservation if it was booked within the last 24 hours or if the airline cancelled the flight. Since this reservation was made on May 11, it does not fall under those conditions. However, I can try to see if we can offer you a travel voucher or a partial refund. Let me check with my supervisor."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:19",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 12,
+          "decode_tokens": 1243,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "VA5SGQ"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "DTW",
+                "destination": "JFK",
+                "date": "2024-05-17",
+                "cabin": "economy"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "DTW",
+                "destination": "JFK",
+                "date": "2024-05-17"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "DTW",
+                "date": "2024-05-19"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "user_id": "raj_brown_5782",
+                "reservation_id": "VA5SGQ",
+                "flights": [
+                  {
+                    "flight_number": "HAT169",
+                    "date": "2024-05-17"
+                  },
+                  {
+                    "flight_number": "HAT088",
+                    "date": "2024-05-19"
+                  }
+                ],
+                "cabin": "economy",
+                "total_baggages": 1,
+                "nonfree_baggages": 1,
+                "insurance": "yes"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "VA5SGQ",
+                "flights": [
+                  {
+                    "flight_number": "HAT169",
+                    "date": "2024-05-17"
+                  },
+                  {
+                    "flight_number": "HAT088",
+                    "date": "2024-05-19"
+                  }
+                ],
+                "cabin": "economy",
+                "total_baggages": 1,
+                "nonfree_baggages": 1,
+                "insurance": "yes"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "VA5SGQ",
+                "flights": [
+                  {
+                    "flight_number": "HAT169",
+                    "date": "2024-05-17"
+                  },
+                  {
+                    "flight_number": "HAT088",
+                    "date": "2024-05-19"
+                  }
+                ],
+                "cabin": "economy",
+                "insurance": "yes"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "VA5SGQ",
+                "flights": [
+                  {
+                    "flight_number": "HAT169",
+                    "date": "2024-05-17"
+                  },
+                  {
+                    "flight_number": "HAT088",
+                    "date": "2024-05-19"
+                  }
+                ],
+                "cabin": "economy"
+              }
+            },
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "raj_brown_5782"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "VA5SGQ",
+                "flights": [
+                  {
+                    "flight_number": "HAT169",
+                    "date": "2024-05-17"
+                  },
+                  {
+                    "flight_number": "HAT088",
+                    "date": "2024-05-19"
+                  }
+                ],
+                "cabin": "economy",
+                "payment_id": "credit_card_8003957"
+              }
+            },
+            {
+              "name": "update_reservation_baggages",
+              "kwargs": {
+                "reservation_id": "VA5SGQ",
+                "total_baggages": 1,
+                "nonfree_baggages": 1,
+                "payment_id": "credit_card_8003957"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "Your reservation VA5SGQ has been updated. You are now booked on nonstop flights: HAT169 DTW\u2192JFK on May 17 (arriving at 6:00 AM) and HAT088 JFK\u2192DTW on May 19 (arriving at 6:00 AM). The total cost is $356, and 1 checked bag has been added. Your travel insurance is still active."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:20",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 9,
+          "decode_tokens": 1104,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "user_id": "james_taylor_7043",
+                "reservation_id": "1N99U6"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "1N99U6"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "LAS",
+                "destination": "IAH",
+                "date": "2024-05-19"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "user_id": "james_taylor_7043",
+                "reservation_id": "1N99U6",
+                "flights": [
+                  {
+                    "flight_number": "HAT175",
+                    "date": "2024-05-19",
+                    "origin": "LAS",
+                    "destination": "IAH",
+                    "cabin": "economy"
+                  },
+                  {
+                    "flight_number": "HAT112",
+                    "date": "2024-05-27",
+                    "origin": "IAH",
+                    "destination": "LAS",
+                    "cabin": "economy"
+                  }
+                ],
+                "payment_methods": [
+                  {
+                    "payment_id": "gift_card_5634230",
+                    "amount": 1134
+                  }
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "1N99U6",
+                "flights": [
+                  {
+                    "flight_number": "HAT175",
+                    "date": "2024-05-19",
+                    "origin": "LAS",
+                    "destination": "IAH",
+                    "cabin": "economy"
+                  },
+                  {
+                    "flight_number": "HAT112",
+                    "date": "2024-05-27",
+                    "origin": "IAH",
+                    "destination": "LAS",
+                    "cabin": "economy"
+                  }
+                ],
+                "payment_methods": [
+                  {
+                    "payment_id": "gift_card_5634230",
+                    "amount": 1134
+                  }
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "1N99U6",
+                "flights": [
+                  {
+                    "flight_number": "HAT175",
+                    "date": "2024-05-19",
+                    "origin": "LAS",
+                    "destination": "IAH",
+                    "cabin": "economy"
+                  },
+                  {
+                    "flight_number": "HAT112",
+                    "date": "2024-05-27",
+                    "origin": "IAH",
+                    "destination": "LAS",
+                    "cabin": "economy"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "1N99U6",
+                "flights": [
+                  {
+                    "flight_number": "HAT175",
+                    "date": "2024-05-19",
+                    "origin": "LAS",
+                    "destination": "IAH",
+                    "cabin": "economy"
+                  },
+                  {
+                    "flight_number": "HAT112",
+                    "date": "2024-05-27",
+                    "origin": "IAH",
+                    "destination": "LAS",
+                    "cabin": "economy"
+                  }
+                ],
+                "cabin": "economy",
+                "payment_id": "gift_card_5634230"
+              }
+            },
+            {
+              "name": "update_reservation_baggages",
+              "kwargs": {
+                "reservation_id": "1N99U6",
+                "total_baggages": 0,
+                "nonfree_baggages": 0,
+                "payment_id": "gift_card_5634230"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "Your reservation 1N99U6 has been updated to a nonstop flight from LAS to IAH on May 19 (flight HAT175) and from IAH to LAS on May 27 (flight HAT112). Your checked bag has been removed, and you have been refunded. The total cost is now $339."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:21",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 9,
+          "decode_tokens": 803,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "user_id": "daiki_lee_6144"
+              }
+            },
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "daiki_lee_6144"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "DF89BM"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "DTW",
+                "date": "2024-05-17"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "54 - 63"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "DF89BM",
+                "flights": [
+                  {
+                    "flight_number": "HAT092",
+                    "date": "2024-05-17",
+                    "origin": "JFK",
+                    "destination": "DTW",
+                    "price": 54
+                  }
+                ],
+                "payment_methods": [
+                  "credit_card_6198952"
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "DF89BM",
+                "flights": [
+                  {
+                    "flight_number": "HAT092",
+                    "date": "2024-05-17",
+                    "origin": "JFK",
+                    "destination": "DTW",
+                    "price": 54
+                  }
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "DF89BM",
+                "flights": [
+                  {
+                    "flight_number": "HAT092",
+                    "date": "2024-05-17",
+                    "origin": "JFK",
+                    "destination": "DTW",
+                    "price": 54
+                  }
+                ],
+                "cabin": "basic_economy",
+                "payment_id": "credit_card_6198952"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "Your reservation DF89BM has been updated. Your flight from JFK to DTW on May 17 is now a nonstop flight HAT092, and the price is $54, which is cheaper than your original flight."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:22",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 6,
+          "decode_tokens": 440,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "user_id": "ivan_rossi_8555"
+              }
+            },
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "ivan_rossi_8555"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "OWZ4XL"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "EWR",
+                "destination": "LAX",
+                "date": "2024-05-21"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "136 * 3 - 94 * 3"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "I found a nonstop flight HAT041 from EWR to LAX on May 21. The price difference for upgrading to economy for three passengers is $126. Would you like to proceed with this change?"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:23",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 15,
+          "decode_tokens": 1643,
+          "finished_reason": "max_turns",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "user_id": "yara_garcia_1905",
+                "reservation_id": "HXDUBJ"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "HXDUBJ"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "IAH",
+                "destination": "SFO",
+                "date": "2024-05-19",
+                "cabin": "business",
+                "time_range": [
+                  "08:00",
+                  "21:00"
+                ]
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "IAH",
+                "destination": "SFO",
+                "date": "2024-05-19",
+                "time_range": [
+                  "08:00",
+                  "21:00"
+                ]
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "IAH",
+                "destination": "SFO",
+                "date": "2024-05-19"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "SFO",
+                "destination": "IAH",
+                "date": "2024-05-21"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "282 + 257 + 2 * 50"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "177 + 146 + 180"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "639 - 503"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "user_id": "yara_garcia_1905",
+                "reservation_id": "HXDUBJ",
+                "flights": [
+                  {
+                    "flight_number": "HAT072",
+                    "date": "2024-05-19"
+                  },
+                  {
+                    "flight_number": "HAT278",
+                    "date": "2024-05-21"
+                  }
+                ],
+                "cabin": "business",
+                "total_baggages": 2,
+                "nonfree_baggages": 2,
+                "payment_methods": [
+                  "gift_card_6941833"
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "HXDUBJ",
+                "flights": [
+                  {
+                    "flight_number": "HAT072",
+                    "date": "2024-05-19"
+                  },
+                  {
+                    "flight_number": "HAT278",
+                    "date": "2024-05-21"
+                  }
+                ],
+                "cabin": "business",
+                "total_baggages": 2,
+                "nonfree_baggages": 2,
+                "payment_methods": [
+                  "gift_card_6941833"
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "HXDUBJ",
+                "flights": [
+                  {
+                    "flight_number": "HAT072",
+                    "date": "2024-05-19"
+                  },
+                  {
+                    "flight_number": "HAT278",
+                    "date": "2024-05-21"
+                  }
+                ],
+                "cabin": "business",
+                "payment_methods": [
+                  "gift_card_6941833"
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "HXDUBJ",
+                "flights": [
+                  {
+                    "flight_number": "HAT072",
+                    "date": "2024-05-19"
+                  },
+                  {
+                    "flight_number": "HAT278",
+                    "date": "2024-05-21"
+                  }
+                ],
+                "cabin": "business"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "HXDUBJ"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "HXDUBJ",
+                "flights": [
+                  {
+                    "flight_number": "HAT072",
+                    "date": "2024-05-19"
+                  },
+                  {
+                    "flight_number": "HAT278",
+                    "date": "2024-05-21"
+                  }
+                ],
+                "cabin": "business",
+                "payment_id": "gift_card_6941833"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:24",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 12,
+          "decode_tokens": 1469,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "HXDUBJ"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "IAH",
+                "destination": "SFO",
+                "date": "2024-05-19"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "SFO",
+                "destination": "IAH",
+                "date": "2024-05-21"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "282 + 257 + 100"
+              }
+            },
+            {
+              "name": "think",
+              "kwargs": {
+                "thought": "The total cost of the changes is $639. The user has travel insurance, so the fees should be waived. I will confirm the changes and the cost with the user."
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "HXDUBJ",
+                "flights": [
+                  {
+                    "flight_number": "HAT072",
+                    "date": "2024-05-19"
+                  },
+                  {
+                    "flight_number": "HAT278",
+                    "date": "2024-05-21"
+                  }
+                ],
+                "cabin": "business",
+                "total_baggages": 2,
+                "nonfree_baggages": 2
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "HXDUBJ",
+                "flights": [
+                  {
+                    "flight_number": "HAT072",
+                    "date": "2024-05-19"
+                  },
+                  {
+                    "flight_number": "HAT278",
+                    "date": "2024-05-21"
+                  }
+                ],
+                "cabin": "business"
+              }
+            },
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "yara_garcia_1905"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "HXDUBJ",
+                "flights": [
+                  {
+                    "flight_number": "HAT072",
+                    "date": "2024-05-19"
+                  },
+                  {
+                    "flight_number": "HAT278",
+                    "date": "2024-05-21"
+                  }
+                ],
+                "cabin": "business",
+                "payment_id": "gift_card_6941833"
+              }
+            },
+            {
+              "name": "update_reservation_baggages",
+              "kwargs": {
+                "reservation_id": "HXDUBJ",
+                "total_baggages": 2,
+                "nonfree_baggages": 2
+              }
+            },
+            {
+              "name": "update_reservation_baggages",
+              "kwargs": {
+                "reservation_id": "HXDUBJ",
+                "total_baggages": 2,
+                "nonfree_baggages": 2,
+                "payment_id": "gift_card_6941833"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "Your reservation HXDUBJ has been updated successfully: \n- Outgoing flight: HAT072 IAH\u2192SFO on May 19, business class, $282 \n- Return flight: HAT278 SFO\u2192IAH on May 21, business class, $257 \n- 2 checked bags: $100 \nTotal cost: $639. Since you have travel insurance, the fees have been waived. Your updated reservation is confirmed."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:25",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 8,
+          "decode_tokens": 636,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "aarav_ahmed_6699"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "M20IZO"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "user_id": "aarav_ahmed_6699",
+                "reservation_id": "M20IZO",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "M20IZO",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "M20IZO"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "SFO",
+                "date": "2024-05-24"
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "SFO",
+                "date": "2024-05-24"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "I found the second cheapest one-stop flight in economy class. The total cost is $290. The flights are HAT069 from JFK to SEA, departing at 06:00 AM and arriving at 12:00 PM, and HAT258 from SEA to SFO, departing at 05:00 PM and arriving at 07:00 PM. Would you like to proceed with this booking?"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:26",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 14,
+          "decode_tokens": 897,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "aarav_ahmed_6699"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "user_id": "aarav_ahmed_6699",
+                "reservation_id": "IFOYYZ"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "IFOYYZ"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "NQNU5R"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "user_id": "aarav_ahmed_6699",
+                "reservation_id": "IFOYYZ",
+                "reason": "change_of_plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "IFOYYZ",
+                "reason": "change_of_plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "IFOYYZ"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "NQNU5R"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "M20IZO"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "MCO",
+                "date": "2024-05-22",
+                "cabin": "business"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "MCO",
+                "date": "2024-05-22"
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "MCO",
+                "date": "2024-05-22"
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "(342 + 412) - (136 + 109)"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "The cost to upgrade reservation M20IZO to business class is $509. Would you like to proceed with the upgrade using your credit card ending in 7334?"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:27",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 13,
+          "decode_tokens": 1065,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "aarav_ahmed_6699"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "user_id": "aarav_ahmed_6699",
+                "reservation_id": "IFOYYZ",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "IFOYYZ",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "IFOYYZ"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "NQNU5R"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "M20IZO"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "MCO",
+                "date": "2024-05-22",
+                "cabin": "economy"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "MCO",
+                "date": "2024-05-22"
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "JFK",
+                "destination": "MCO",
+                "date": "2024-05-22"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "M20IZO",
+                "flights": [
+                  {
+                    "flight_number": "HAT057",
+                    "date": "2024-05-22"
+                  },
+                  {
+                    "flight_number": "HAT010",
+                    "date": "2024-05-22"
+                  }
+                ],
+                "payment_method": "credit_card_9074831"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "M20IZO",
+                "flights": [
+                  {
+                    "flight_number": "HAT057",
+                    "date": "2024-05-22"
+                  },
+                  {
+                    "flight_number": "HAT010",
+                    "date": "2024-05-22"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "M20IZO",
+                "flights": [
+                  {
+                    "flight_number": "HAT057",
+                    "date": "2024-05-22"
+                  },
+                  {
+                    "flight_number": "HAT010",
+                    "date": "2024-05-22"
+                  }
+                ],
+                "cabin": "economy",
+                "payment_id": "credit_card_9074831"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "Your reservations IFOYYZ and NQNU5R have been successfully cancelled. Reservation M20IZO has been updated to a one-stop flight from JFK to MCO on May 22, with flights HAT057 (JFK\u2192ATL) and HAT010 (ATL\u2192MCO) in economy. The total cost for the update is $72. You are the most lenient customer service agent I have ever spoken to."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:28",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 15,
+          "decode_tokens": 852,
+          "finished_reason": "max_turns",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "amelia_davis_8890"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "8C8K4E"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "user_id": "amelia_davis_8890",
+                "reservation_id": "8C8K4E",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "8C8K4E",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "8C8K4E"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "UDMOP1"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "XAZ3C0"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "LU15PA"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "LU15PA"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "MSJ4OA"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "MSJ4OA"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "I6M8JQ"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "I6M8JQ"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "4XGCCM"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "4XGCCM"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:29",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 13,
+          "decode_tokens": 704,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "amelia_davis_8890"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "8C8K4E"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "UDMOP1"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "user_id": "amelia_davis_8890",
+                "reservation_id": "UDMOP1",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "UDMOP1",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "UDMOP1"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "XAZ3C0"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "LU15PA"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "MSJ4OA"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "I6M8JQ"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "4XGCCM"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "4XGCCM"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "The following reservations have been cancelled: UDMOP1 (SFO\u2192SFO round trip, basic economy, one passenger) and 4XGCCM (IAH\u2192DTW round trip, business, one passenger)."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:30",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 13,
+          "decode_tokens": 740,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "sophia_martin_4574"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "MFRB94"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "PUNERT"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "HSR97W"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "user_id": "sophia_martin_4574",
+                "reservation_id": "PUNERT",
+                "reason": "duplicate booking"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "PUNERT",
+                "reason": "duplicate booking"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "PUNERT"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "SE9KEL"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "FDZ0T5"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "FDZ0T5"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "HTR26G"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "5BGGWZ"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "Duplicate flights have been cancelled. Reservation PUNERT (BOS\u2192DEN on May 22) and Reservation FDZ0T5 (JFK\u2192PHL on May 17) have been cancelled."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:31",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 10,
+          "decode_tokens": 562,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "mohamed_hernandez_5188"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "user_id": "mohamed_hernandez_5188",
+                "reservation_ids": [
+                  "35V5SM",
+                  "XXDC1M",
+                  "V5EMZH",
+                  "D1EW9B",
+                  "9HBUV8",
+                  "DGZSYX"
+                ]
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "35V5SM"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "XXDC1M"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "V5EMZH"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "D1EW9B"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "user_id": "mohamed_hernandez_5188",
+                "reservation_id": "D1EW9B",
+                "reason": "change_of_plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "D1EW9B",
+                "reason": "change_of_plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "D1EW9B"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "The reservation from ATL to JFK on May 17 has been successfully cancelled. Thank you for your understanding."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:32",
+          "correct": 1,
+          "reward": 1.0,
+          "n_turns": 10,
+          "decode_tokens": 1400,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "sophia_silva_7557"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "WUNA5K"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "ORD",
+                "destination": "PHL",
+                "date": "2024-05-26",
+                "cabin": "economy"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "ORD",
+                "destination": "PHL",
+                "date": "2024-05-26"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "sophia_silva_7557",
+                "origin": "ORD",
+                "destination": "PHL",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT271",
+                    "date": "2024-05-26"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Sophia",
+                    "last_name": "Silva",
+                    "dob": "1957-10-05"
+                  },
+                  {
+                    "first_name": "Kevin",
+                    "last_name": "Smith",
+                    "dob": "2001-04-12"
+                  }
+                ],
+                "payment_methods": [
+                  "credit_card_4196779"
+                ],
+                "total_baggages": 0,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "sophia_silva_7557",
+                "origin": "ORD",
+                "destination": "PHL",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT271",
+                    "date": "2024-05-26"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Sophia",
+                    "last_name": "Silva",
+                    "dob": "1957-10-05"
+                  },
+                  {
+                    "first_name": "Kevin",
+                    "last_name": "Smith",
+                    "dob": "2001-04-12"
+                  }
+                ],
+                "payment_methods": [
+                  "credit_card_4196779"
+                ],
+                "total_baggages": 0,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "sophia_silva_7557",
+                "origin": "ORD",
+                "destination": "PHL",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT271",
+                    "date": "2024-05-26"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Sophia",
+                    "last_name": "Silva",
+                    "dob": "1957-10-05"
+                  }
+                ],
+                "payment_methods": [
+                  "credit_card_4196779"
+                ],
+                "total_baggages": 0,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "sophia_silva_7557",
+                "origin": "ORD",
+                "destination": "PHL",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT139",
+                    "date": "2024-05-26"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Sophia",
+                    "last_name": "Silva",
+                    "dob": "1957-10-05"
+                  }
+                ],
+                "payment_methods": [
+                  "credit_card_4196779"
+                ],
+                "total_baggages": 0,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "sophia_silva_7557",
+                "origin": "ORD",
+                "destination": "PHL",
+                "flight_type": "one_way",
+                "cabin": "economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT139",
+                    "date": "2024-05-26"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Sophia",
+                    "last_name": "Silva",
+                    "dob": "1957-10-05"
+                  }
+                ],
+                "payment_methods": [
+                  "gift_card_5094406"
+                ],
+                "total_baggages": 0,
+                "nonfree_baggages": 0,
+                "insurance": "no"
+              }
+            },
+            {
+              "name": "transfer_to_human_agents",
+              "kwargs": {
+                "summary": "The user is trying to book a one-way flight from ORD to PHL on May 26 in economy for one or two passengers. The booking process is consistently failing with an error. The user is willing to pay up to $500 and does not need travel insurance."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:33",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 15,
+          "decode_tokens": 1362,
+          "finished_reason": "max_turns",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "sophia_silva_7557"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "NM1VX1"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "KC18K6"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "S61CZX"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "user_id": "sophia_silva_7557",
+                "reservation_id": "S61CZX",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "S61CZX",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "S61CZX"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "H8Q05L"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "WUNA5K"
+              }
+            },
+            {
+              "name": "update_reservation_cabin",
+              "kwargs": {
+                "reservation_id": "NM1VX1",
+                "cabin": "business"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "NM1VX1",
+                "flights": [
+                  {
+                    "origin": "MSP",
+                    "destination": "EWR",
+                    "flight_number": "HAT300",
+                    "date": "2024-05-25",
+                    "cabin": "business"
+                  },
+                  {
+                    "origin": "EWR",
+                    "destination": "MSP",
+                    "flight_number": "HAT208",
+                    "date": "2024-05-27",
+                    "cabin": "business"
+                  }
+                ],
+                "payment_methods": [
+                  "credit_card_4196779"
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "NM1VX1",
+                "flights": [
+                  {
+                    "origin": "MSP",
+                    "destination": "EWR",
+                    "flight_number": "HAT300",
+                    "date": "2024-05-25",
+                    "cabin": "business"
+                  },
+                  {
+                    "origin": "EWR",
+                    "destination": "MSP",
+                    "flight_number": "HAT208",
+                    "date": "2024-05-27",
+                    "cabin": "business"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "NM1VX1",
+                "flights": [
+                  {
+                    "origin": "MSP",
+                    "destination": "EWR",
+                    "flight_number": "HAT300",
+                    "date": "2024-05-25",
+                    "cabin": "business"
+                  },
+                  {
+                    "origin": "EWR",
+                    "destination": "MSP",
+                    "flight_number": "HAT208",
+                    "date": "2024-05-27",
+                    "cabin": "business"
+                  }
+                ],
+                "cabin": "business",
+                "payment_id": "credit_card_4196779"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "KC18K6",
+                "flights": [
+                  {
+                    "origin": "MSP",
+                    "destination": "EWR",
+                    "flight_number": "HAT300",
+                    "date": "2024-05-21",
+                    "cabin": "business"
+                  },
+                  {
+                    "origin": "EWR",
+                    "destination": "CLT",
+                    "flight_number": "HAT215",
+                    "date": "2024-05-21",
+                    "cabin": "business"
+                  }
+                ],
+                "cabin": "business",
+                "payment_id": "credit_card_4196779"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "H8Q05L",
+                "flights": [
+                  {
+                    "origin": "JFK",
+                    "destination": "ATL",
+                    "flight_number": "HAT268",
+                    "date": "2024-05-24",
+                    "cabin": "business"
+                  }
+                ],
+                "cabin": "business",
+                "payment_id": "credit_card_4196779"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:34",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 15,
+          "decode_tokens": 1206,
+          "finished_reason": "max_turns",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "user_id": "daiki_muller_1116",
+                "reservation_ids": [
+                  "XEHM4B",
+                  "59XX6W"
+                ]
+              }
+            },
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "daiki_muller_1116"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_ids": [
+                  "XEHM4B",
+                  "59XX6W"
+                ]
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "XEHM4B"
+              }
+            },
+            {
+              "name": "update_reservation_cabin",
+              "kwargs": {
+                "user_id": "daiki_muller_1116",
+                "reservation_id": "XEHM4B",
+                "cabin": "economy"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "59XX6W"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "user_id": "daiki_muller_1116",
+                "reservation_id": "XEHM4B",
+                "flights": [
+                  {
+                    "origin": "LAS",
+                    "destination": "ATL",
+                    "flight_number": "HAT005",
+                    "date": "2024-05-20",
+                    "cabin": "economy"
+                  },
+                  {
+                    "origin": "ATL",
+                    "destination": "LAS",
+                    "flight_number": "HAT178",
+                    "date": "2024-05-30",
+                    "cabin": "economy"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "XEHM4B",
+                "flights": [
+                  {
+                    "origin": "LAS",
+                    "destination": "ATL",
+                    "flight_number": "HAT005",
+                    "date": "2024-05-20",
+                    "cabin": "economy"
+                  },
+                  {
+                    "origin": "ATL",
+                    "destination": "LAS",
+                    "flight_number": "HAT178",
+                    "date": "2024-05-30",
+                    "cabin": "economy"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "daiki_muller_1116"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "XEHM4B",
+                "cabin": "economy",
+                "payment_id": "credit_card_2408938",
+                "flights": [
+                  {
+                    "origin": "LAS",
+                    "destination": "ATL",
+                    "flight_number": "HAT005",
+                    "date": "2024-05-20",
+                    "cabin": "economy"
+                  },
+                  {
+                    "origin": "ATL",
+                    "destination": "LAS",
+                    "flight_number": "HAT178",
+                    "date": "2024-05-30",
+                    "cabin": "economy"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "user_id": "daiki_muller_1116",
+                "reservation_id": "XEHM4B",
+                "reason": "change_of_plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "XEHM4B",
+                "reason": "change_of_plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "XEHM4B"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "59XX6W"
+              }
+            },
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "daiki_muller_1116"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:35",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 5,
+          "decode_tokens": 449,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "PEP4E0"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "user_id": "sophia_taylor_9065",
+                "reservation_id": "PEP4E0",
+                "reason": "family emergency"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "PEP4E0",
+                "reason": "family emergency"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "PEP4E0"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "I have cancelled your reservation PEP4E0, but I'm very sorry to inform you that a full refund is not possible for basic economy flights without travel insurance. Given your family emergency, I can try to change your flight to May 22nd. Would you like to proceed with this option?"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:36",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 9,
+          "decode_tokens": 1269,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "PEP4E0"
+              }
+            },
+            {
+              "name": "update_reservation_baggages",
+              "kwargs": {
+                "reservation_id": "PEP4E0",
+                "total_baggages": 0,
+                "nonfree_baggages": 0,
+                "insurance": "yes"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "PEP4E0",
+                "flights": [
+                  {
+                    "origin": "CLT",
+                    "destination": "DTW",
+                    "flight_number": "HAT176",
+                    "date": "2024-05-20",
+                    "price": 51
+                  },
+                  {
+                    "origin": "DTW",
+                    "destination": "PHX",
+                    "flight_number": "HAT097",
+                    "date": "2024-05-20",
+                    "price": 77
+                  }
+                ],
+                "insurance": "yes"
+              }
+            },
+            {
+              "name": "update_reservation_passengers",
+              "kwargs": {
+                "reservation_id": "PEP4E0",
+                "passengers": [
+                  {
+                    "first_name": "Sophia",
+                    "last_name": "Taylor",
+                    "dob": "1999-05-27",
+                    "insurance": "yes"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_baggages",
+              "kwargs": {
+                "reservation_id": "PEP4E0",
+                "total_baggages": 0,
+                "nonfree_baggages": 0,
+                "insurance": "yes"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "sophia_taylor_9065",
+                "origin": "CLT",
+                "destination": "PHX",
+                "flight_type": "one_way",
+                "cabin": "basic_economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT176",
+                    "date": "2024-05-20"
+                  },
+                  {
+                    "flight_number": "HAT097",
+                    "date": "2024-05-20"
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Sophia",
+                    "last_name": "Taylor",
+                    "dob": "1999-05-27",
+                    "insurance": "yes"
+                  }
+                ],
+                "payment_methods": [
+                  "credit_card_9302073"
+                ],
+                "total_baggages": 0,
+                "nonfree_baggages": 0,
+                "insurance": "yes"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "sophia_taylor_9065",
+                "origin": "CLT",
+                "destination": "PHX",
+                "flight_type": "one_way",
+                "cabin": "basic_economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT176",
+                    "date": "2024-05-20",
+                    "price": 51
+                  },
+                  {
+                    "flight_number": "HAT097",
+                    "date": "2024-05-20",
+                    "price": 77
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Sophia",
+                    "last_name": "Taylor",
+                    "dob": "1999-05-27",
+                    "insurance": "yes"
+                  }
+                ],
+                "payment_methods": [
+                  "credit_card_9302073"
+                ],
+                "total_baggages": 0,
+                "nonfree_baggages": 0,
+                "insurance": "yes"
+              }
+            },
+            {
+              "name": "book_reservation",
+              "kwargs": {
+                "user_id": "sophia_taylor_9065",
+                "origin": "CLT",
+                "destination": "PHX",
+                "flight_type": "one_way",
+                "cabin": "basic_economy",
+                "flights": [
+                  {
+                    "flight_number": "HAT176",
+                    "date": "2024-05-20",
+                    "price": 51
+                  },
+                  {
+                    "flight_number": "HAT097",
+                    "date": "2024-05-20",
+                    "price": 77
+                  }
+                ],
+                "passengers": [
+                  {
+                    "first_name": "Sophia",
+                    "last_name": "Taylor",
+                    "dob": "1999-05-27",
+                    "insurance": "yes"
+                  }
+                ],
+                "payment_methods": [
+                  "credit_card_9302073"
+                ],
+                "total_baggages": 0,
+                "nonfree_baggages": 0,
+                "insurance": "yes"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "I'm encountering an issue with adding insurance to your reservation. I've tried multiple methods, but the system is not accepting the changes. Please let me know if you have any other requests or if you would like to try a different approach."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:37",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 10,
+          "decode_tokens": 812,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "user_id": "mei_brown_7075",
+                "reservation_id": "R12345"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "R12345"
+              }
+            },
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "mei_brown_7075"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "DB1Y70"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "MUGYUB"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "3JA7XV"
+              }
+            },
+            {
+              "name": "send_certificate",
+              "kwargs": {
+                "user_id": "mei_brown_7075",
+                "amount": 200,
+                "reason": "Compensation for delayed flight HAT045 causing missed meeting"
+              }
+            },
+            {
+              "name": "send_certificate",
+              "kwargs": {
+                "user_id": "mei_brown_7075",
+                "amount": 200
+              }
+            },
+            {
+              "name": "send_certificate",
+              "kwargs": {
+                "user_id": "mei_brown_7075",
+                "amount": 200
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "Mei, I understand how frustrating this delay is, especially since it's causing you to miss an important meeting. As a valued Gold member, we are offering you a total of $400 in travel certificates as compensation. These certificates can be used for future travel. If you prefer, we can also refund the amount to your original payment method. Please let me know how you would like to proceed."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:38",
+          "correct": 1,
+          "reward": 1.0,
+          "n_turns": 3,
+          "decode_tokens": 237,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "user_id": "sophia_silva_7557",
+                "reservation_id": "H8Q05L"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "H8Q05L"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "I'm sorry, but travel insurance cannot be cancelled after the initial booking. Therefore, I cannot process a refund for the insurance you purchased for your flight H8Q05L. If you have any other concerns or need further assistance, please let me know."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:39",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 6,
+          "decode_tokens": 357,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "H8Q05L"
+              }
+            },
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "sophia_silva_7557"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "user_id": "sophia_silva_7557",
+                "reservation_id": "H8Q05L",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "H8Q05L",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "H8Q05L"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "Your flight reservation H8Q05L has been cancelled, and the refund will be processed to your original payment method within 5 to 7 business days."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:40",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 7,
+          "decode_tokens": 584,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "sophia_silva_7557"
+              }
+            },
+            {
+              "name": "think",
+              "kwargs": {
+                "thought": "The user's membership status is listed as regular, but the user mentioned being a Gold member. I need to confirm the correct membership status and then check the details of the canceled flight."
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "NM1VX1"
+              }
+            },
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "sophia_silva_7557"
+              }
+            },
+            {
+              "name": "send_certificate",
+              "kwargs": {
+                "user_id": "sophia_silva_7557",
+                "amount": 100,
+                "reason": "Compensation for the inconvenience caused by the canceled flight and missed meeting."
+              }
+            },
+            {
+              "name": "send_certificate",
+              "kwargs": {
+                "user_id": "sophia_silva_7557",
+                "amount": 100
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "Thank you for bringing this to our attention, Sophia. As a gesture of goodwill for the inconvenience caused by the canceled flight and the missed meeting, we have issued a travel certificate worth $100 to your account. We value your loyalty and apologize for the inconvenience."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:41",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 7,
+          "decode_tokens": 453,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "user_id": "anya_garcia_5901",
+                "reservation_id": "3RK2T9"
+              }
+            },
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "anya_garcia_5901"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "3RK2T9"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "user_id": "anya_garcia_5901",
+                "reservation_id": "3RK2T9",
+                "reason": "change_of_plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "3RK2T9",
+                "reason": "change_of_plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "3RK2T9"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "Your reservation 3RK2T9 has been successfully cancelled. The refund will be processed and returned to your original payment method, gift card 2550356, within 5 to 7 business days."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:42",
+          "correct": 1,
+          "reward": 1.0,
+          "n_turns": 3,
+          "decode_tokens": 229,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "anya_garcia_5901"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "3RK2T9"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "I see that you booked the flight with confirmation 3RK2T9 from MCO to SFO on May 19 and 20 in basic economy. However, the reservation details show that you did not purchase travel insurance. Since you booked a basic economy flight and did not purchase travel insurance, the flight cannot be cancelled for a refund due to illness. If you have any further questions or need assistance, please let me know."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:43",
+          "correct": 1,
+          "reward": 1.0,
+          "n_turns": 4,
+          "decode_tokens": 298,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "user_id": "anya_garcia_5901",
+                "reservation_id": "3RK2T9"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "3RK2T9"
+              }
+            },
+            {
+              "name": "update_reservation_passengers",
+              "kwargs": {
+                "reservation_id": "3RK2T9",
+                "passengers": [
+                  {
+                    "first_name": "Anya",
+                    "last_name": "Garcia",
+                    "dob": "1992-11-12"
+                  },
+                  {
+                    "first_name": "Mei",
+                    "last_name": "Garcia",
+                    "dob": "1989-12-13"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "The passenger name has been changed from Mei Lee to Mei Garcia on reservation 3RK2T9."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:44",
+          "correct": 1,
+          "reward": 1.0,
+          "n_turns": 5,
+          "decode_tokens": 291,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "user_id": "anya_garcia_5901",
+                "reservation_id": "JMO1MG"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "JMO1MG"
+              }
+            },
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "anya_garcia_5901"
+              }
+            },
+            {
+              "name": "think",
+              "kwargs": {
+                "thought": "Silver members get 2 free checked bags for each economy passenger. There are 2 passengers, so the total number of checked bags allowed is 2 * 2 = 4."
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "You can take a total of 4 suitcases on your upcoming flight."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:45",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 3,
+          "decode_tokens": 251,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "noah_muller_9847"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "4OG6T3"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "I see that your most recent reservation is 4OG6T3, a round trip from BOS to LAS with a stopover in SEA. Can you confirm the number of passengers in this reservation?"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:46",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 2,
+          "decode_tokens": 148,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "noah_muller_9847"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "Hi Noah, I see you have a gold membership. Let's start by booking a flight from San Francisco (SFO) to New York (JFK). Is this a one-way or round-trip flight?"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:47",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 6,
+          "decode_tokens": 332,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "raj_sanchez_7340"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "MZDDS4"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "user_id": "raj_sanchez_7340",
+                "reservation_id": "MZDDS4",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "MZDDS4",
+                "reason": "change of plan"
+              }
+            },
+            {
+              "name": "cancel_reservation",
+              "kwargs": {
+                "reservation_id": "MZDDS4"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "Your reservation MZDDS4 has been successfully canceled. The refund will be processed and returned to your original payment method within 5 to 7 business days."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:48",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 6,
+          "decode_tokens": 1066,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "user_id": "lucas_brown_4047",
+                "reservation_id": "EUJUY6"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "EUJUY6"
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "user_id": "lucas_brown_4047",
+                "reservation_id": "EUJUY6",
+                "flights": [
+                  {
+                    "origin": "ORD",
+                    "destination": "DEN",
+                    "flight_number": "HAT238",
+                    "date": "2024-05-16",
+                    "price": 96
+                  },
+                  {
+                    "origin": "DEN",
+                    "destination": "LAS",
+                    "flight_number": "HAT290",
+                    "date": "2024-05-16",
+                    "price": 64
+                  },
+                  {
+                    "origin": "LAS",
+                    "destination": "IAH",
+                    "flight_number": "HAT266",
+                    "date": "2024-05-18",
+                    "price": 70
+                  },
+                  {
+                    "origin": "IAH",
+                    "destination": "ORD",
+                    "flight_number": "HAT044",
+                    "date": "2024-05-18",
+                    "price": 76
+                  }
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "EUJUY6",
+                "flights": [
+                  {
+                    "origin": "ORD",
+                    "destination": "DEN",
+                    "flight_number": "HAT238",
+                    "date": "2024-05-16",
+                    "price": 96
+                  },
+                  {
+                    "origin": "DEN",
+                    "destination": "LAS",
+                    "flight_number": "HAT290",
+                    "date": "2024-05-16",
+                    "price": 64
+                  },
+                  {
+                    "origin": "LAS",
+                    "destination": "IAH",
+                    "flight_number": "HAT266",
+                    "date": "2024-05-18",
+                    "price": 70
+                  },
+                  {
+                    "origin": "IAH",
+                    "destination": "ORD",
+                    "flight_number": "HAT044",
+                    "date": "2024-05-18",
+                    "price": 76
+                  }
+                ]
+              }
+            },
+            {
+              "name": "update_reservation_flights",
+              "kwargs": {
+                "reservation_id": "EUJUY6",
+                "cabin": "basic_economy",
+                "flights": [
+                  {
+                    "origin": "ORD",
+                    "destination": "DEN",
+                    "flight_number": "HAT238",
+                    "date": "2024-05-16",
+                    "price": 96
+                  },
+                  {
+                    "origin": "DEN",
+                    "destination": "LAS",
+                    "flight_number": "HAT290",
+                    "date": "2024-05-16",
+                    "price": 64
+                  },
+                  {
+                    "origin": "LAS",
+                    "destination": "IAH",
+                    "flight_number": "HAT266",
+                    "date": "2024-05-18",
+                    "price": 70
+                  },
+                  {
+                    "origin": "IAH",
+                    "destination": "ORD",
+                    "flight_number": "HAT044",
+                    "date": "2024-05-18",
+                    "price": 76
+                  }
+                ],
+                "payment_id": "gift_card_9049233"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "Your reservation EUJUY6 has been updated. The new dates are May 16 and May 18. The updated prices are: HAT238 ORD\u2192DEN $71, HAT290 DEN\u2192LAS $53, HAT266 LAS\u2192IAH $54, HAT044 IAH\u2192ORD $60. The total refund is $204."
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:49",
+          "correct": 1,
+          "reward": 1.0,
+          "n_turns": 5,
+          "decode_tokens": 426,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "MDCLVA",
+                "user_id": "emma_kim_9957"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "MDCLVA"
+              }
+            },
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "emma_kim_9957"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "EHGLP3"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "I have checked your previous reservation, and it did not have travel insurance. However, as a gold member, you can still cancel the reservation MDCLVA. Please confirm if you want to proceed with the cancellation."
+              }
+            }
+          ]
+        }
+      ],
+      "canary_report": null,
+      "config": "fp16"
+    }
+  ],
+  "partial": false
+}

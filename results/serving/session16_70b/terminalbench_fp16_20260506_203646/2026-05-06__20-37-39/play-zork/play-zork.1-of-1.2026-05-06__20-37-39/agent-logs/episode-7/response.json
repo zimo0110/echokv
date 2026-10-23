@@ -1,0 +1,12 @@
+{
+    "state_analysis": "The tree is unremarkable, and we are still on the forest path",
+    "explanation": "Climb the tree to see if there's a good view",
+    "commands": [
+        {
+            "keystrokes": "climb tree\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

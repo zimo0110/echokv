@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We are still at the north side of the house, and we have examined it to find that it is a beautiful colonial house",
+    "explanation": "Let's go around to the west side of the house to see if we can find any other clues or objects",
+    "commands": [
+        {
+            "keystrokes": "go west\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

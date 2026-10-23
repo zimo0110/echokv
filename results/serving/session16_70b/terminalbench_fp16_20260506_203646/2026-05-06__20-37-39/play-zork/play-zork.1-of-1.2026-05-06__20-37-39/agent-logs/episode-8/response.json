@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We are now up a tree, and there is a bird's nest with a valuable egg",
+    "explanation": "Take the egg from the nest",
+    "commands": [
+        {
+            "keystrokes": "take egg\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

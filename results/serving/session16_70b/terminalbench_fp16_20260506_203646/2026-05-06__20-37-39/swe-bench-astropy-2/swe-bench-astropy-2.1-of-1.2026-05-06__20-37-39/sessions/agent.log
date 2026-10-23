@@ -1,0 +1,117 @@
+[?2004hroot@c63a4192bda5:/app/astropy# asciinema rec --stdin /logs/agent.cast
+[?2004l[0;32masciinema: recording asciicast to /logs/agent.cast[0m
+[0;32masciinema: press <ctrl-d> or type "exit" when you're done[0m
+[?2004hroot@c63a4192bda5:/app/astropy# clear
+[?2004l[H[J[3J[?2004hroot@c63a4192bda5:/app/astropy# cd astropy/io/ascii/qdp.py
+[?2004lbash: cd: astropy/io/ascii/qdp.py: Not a directory
+[?2004hroot@c63a4192bda5:/app/astropy# vim +/QDP +/line  qdp.py
+[?2004lbash: vim: command not found
+[?2004hroot@c63a4192bda5:/app/astropy# apt-get update && apt-get install -y vim; tmux wait -S done
+[?2004l0% [Working]            Hit:1 http://deb.debian.org/debian bookworm InRelease
+0% [Working]            Hit:2 http://deb.debian.org/debian bookworm-updates InRelease
+0% [Working]            Hit:3 http://deb.debian.org/debian-security bookworm-security InRelease
+0% [Working]0% [Working]0% [Working]20% [Working]             Reading package lists... 0%Reading package lists... 0%Reading package lists... 0%Reading package lists... 95%Reading package lists... 95%Reading package lists... 95%Reading package lists... 95%Reading package lists... 99%Reading package lists... 99%Reading package lists... Done
+Reading package lists... 0%Reading package lists... 0%Reading package lists... 0%Reading package lists... 95%Reading package lists... 95%Reading package lists... 95%Reading package lists... 95%Reading package lists... 99%Reading package lists... 99%Reading package lists... Done
+Building dependency tree... 0%Building dependency tree... 0%Building dependency tree... 50%Building dependency tree... 50%Building dependency tree... Done
+Reading state information... 0% Reading state information... 0%Reading state information... Done
+The following additional packages will be installed:
+  libgpm2 libsodium23 vim-common vim-runtime xxd
+Suggested packages:
+  gpm ctags vim-doc vim-scripts
+The following NEW packages will be installed:
+  libgpm2 libsodium23 vim vim-common vim-runtime xxd
+0 upgraded, 6 newly installed, 0 to remove and 11 not upgraded.
+Need to get 8980 kB of archives.
+After this operation, 41.9 MB of additional disk space will be used.
+0% [Working]            Get:1 http://deb.debian.org/debian bookworm/main amd64 vim-common all 2:9.0.1378-2+deb12u2 [125 kB]
+0% [1 vim-common 4096 B/125 kB 3%]                                  4% [Working]            Get:2 http://deb.debian.org/debian bookworm/main amd64 libgpm2 amd64 1.20.7-10+b1 [14.2 kB]
+4% [2 libgpm2 4862 B/14.2 kB 34%]                                 8% [Waiting for headers]                        Get:3 http://deb.debian.org/debian-security bookworm-security/main amd64 libsodium23 amd64 1.0.18-1+deb12u1 [162 kB]
+8% [3 libsodium23 11.6 kB/162 kB 7%]                                    13% [Waiting for headers]                         Get:4 http://deb.debian.org/debian bookworm/main amd64 vim-runtime all 2:9.0.1378-2+deb12u2 [7027 kB]
+13% [4 vim-runtime 12.3 kB/7027 kB 0%]                                      79% [Working]             Get:5 http://deb.debian.org/debian bookworm/main amd64 vim amd64 2:9.0.1378-2+deb12u2 [1568 kB]
+79% [5 vim 8192 B/1568 kB 1%]                             96% [Waiting for headers]                         Get:6 http://deb.debian.org/debian bookworm/main amd64 xxd amd64 2:9.0.1378-2+deb12u2 [84.1 kB]
+96% [6 xxd 12.7 kB/84.1 kB 15%]                               100% [Working]              Fetched 8980 kB in 0s (67.2 MB/s)
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package vim-common.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 11229 files and directories currently installed.)
+Preparing to unpack .../0-vim-common_2%3a9.0.1378-2+deb12u2_all.deb ...
+Unpacking vim-common (2:9.0.1378-2+deb12u2) ...
+Selecting previously unselected package libgpm2:amd64.
+Preparing to unpack .../1-libgpm2_1.20.7-10+b1_amd64.deb ...
+Unpacking libgpm2:amd64 (1.20.7-10+b1) ...
+Selecting previously unselected package libsodium23:amd64.
+Preparing to unpack .../2-libsodium23_1.0.18-1+deb12u1_amd64.deb ...
+Unpacking libsodium23:amd64 (1.0.18-1+deb12u1) ...
+Selecting previously unselected package vim-runtime.
+Preparing to unpack .../3-vim-runtime_2%3a9.0.1378-2+deb12u2_all.deb ...
+Adding 'diversion of /usr/share/vim/vim90/doc/help.txt to /usr/share/vim/vim90/doc/help.txt.vim-tiny by vim-runtime'
+Adding 'diversion of /usr/share/vim/vim90/doc/tags to /usr/share/vim/vim90/doc/tags.vim-tiny by vim-runtime'
+Unpacking vim-runtime (2:9.0.1378-2+deb12u2) ...
+Selecting previously unselected package vim.
+Preparing to unpack .../4-vim_2%3a9.0.1378-2+deb12u2_amd64.deb ...
+Unpacking vim (2:9.0.1378-2+deb12u2) ...
+Selecting previously unselected package xxd.
+Preparing to unpack .../5-xxd_2%3a9.0.1378-2+deb12u2_amd64.deb ...
+Unpacking xxd (2:9.0.1378-2+deb12u2) ...
+Setting up libsodium23:amd64 (1.0.18-1+deb12u1) ...
+Setting up libgpm2:amd64 (1.20.7-10+b1) ...
+Setting up xxd (2:9.0.1378-2+deb12u2) ...
+Setting up vim-common (2:9.0.1378-2+deb12u2) ...
+Setting up vim-runtime (2:9.0.1378-2+deb12u2) ...
+Setting up vim (2:9.0.1378-2+deb12u2) ...
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/editor (editor) in auto mode
+update-alternatives: warning: skip creation of /usr/share/man/man1/editor.1.gz because associated file /usr/share/man/man1/vim.1.gz (of link group editor) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/da/man1/editor.1.gz because associated file /usr/share/man/da/man1/vim.1.gz (of link group editor) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/de/man1/editor.1.gz because associated file /usr/share/man/de/man1/vim.1.gz (of link group editor) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/fr/man1/editor.1.gz because associated file /usr/share/man/fr/man1/vim.1.gz (of link group editor) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/it/man1/editor.1.gz because associated file /usr/share/man/it/man1/vim.1.gz (of link group editor) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/ja/man1/editor.1.gz because associated file /usr/share/man/ja/man1/vim.1.gz (of link group editor) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/pl/man1/editor.1.gz because associated file /usr/share/man/pl/man1/vim.1.gz (of link group editor) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/ru/man1/editor.1.gz because associated file /usr/share/man/ru/man1/vim.1.gz (of link group editor) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/tr/man1/editor.1.gz because associated file /usr/share/man/tr/man1/vim.1.gz (of link group editor) doesn't exist
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/ex (ex) in auto mode
+update-alternatives: warning: skip creation of /usr/share/man/man1/ex.1.gz because associated file /usr/share/man/man1/vim.1.gz (of link group ex) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/da/man1/ex.1.gz because associated file /usr/share/man/da/man1/vim.1.gz (of link group ex) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/de/man1/ex.1.gz because associated file /usr/share/man/de/man1/vim.1.gz (of link group ex) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/fr/man1/ex.1.gz because associated file /usr/share/man/fr/man1/vim.1.gz (of link group ex) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/it/man1/ex.1.gz because associated file /usr/share/man/it/man1/vim.1.gz (of link group ex) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/ja/man1/ex.1.gz because associated file /usr/share/man/ja/man1/vim.1.gz (of link group ex) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/pl/man1/ex.1.gz because associated file /usr/share/man/pl/man1/vim.1.gz (of link group ex) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/ru/man1/ex.1.gz because associated file /usr/share/man/ru/man1/vim.1.gz (of link group ex) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/tr/man1/ex.1.gz because associated file /usr/share/man/tr/man1/vim.1.gz (of link group ex) doesn't exist
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/rview (rview) in auto mode
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/rvim (rvim) in auto mode
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/vi (vi) in auto mode
+update-alternatives: warning: skip creation of /usr/share/man/man1/vi.1.gz because associated file /usr/share/man/man1/vim.1.gz (of link group vi) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/da/man1/vi.1.gz because associated file /usr/share/man/da/man1/vim.1.gz (of link group vi) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/de/man1/vi.1.gz because associated file /usr/share/man/de/man1/vim.1.gz (of link group vi) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/fr/man1/vi.1.gz because associated file /usr/share/man/fr/man1/vim.1.gz (of link group vi) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/it/man1/vi.1.gz because associated file /usr/share/man/it/man1/vim.1.gz (of link group vi) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/ja/man1/vi.1.gz because associated file /usr/share/man/ja/man1/vim.1.gz (of link group vi) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/pl/man1/vi.1.gz because associated file /usr/share/man/pl/man1/vim.1.gz (of link group vi) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/ru/man1/vi.1.gz because associated file /usr/share/man/ru/man1/vim.1.gz (of link group vi) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/tr/man1/vi.1.gz because associated file /usr/share/man/tr/man1/vim.1.gz (of link group vi) doesn't exist
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/view (view) in auto mode
+update-alternatives: warning: skip creation of /usr/share/man/man1/view.1.gz because associated file /usr/share/man/man1/vim.1.gz (of link group view) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/da/man1/view.1.gz because associated file /usr/share/man/da/man1/vim.1.gz (of link group view) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/de/man1/view.1.gz because associated file /usr/share/man/de/man1/vim.1.gz (of link group view) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/fr/man1/view.1.gz because associated file /usr/share/man/fr/man1/vim.1.gz (of link group view) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/it/man1/view.1.gz because associated file /usr/share/man/it/man1/vim.1.gz (of link group view) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/ja/man1/view.1.gz because associated file /usr/share/man/ja/man1/vim.1.gz (of link group view) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/pl/man1/view.1.gz because associated file /usr/share/man/pl/man1/vim.1.gz (of link group view) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/ru/man1/view.1.gz because associated file /usr/share/man/ru/man1/vim.1.gz (of link group view) doesn't exist
+update-alternatives: warning: skip creation of /usr/share/man/tr/man1/view.1.gz because associated file /usr/share/man/tr/man1/vim.1.gz (of link group view) doesn't exist
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/vim (vim) in auto mode
+update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/vimdiff (vimdiff) in auto mode
+Processing triggers for libc-bin (2.36-9+deb12u13) ...
+[?2004hroot@c63a4192bda5:/app/astropy# vim +/QDP qdp.py
+[?2004l[?1000h[?1049h[?1h=[?2004h[1;40r[27m[24m[23m[0m[H[J[?25l[40;1H"qdp.py" [New]
+[31msearch hit BOTTOM, continuing at TOP[0m[97m[41mError detected while processing command line:[0m
+[97m[41mE486: Pattern not found: QDP[2;1H▽[6n[0m[2;1H  [3;1HPzz\[0%m[6n[3;1H           [1;1H[?1000l[40;1H
+[32mPress ENTER or type command to continue[34h[?25h[?1000h[?25l[0m[40;1H[K[40;1H/[?1000lread[?1000h[31msearch hit BOTTOM, continuing at TOP[0m[97m[41mE486: Pattern not found: read[0m[40;30H[K[?1000l[40;1H
+[32mPress ENTER or type command to continue[34h[?25h[?1000h[0m[1;1H[4L[?25l[2;1H[94m~                                                                                                                                                               [3;1H~                                                                                                                                                               [4;1H~                                                                                                                                                               [5;1H~                                                                                                                                                               [6;1H~                                                                                                                                                               [7;1H~                                                                                                                                                               [8;1H~                                                                                                                                                               [9;1H~                                                                                                                                                               [10;1H~                                                                                                                                                               [11;1H~                                                                                                                                                               [12;1H~                                                                                                                                                               [13;1H~                                                                                                                                                               [14;1H~                                                                                                                                                               [15;1H~                                                                                                                                                               [16;1H~                                                                                                                                                               [17;1H~                                                                                                                                                               [18;1H~                                                                                                                                                               [19;1H~                                                                                                                                                               [20;1H~                                                                                                                                                               [21;1H~                                                                                                                                                               [22;1H~                                                                                                                                                               [23;1H~                                                                                                                                                               [24;1H~                                                                                                                                                               [25;1H~                                                                                                                                                               [26;1H~                                                                                                                                                               [27;1H~                                                                                                                                                               [28;1H~                                                                                                                                                               [29;1H~                                                                                                                                                               [30;1H~                                                                                                                                                               [31;1H~                                                                                                                                                               [32;1H~                                                                                                                                                               [33;1H~                                                                                                                                                               [34;1H~                                                                                                                                                               [35;1H~                                                                                                                                                               [36;1H~                                                                                                                                                               [37;1H~                                                                                                                                                               [38;1H~                                                                                                                                                               [39;1H~                                                                                                                                                               [0m[40;1H[K[40;143H0,0-1[9CAll[1;1H[34h[?25h[?25l[40;1H[1m-- INSERT --[0m[40;143H[K[40;143H0,1[11CAll[2;1H[K[40;143H[K[40;143H2,1[11CAll[2;1H[34h[?25h[?25l[35m.lower()[0m[3;1H[K[40;143H3[3;1H[34h[?25h[?25lEsc[4;1H[K[40;143H4[4;1H[34h[?25h[?25l:wq[5;1H[K[40;143H5[5;1H[34h[?25h[?25l:wq![6;1H[K[40;143H6[6;1H[34h[?25h[?25lEsc[7;1H[K[40;143H7[7;1H[34h[?25h[?25l:wq![8;1H[K[40;143H8[8;1H[34h[?25h[?25lC-[ ZZ
+   [9;4H[K[40;143H9,4[9;4H[34h[?25h[?25lCtrl+C
+   [10;4H[K[40;143H10,4[10;4H[34h[?25h[?25l:q!
+   [11;4H[K[40;144H1[11;4H[34h[?25h[?25lCtrl+Z
+   [12;4H[K[40;144H2[12;4H[34h[?25h[?25lkill %[31m1[0m
+   [13;4H[K[40;144H3[13;4H[34h[?25h[?25lC-b d; tmux wait -S done
+   [14;4H[K[40;144H4[14;4H[34h[?25h[?25l[40;146H1[14;1H[34h[?25h

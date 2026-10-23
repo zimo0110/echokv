@@ -1,0 +1,40 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"qdp.py" [New]
+Error detected while processing command line:
+E486: Pattern not found: QDP
+Press ENTER or type command to continue

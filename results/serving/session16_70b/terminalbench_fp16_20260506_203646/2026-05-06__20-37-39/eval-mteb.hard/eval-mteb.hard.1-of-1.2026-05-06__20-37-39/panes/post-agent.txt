@@ -1,0 +1,1321 @@
+root@64523a81e6e9:/app# pip install mteb; tmux wait -S done
+Requirement already satisfied: mteb in /usr/local/lib/python3.10/site-packages (1.36.8)
+Requirement already satisfied: datasets<3.0.0,>=2.19.0 in /usr/local/lib/python3.10/site-packages (from mteb) (2.21.0)
+Requirement already satisfied: typing-extensions>=4.5.0 in /usr/local/lib/python3.10/site-packages (from mteb) (4.15.0)
+Requirement already satisfied: pydantic>=2.0.0 in /usr/local/lib/python3.10/site-packages (from mteb) (2.13.4)
+Requirement already satisfied: eval_type_backport>=0.0.0 in /usr/local/lib/python3.10/site-packages (from mteb) (0.3.1)
+Requirement already satisfied: torch>1.0.0 in /usr/local/lib/python3.10/site-packages (from mteb) (2.11.0)
+Requirement already satisfied: numpy<3.0.0,>=1.0.0 in /usr/local/lib/python3.10/site-packages (from mteb) (2.2.6)
+Requirement already satisfied: sentence_transformers>=3.0.0 in /usr/local/lib/python3.10/site-packages (from mteb) (5.4.1)
+Requirement already satisfied: tqdm>1.0.0 in /usr/local/lib/python3.10/site-packages (from mteb) (4.67.3)
+Requirement already satisfied: requests>=2.26.0 in /usr/local/lib/python3.10/site-packages (from mteb) (2.33.1)
+Requirement already satisfied: scipy>=0.0.0 in /usr/local/lib/python3.10/site-packages (from mteb) (1.15.3)
+Requirement already satisfied: rich>=0.0.0 in /usr/local/lib/python3.10/site-packages (from mteb) (15.0.0)
+Requirement already satisfied: pytrec-eval-terrier>=0.5.6 in /usr/local/lib/python3.10/site-packages (from mteb) (0.5.10)
+Requirement already satisfied: polars>=0.20.22 in /usr/local/lib/python3.10/site-packages (from mteb) (1.40.1)
+Requirement already satisfied: torchvision>0.0.0 in /usr/local/lib/python3.10/site-packages (from mteb) (0.26.0)
+Requirement already satisfied: scikit_learn>=1.0.2 in /usr/local/lib/python3.10/site-packages (from mteb) (1.7.2)
+Requirement already satisfied: dill<0.3.9,>=0.3.0 in /usr/local/lib/python3.10/site-packages (from datasets<3.0.0,>=2.19.0->mteb) (0.3.8)
+Requirement already satisfied: pyyaml>=5.1 in /usr/local/lib/python3.10/site-packages (from datasets<3.0.0,>=2.19.0->mteb) (6.0.3)
+Requirement already satisfied: aiohttp in /usr/local/lib/python3.10/site-packages (from datasets<3.0.0,>=2.19.0->mteb) (3.13.5)
+Requirement already satisfied: multiprocess in /usr/local/lib/python3.10/site-packages (from datasets<3.0.0,>=2.19.0->mteb) (0.70.16)
+Requirement already satisfied: packaging in /usr/local/lib/python3.10/site-packages (from datasets<3.0.0,>=2.19.0->mteb) (26.2)
+Requirement already satisfied: huggingface-hub>=0.21.2 in /usr/local/lib/python3.10/site-packages (from datasets<3.0.0,>=2.19.0->mteb) (1.14.0)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/site-packages (from datasets<3.0.0,>=2.19.0->mteb) (3.29.0)
+Requirement already satisfied: pyarrow>=15.0.0 in /usr/local/lib/python3.10/site-packages (from datasets<3.0.0,>=2.19.0->mteb) (24.0.0)
+Requirement already satisfied: fsspec[http]<=2024.6.1,>=2023.1.0 in /usr/local/lib/python3.10/site-packages (from datasets<3.0.0,>=2.19.0->mteb) (2024.6.1)
+Requirement already satisfied: pandas in /usr/local/lib/python3.10/site-packages (from datasets<3.0.0,>=2.19.0->mteb) (2.3.3)
+Requirement already satisfied: xxhash in /usr/local/lib/python3.10/site-packages (from datasets<3.0.0,>=2.19.0->mteb) (3.7.0)
+Requirement already satisfied: polars-runtime-32==1.40.1 in /usr/local/lib/python3.10/site-packages (from polars>=0.20.22->mteb) (1.40.1)
+Requirement already satisfied: annotated-types>=0.6.0 in /usr/local/lib/python3.10/site-packages (from pydantic>=2.0.0->mteb) (0.7.0)
+Requirement already satisfied: typing-inspection>=0.4.2 in /usr/local/lib/python3.10/site-packages (from pydantic>=2.0.0->mteb) (0.4.2)
+Requirement already satisfied: pydantic-core==2.46.4 in /usr/local/lib/python3.10/site-packages (from pydantic>=2.0.0->mteb) (2.46.4)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.10/site-packages (from requests>=2.26.0->mteb) (3.4.7)
+Requirement already satisfied: certifi>=2023.5.7 in /usr/local/lib/python3.10/site-packages (from requests>=2.26.0->mteb) (2026.4.22)
+Requirement already satisfied: urllib3<3,>=1.26 in /usr/local/lib/python3.10/site-packages (from requests>=2.26.0->mteb) (2.6.3)
+Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/site-packages (from requests>=2.26.0->mteb) (3.13)
+Requirement already satisfied: markdown-it-py>=2.2.0 in /usr/local/lib/python3.10/site-packages (from rich>=0.0.0->mteb) (4.1.0)
+Requirement already satisfied: pygments<3.0.0,>=2.13.0 in /usr/local/lib/python3.10/site-packages (from rich>=0.0.0->mteb) (2.20.0)
+Requirement already satisfied: joblib>=1.2.0 in /usr/local/lib/python3.10/site-packages (from scikit_learn>=1.0.2->mteb) (1.5.3)
+Requirement already satisfied: threadpoolctl>=3.1.0 in /usr/local/lib/python3.10/site-packages (from scikit_learn>=1.0.2->mteb) (3.6.0)
+Requirement already satisfied: transformers<6.0.0,>=4.41.0 in /usr/local/lib/python3.10/site-packages (from sentence_transformers>=3.0.0->mteb) (5.8.0)
+Requirement already satisfied: networkx>=2.5.1 in /usr/local/lib/python3.10/site-packages (from torch>1.0.0->mteb) (3.4.2)
+Requirement already satisfied: sympy>=1.13.3 in /usr/local/lib/python3.10/site-packages (from torch>1.0.0->mteb) (1.14.0)
+Requirement already satisfied: setuptools<82 in /usr/local/lib/python3.10/site-packages (from torch>1.0.0->mteb) (79.0.1)
+Requirement already satisfied: cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2 in /usr/local/lib/python3.10
+/site-packages (from torch>1.0.0->mteb) (13.0.2)
+Requirement already satisfied: triton==3.6.0 in /usr/local/lib/python3.10/site-packages (from torch>1.0.0->mteb) (3.6.0)
+Requirement already satisfied: jinja2 in /usr/local/lib/python3.10/site-packages (from torch>1.0.0->mteb) (3.1.6)
+Requirement already satisfied: nvidia-cusparselt-cu13==0.8.0 in /usr/local/lib/python3.10/site-packages (from torch>1.0.0->mteb) (0.8.0)
+Requirement already satisfied: nvidia-nccl-cu13==2.28.9 in /usr/local/lib/python3.10/site-packages (from torch>1.0.0->mteb) (2.28.9)
+Requirement already satisfied: nvidia-cudnn-cu13==9.19.0.56 in /usr/local/lib/python3.10/site-packages (from torch>1.0.0->mteb) (9.19.0.56)
+Requirement already satisfied: cuda-bindings<14,>=13.0.3 in /usr/local/lib/python3.10/site-packages (from torch>1.0.0->mteb) (13.2.0)
+Requirement already satisfied: nvidia-nvshmem-cu13==3.4.5 in /usr/local/lib/python3.10/site-packages (from torch>1.0.0->mteb) (3.4.5)
+Requirement already satisfied: nvidia-cusparse==12.6.3.3.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand
+,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>1.0.0->mteb) (12.6.3.3)
+Requirement already satisfied: nvidia-cusolver==12.0.4.66.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curan
+d,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>1.0.0->mteb) (12.0.4.66)
+Requirement already satisfied: nvidia-cufile==1.15.1.6.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,c
+usolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>1.0.0->mteb) (1.15.1.6)
+Requirement already satisfied: nvidia-nvtx==13.0.85.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cuso
+lver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>1.0.0->mteb) (13.0.85)
+Requirement already satisfied: nvidia-cuda-cupti==13.0.85.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curan
+d,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>1.0.0->mteb) (13.0.85)
+Requirement already satisfied: nvidia-cufft==12.0.0.61.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,c
+usolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>1.0.0->mteb) (12.0.0.61)
+Requirement already satisfied: nvidia-cuda-runtime==13.0.96.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,cur
+and,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>1.0.0->mteb) (13.0.96)
+Requirement already satisfied: nvidia-nvjitlink==13.0.88.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand
+,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>1.0.0->mteb) (13.0.88)
+Requirement already satisfied: nvidia-cuda-nvrtc==13.0.88.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curan
+d,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>1.0.0->mteb) (13.0.88)
+Requirement already satisfied: nvidia-curand==10.4.0.35.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,
+cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>1.0.0->mteb) (10.4.0.35)
+Requirement already satisfied: nvidia-cublas==13.1.0.3.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,c
+usolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>1.0.0->mteb) (13.1.0.3)
+Requirement already satisfied: pillow!=8.3.*,>=5.3.0 in /usr/local/lib/python3.10/site-packages (from torchvision>0.0.0->mteb) (12.2.0)
+Requirement already satisfied: cuda-pathfinder~=1.1 in /usr/local/lib/python3.10/site-packages (from cuda-bindings<14,>=13.0.3->torch>1.0.0->mteb) (1.5.4)
+Requirement already satisfied: frozenlist>=1.1.1 in /usr/local/lib/python3.10/site-packages (from aiohttp->datasets<3.0.0,>=2.19.0->mteb) (1.8.0)
+Requirement already satisfied: yarl<2.0,>=1.17.0 in /usr/local/lib/python3.10/site-packages (from aiohttp->datasets<3.0.0,>=2.19.0->mteb) (1.23.0)
+Requirement already satisfied: aiohappyeyeballs>=2.5.0 in /usr/local/lib/python3.10/site-packages (from aiohttp->datasets<3.0.0,>=2.19.0->mteb) (2.6.1)
+Requirement already satisfied: aiosignal>=1.4.0 in /usr/local/lib/python3.10/site-packages (from aiohttp->datasets<3.0.0,>=2.19.0->mteb) (1.4.0)
+Requirement already satisfied: propcache>=0.2.0 in /usr/local/lib/python3.10/site-packages (from aiohttp->datasets<3.0.0,>=2.19.0->mteb) (0.4.1)
+Requirement already satisfied: async-timeout<6.0,>=4.0 in /usr/local/lib/python3.10/site-packages (from aiohttp->datasets<3.0.0,>=2.19.0->mteb) (5.0.1)
+Requirement already satisfied: attrs>=17.3.0 in /usr/local/lib/python3.10/site-packages (from aiohttp->datasets<3.0.0,>=2.19.0->mteb) (26.1.0)
+Requirement already satisfied: multidict<7.0,>=4.5 in /usr/local/lib/python3.10/site-packages (from aiohttp->datasets<3.0.0,>=2.19.0->mteb) (6.7.1)
+Requirement already satisfied: httpx<1,>=0.23.0 in /usr/local/lib/python3.10/site-packages (from huggingface-hub>=0.21.2->datasets<3.0.0,>=2.19.0->mteb) (0.28.1
+)
+Requirement already satisfied: typer>=0.20.0 in /usr/local/lib/python3.10/site-packages (from huggingface-hub>=0.21.2->datasets<3.0.0,>=2.19.0->mteb) (0.25.1)
+Requirement already satisfied: hf-xet<2.0.0,>=1.4.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub>=0.21.2->datasets<3.0.0,>=2.19.0->mteb) (1.
+5.0)
+Requirement already satisfied: mdurl~=0.1 in /usr/local/lib/python3.10/site-packages (from markdown-it-py>=2.2.0->rich>=0.0.0->mteb) (0.1.2)
+Requirement already satisfied: mpmath<1.4,>=1.1.0 in /usr/local/lib/python3.10/site-packages (from sympy>=1.13.3->torch>1.0.0->mteb) (1.3.0)
+Requirement already satisfied: tokenizers<=0.23.0,>=0.22.0 in /usr/local/lib/python3.10/site-packages (from transformers<6.0.0,>=4.41.0->sentence_transformers>=
+3.0.0->mteb) (0.22.2)
+Requirement already satisfied: safetensors>=0.4.3 in /usr/local/lib/python3.10/site-packages (from transformers<6.0.0,>=4.41.0->sentence_transformers>=3.0.0->mt
+eb) (0.7.0)
+Requirement already satisfied: regex>=2025.10.22 in /usr/local/lib/python3.10/site-packages (from transformers<6.0.0,>=4.41.0->sentence_transformers>=3.0.0->mte
+b) (2026.4.4)
+Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/lib/python3.10/site-packages (from jinja2->torch>1.0.0->mteb) (3.0.3)
+Requirement already satisfied: python-dateutil>=2.8.2 in /usr/local/lib/python3.10/site-packages (from pandas->datasets<3.0.0,>=2.19.0->mteb) (2.9.0.post0)
+Requirement already satisfied: tzdata>=2022.7 in /usr/local/lib/python3.10/site-packages (from pandas->datasets<3.0.0,>=2.19.0->mteb) (2026.2)
+Requirement already satisfied: pytz>=2020.1 in /usr/local/lib/python3.10/site-packages (from pandas->datasets<3.0.0,>=2.19.0->mteb) (2026.2)
+Requirement already satisfied: httpcore==1.* in /usr/local/lib/python3.10/site-packages (from httpx<1,>=0.23.0->huggingface-hub>=0.21.2->datasets<3.0.0,>=2.19.0
+->mteb) (1.0.9)
+Requirement already satisfied: anyio in /usr/local/lib/python3.10/site-packages (from httpx<1,>=0.23.0->huggingface-hub>=0.21.2->datasets<3.0.0,>=2.19.0->mteb)
+(4.13.0)
+Requirement already satisfied: h11>=0.16 in /usr/local/lib/python3.10/site-packages (from httpcore==1.*->httpx<1,>=0.23.0->huggingface-hub>=0.21.2->datasets<3.0
+.0,>=2.19.0->mteb) (0.16.0)
+Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.10/site-packages (from python-dateutil>=2.8.2->pandas->datasets<3.0.0,>=2.19.0->mteb) (1.17.0)
+Requirement already satisfied: annotated-doc>=0.0.2 in /usr/local/lib/python3.10/site-packages (from typer>=0.20.0->huggingface-hub>=0.21.2->datasets<3.0.0,>=2.
+19.0->mteb) (0.0.4)
+Requirement already satisfied: click>=8.2.1 in /usr/local/lib/python3.10/site-packages (from typer>=0.20.0->huggingface-hub>=0.21.2->datasets<3.0.0,>=2.19.0->mt
+eb) (8.3.3)
+Requirement already satisfied: shellingham>=1.3.0 in /usr/local/lib/python3.10/site-packages (from typer>=0.20.0->huggingface-hub>=0.21.2->datasets<3.0.0,>=2.19
+.0->mteb) (1.5.4)
+Requirement already satisfied: exceptiongroup>=1.0.2 in /usr/local/lib/python3.10/site-packages (from anyio->httpx<1,>=0.23.0->huggingface-hub>=0.21.2->datasets
+<3.0.0,>=2.19.0->mteb) (1.3.1)
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a v
+irtual environment instead: https://pip.pypa.io/warnings/venv
+
+[notice] A new release of pip is available: 23.0.1 -> 26.1.1
+[notice] To update, run: pip install --upgrade pip
+root@64523a81e6e9:/app# mteb download sts12; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/gme_v_models.py", line 13, in <module>
+    from transformers import AutoModelForVision2Seq, AutoProcessor
+ImportError: cannot import name 'AutoModelForVision2Seq' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model comm
+it id}}/sts12.json --score cosine_spearman; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/gme_v_models.py", line 13, in <module>
+    from transformers import AutoModelForVision2Seq, AutoProcessor
+ImportError: cannot import name 'AutoModelForVision2Seq' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# pip install transformers==4.17.0; tmux wait -S done
+Collecting transformers==4.17.0
+  Downloading transformers-4.17.0-py3-none-any.whl (3.8 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.8/3.8 MB 44.1 MB/s eta 0:00:00
+Collecting sacremoses
+  Downloading sacremoses-0.1.1-py3-none-any.whl (897 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 897.5/897.5 kB 98.6 MB/s eta 0:00:00
+Requirement already satisfied: tqdm>=4.27 in /usr/local/lib/python3.10/site-packages (from transformers==4.17.0) (4.67.3)
+Requirement already satisfied: numpy>=1.17 in /usr/local/lib/python3.10/site-packages (from transformers==4.17.0) (2.2.6)
+Requirement already satisfied: packaging>=20.0 in /usr/local/lib/python3.10/site-packages (from transformers==4.17.0) (26.2)
+Requirement already satisfied: pyyaml>=5.1 in /usr/local/lib/python3.10/site-packages (from transformers==4.17.0) (6.0.3)
+Collecting huggingface-hub<1.0,>=0.1.0
+  Downloading huggingface_hub-0.36.2-py3-none-any.whl (566 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 566.4/566.4 kB 89.9 MB/s eta 0:00:00
+Requirement already satisfied: tokenizers!=0.11.3,>=0.11.1 in /usr/local/lib/python3.10/site-packages (from transformers==4.17.0) (0.22.2)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/site-packages (from transformers==4.17.0) (2026.4.4)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/site-packages (from transformers==4.17.0) (3.29.0)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/site-packages (from transformers==4.17.0) (2.33.1)
+Requirement already satisfied: typing-extensions>=3.7.4.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.1.0->transformers==4.17.0) (4
+.15.0)
+Requirement already satisfied: fsspec>=2023.5.0 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.1.0->transformers==4.17.0) (2024.6.1)
+Requirement already satisfied: hf-xet<2.0.0,>=1.1.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.1.0->transformers==4.17.0) (1.5.0)
+Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/site-packages (from requests->transformers==4.17.0) (3.13)
+Requirement already satisfied: certifi>=2023.5.7 in /usr/local/lib/python3.10/site-packages (from requests->transformers==4.17.0) (2026.4.22)
+Requirement already satisfied: urllib3<3,>=1.26 in /usr/local/lib/python3.10/site-packages (from requests->transformers==4.17.0) (2.6.3)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.10/site-packages (from requests->transformers==4.17.0) (3.4.7)
+Requirement already satisfied: joblib in /usr/local/lib/python3.10/site-packages (from sacremoses->transformers==4.17.0) (1.5.3)
+Requirement already satisfied: click in /usr/local/lib/python3.10/site-packages (from sacremoses->transformers==4.17.0) (8.3.3)
+Installing collected packages: sacremoses, huggingface-hub, transformers
+  Attempting uninstall: huggingface-hub
+    Found existing installation: huggingface_hub 1.14.0
+    Uninstalling huggingface_hub-1.14.0:
+      Successfully uninstalled huggingface_hub-1.14.0
+  Attempting uninstall: transformers
+    Found existing installation: transformers 5.8.0
+    Uninstalling transformers-5.8.0:
+      Successfully uninstalled transformers-5.8.0
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following depende
+ncy conflicts.
+sentence-transformers 5.4.1 requires transformers<6.0.0,>=4.41.0, but you have transformers 4.17.0 which is incompatible.
+Successfully installed huggingface-hub-0.36.2 sacremoses-0.1.1 transformers-4.17.0
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a v
+irtual environment instead: https://pip.pypa.io/warnings/venv
+
+[notice] A new release of pip is available: 23.0.1 -> 26.1.1
+[notice] To update, run: pip install --upgrade pip
+root@64523a81e6e9:/app# mteb download sts12; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 17, in <module>
+    from sentence_transformers import CrossEncoder, SentenceTransformer
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/__init__.py", line 10, in <module>
+    from sentence_transformers.backend import (
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/backend/__init__.py", line 5, in <module>
+    from .quantize import export_dynamic_quantized_onnx_model, export_static_quantized_openvino_model
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/backend/quantize.py", line 7, in <module>
+    from sentence_transformers.util import disable_datasets_caching, is_datasets_available
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/util/__init__.py", line 5, in <module>
+    from .environment import (
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/util/environment.py", line 11, in <module>
+    from transformers import is_torch_npu_available
+ImportError: cannot import name 'is_torch_npu_available' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model comm
+it id}}/sts12.json --score cosine_spearman; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 17, in <module>
+    from sentence_transformers import CrossEncoder, SentenceTransformer
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/__init__.py", line 10, in <module>
+    from sentence_transformers.backend import (
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/backend/__init__.py", line 5, in <module>
+    from .quantize import export_dynamic_quantized_onnx_model, export_static_quantized_openvino_model
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/backend/quantize.py", line 7, in <module>
+    from sentence_transformers.util import disable_datasets_caching, is_datasets_available
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/util/__init__.py", line 5, in <module>
+    from .environment import (
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/util/environment.py", line 11, in <module>
+    from transformers import is_torch_npu_available
+ImportError: cannot import name 'is_torch_npu_available' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# pip install transformers==4.10.0; tmux wait -S done
+Collecting transformers==4.10.0
+  Downloading transformers-4.10.0-py3-none-any.whl (2.8 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.8/2.8 MB 34.2 MB/s eta 0:00:00
+Requirement already satisfied: numpy>=1.17 in /usr/local/lib/python3.10/site-packages (from transformers==4.10.0) (2.2.6)
+Requirement already satisfied: tqdm>=4.27 in /usr/local/lib/python3.10/site-packages (from transformers==4.10.0) (4.67.3)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/site-packages (from transformers==4.10.0) (2026.4.4)
+Requirement already satisfied: sacremoses in /usr/local/lib/python3.10/site-packages (from transformers==4.10.0) (0.1.1)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/site-packages (from transformers==4.10.0) (2.33.1)
+Collecting tokenizers<0.11,>=0.10.1
+  Downloading tokenizers-0.10.3.tar.gz (212 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 212.7/212.7 kB 44.2 MB/s eta 0:00:00
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... done
+  Preparing metadata (pyproject.toml) ... done
+Requirement already satisfied: pyyaml>=5.1 in /usr/local/lib/python3.10/site-packages (from transformers==4.10.0) (6.0.3)
+Requirement already satisfied: packaging in /usr/local/lib/python3.10/site-packages (from transformers==4.10.0) (26.2)
+Requirement already satisfied: huggingface-hub>=0.0.12 in /usr/local/lib/python3.10/site-packages (from transformers==4.10.0) (0.36.2)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/site-packages (from transformers==4.10.0) (3.29.0)
+Requirement already satisfied: typing-extensions>=3.7.4.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub>=0.0.12->transformers==4.10.0) (4.15.
+0)
+Requirement already satisfied: fsspec>=2023.5.0 in /usr/local/lib/python3.10/site-packages (from huggingface-hub>=0.0.12->transformers==4.10.0) (2024.6.1)
+Requirement already satisfied: hf-xet<2.0.0,>=1.1.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub>=0.0.12->transformers==4.10.0) (1.5.0)
+Requirement already satisfied: certifi>=2023.5.7 in /usr/local/lib/python3.10/site-packages (from requests->transformers==4.10.0) (2026.4.22)
+Requirement already satisfied: urllib3<3,>=1.26 in /usr/local/lib/python3.10/site-packages (from requests->transformers==4.10.0) (2.6.3)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.10/site-packages (from requests->transformers==4.10.0) (3.4.7)
+Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/site-packages (from requests->transformers==4.10.0) (3.13)
+Requirement already satisfied: click in /usr/local/lib/python3.10/site-packages (from sacremoses->transformers==4.10.0) (8.3.3)
+Requirement already satisfied: joblib in /usr/local/lib/python3.10/site-packages (from sacremoses->transformers==4.10.0) (1.5.3)
+Building wheels for collected packages: tokenizers
+  Building wheel for tokenizers (pyproject.toml) ... error
+  error: subprocess-exited-with-error
+
+  × Building wheel for tokenizers (pyproject.toml) did not run successfully.
+  │ exit code: 1
+  ╰─> [62 lines of output]
+      /tmp/pip-build-env-zyusdj_9/overlay/lib/python3.10/site-packages/setuptools/dist.py:765: SetuptoolsDeprecationWarning: License classifiers are deprecated.
+      !!
+
+              ********************************************************************************
+              Please consider removing the following classifiers in favor of a SPDX license expression:
+
+              License :: OSI Approved :: Apache Software License
+
+              See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+              ********************************************************************************
+
+      !!
+        self._finalize_license_expression()
+      running bdist_wheel
+      running build
+      running build_py
+      creating build/lib.linux-x86_64-cpython-310/tokenizers
+      copying py_src/tokenizers/__init__.py -> build/lib.linux-x86_64-cpython-310/tokenizers
+      creating build/lib.linux-x86_64-cpython-310/tokenizers/models
+      copying py_src/tokenizers/models/__init__.py -> build/lib.linux-x86_64-cpython-310/tokenizers/models
+      creating build/lib.linux-x86_64-cpython-310/tokenizers/decoders
+      copying py_src/tokenizers/decoders/__init__.py -> build/lib.linux-x86_64-cpython-310/tokenizers/decoders
+      creating build/lib.linux-x86_64-cpython-310/tokenizers/normalizers
+      copying py_src/tokenizers/normalizers/__init__.py -> build/lib.linux-x86_64-cpython-310/tokenizers/normalizers
+      creating build/lib.linux-x86_64-cpython-310/tokenizers/pre_tokenizers
+      copying py_src/tokenizers/pre_tokenizers/__init__.py -> build/lib.linux-x86_64-cpython-310/tokenizers/pre_tokenizers
+      creating build/lib.linux-x86_64-cpython-310/tokenizers/processors
+      copying py_src/tokenizers/processors/__init__.py -> build/lib.linux-x86_64-cpython-310/tokenizers/processors
+      creating build/lib.linux-x86_64-cpython-310/tokenizers/trainers
+      copying py_src/tokenizers/trainers/__init__.py -> build/lib.linux-x86_64-cpython-310/tokenizers/trainers
+      creating build/lib.linux-x86_64-cpython-310/tokenizers/implementations
+      copying py_src/tokenizers/implementations/char_level_bpe.py -> build/lib.linux-x86_64-cpython-310/tokenizers/implementations
+      copying py_src/tokenizers/implementations/sentencepiece_unigram.py -> build/lib.linux-x86_64-cpython-310/tokenizers/implementations
+      copying py_src/tokenizers/implementations/__init__.py -> build/lib.linux-x86_64-cpython-310/tokenizers/implementations
+      copying py_src/tokenizers/implementations/byte_level_bpe.py -> build/lib.linux-x86_64-cpython-310/tokenizers/implementations
+      copying py_src/tokenizers/implementations/base_tokenizer.py -> build/lib.linux-x86_64-cpython-310/tokenizers/implementations
+      copying py_src/tokenizers/implementations/bert_wordpiece.py -> build/lib.linux-x86_64-cpython-310/tokenizers/implementations
+      copying py_src/tokenizers/implementations/sentencepiece_bpe.py -> build/lib.linux-x86_64-cpython-310/tokenizers/implementations
+      creating build/lib.linux-x86_64-cpython-310/tokenizers/tools
+      copying py_src/tokenizers/tools/__init__.py -> build/lib.linux-x86_64-cpython-310/tokenizers/tools
+      copying py_src/tokenizers/tools/visualizer.py -> build/lib.linux-x86_64-cpython-310/tokenizers/tools
+      copying py_src/tokenizers/__init__.pyi -> build/lib.linux-x86_64-cpython-310/tokenizers
+      copying py_src/tokenizers/models/__init__.pyi -> build/lib.linux-x86_64-cpython-310/tokenizers/models
+      copying py_src/tokenizers/decoders/__init__.pyi -> build/lib.linux-x86_64-cpython-310/tokenizers/decoders
+      copying py_src/tokenizers/normalizers/__init__.pyi -> build/lib.linux-x86_64-cpython-310/tokenizers/normalizers
+      copying py_src/tokenizers/pre_tokenizers/__init__.pyi -> build/lib.linux-x86_64-cpython-310/tokenizers/pre_tokenizers
+      copying py_src/tokenizers/processors/__init__.pyi -> build/lib.linux-x86_64-cpython-310/tokenizers/processors
+      copying py_src/tokenizers/trainers/__init__.pyi -> build/lib.linux-x86_64-cpython-310/tokenizers/trainers
+      copying py_src/tokenizers/tools/visualizer-styles.css -> build/lib.linux-x86_64-cpython-310/tokenizers/tools
+      running build_ext
+      running build_rust
+      error: can't find Rust compiler
+
+      If you are using an outdated pip version, it is possible a prebuilt wheel is available for this package but pip is not able to install from it. Installing
+ from the wheel would avoid the need for a Rust compiler.
+
+      To update pip, run:
+
+          pip install --upgrade pip
+
+      and then retry package installation.
+
+      If you did intend to build this package from source, try installing a Rust compiler from your system package manager and ensure it is on the PATH during i
+nstallation. Alternatively, rustup (available at https://rustup.rs) is the recommended way to download and update the Rust compiler toolchain.
+      [end of output]
+
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+  ERROR: Failed building wheel for tokenizers
+Failed to build tokenizers
+ERROR: Could not build wheels for tokenizers, which is required to install pyproject.toml-based projects
+
+[notice] A new release of pip is available: 23.0.1 -> 26.1.1
+[notice] To update, run: pip install --upgrade pip
+root@64523a81e6e9:/app# pip install sentence-transformers==2.2.0; tmux wait -S done
+Collecting sentence-transformers==2.2.0
+  Downloading sentence-transformers-2.2.0.tar.gz (79 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 79.7/79.7 kB 4.1 MB/s eta 0:00:00
+  Preparing metadata (setup.py) ... done
+Requirement already satisfied: transformers<5.0.0,>=4.6.0 in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (4.17.0)
+Requirement already satisfied: tqdm in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (4.67.3)
+Requirement already satisfied: torch>=1.6.0 in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (2.11.0)
+Requirement already satisfied: torchvision in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (0.26.0)
+Requirement already satisfied: numpy in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (2.2.6)
+Requirement already satisfied: scikit-learn in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (1.7.2)
+Requirement already satisfied: scipy in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (1.15.3)
+Collecting nltk
+  Downloading nltk-3.9.4-py3-none-any.whl (1.6 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.6/1.6 MB 37.4 MB/s eta 0:00:00
+Collecting sentencepiece
+  Downloading sentencepiece-0.2.1-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (1.4 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.4/1.4 MB 143.6 MB/s eta 0:00:00
+Requirement already satisfied: huggingface-hub in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (0.36.2)
+Requirement already satisfied: setuptools<82 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (79.0.1)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (3.29.0)
+Requirement already satisfied: nvidia-nccl-cu13==2.28.9 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (2.28.9)
+Requirement already satisfied: sympy>=1.13.3 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (1.14.0)
+Requirement already satisfied: typing-extensions>=4.10.0 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (4.15.0)
+Requirement already satisfied: nvidia-cudnn-cu13==9.19.0.56 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (9.19.0
+.56)
+Requirement already satisfied: jinja2 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (3.1.6)
+Requirement already satisfied: networkx>=2.5.1 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (3.4.2)
+Requirement already satisfied: fsspec>=0.8.5 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (2024.6.1)
+Requirement already satisfied: nvidia-nvshmem-cu13==3.4.5 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (3.4.5)
+Requirement already satisfied: triton==3.6.0 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (3.6.0)
+Requirement already satisfied: nvidia-cusparselt-cu13==0.8.0 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (0.8.0
+)
+Requirement already satisfied: cuda-bindings<14,>=13.0.3 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (13.2.0)
+Requirement already satisfied: cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2 in /usr/local/lib/python3.10
+/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (13.0.2)
+Requirement already satisfied: nvidia-cusolver==12.0.4.66.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curan
+d,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (12.0.4.66)
+Requirement already satisfied: nvidia-cuda-runtime==13.0.96.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,cur
+and,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (13.0.96)
+Requirement already satisfied: nvidia-cufft==12.0.0.61.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,c
+usolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (12.0.0.61)
+Requirement already satisfied: nvidia-curand==10.4.0.35.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,
+cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (10.4.0.35)
+Requirement already satisfied: nvidia-cuda-nvrtc==13.0.88.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curan
+d,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (13.0.88)
+Requirement already satisfied: nvidia-cuda-cupti==13.0.85.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curan
+d,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (13.0.85)
+Requirement already satisfied: nvidia-cufile==1.15.1.6.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,c
+usolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (1.15.1.6)
+Requirement already satisfied: nvidia-cublas==13.1.0.3.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,c
+usolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (13.1.0.3)
+Requirement already satisfied: nvidia-nvtx==13.0.85.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cuso
+lver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (13.0.85)
+Requirement already satisfied: nvidia-cusparse==12.6.3.3.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand
+,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (12.6.3.3)
+Requirement already satisfied: nvidia-nvjitlink==13.0.88.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand
+,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (13.0.88)
+Requirement already satisfied: packaging>=20.0 in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=4.6.0->sentence-transformers==2.2.0) (26.2)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=4.6.0->sentence-transformers==2.2.0) (202
+6.4.4)
+Requirement already satisfied: sacremoses in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=4.6.0->sentence-transformers==2.2.0) (0.1.1)
+Requirement already satisfied: pyyaml>=5.1 in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=4.6.0->sentence-transformers==2.2.0) (6.0.3)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=4.6.0->sentence-transformers==2.2.0) (2.33.1)
+Requirement already satisfied: tokenizers!=0.11.3,>=0.11.1 in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=4.6.0->sentence-transformers==2
+.2.0) (0.22.2)
+Requirement already satisfied: hf-xet<2.0.0,>=1.1.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub->sentence-transformers==2.2.0) (1.5.0)
+Requirement already satisfied: joblib in /usr/local/lib/python3.10/site-packages (from nltk->sentence-transformers==2.2.0) (1.5.3)
+Requirement already satisfied: click in /usr/local/lib/python3.10/site-packages (from nltk->sentence-transformers==2.2.0) (8.3.3)
+Requirement already satisfied: threadpoolctl>=3.1.0 in /usr/local/lib/python3.10/site-packages (from scikit-learn->sentence-transformers==2.2.0) (3.6.0)
+Requirement already satisfied: pillow!=8.3.*,>=5.3.0 in /usr/local/lib/python3.10/site-packages (from torchvision->sentence-transformers==2.2.0) (12.2.0)
+Requirement already satisfied: cuda-pathfinder~=1.1 in /usr/local/lib/python3.10/site-packages (from cuda-bindings<14,>=13.0.3->torch>=1.6.0->sentence-transform
+ers==2.2.0) (1.5.4)
+Requirement already satisfied: mpmath<1.4,>=1.1.0 in /usr/local/lib/python3.10/site-packages (from sympy>=1.13.3->torch>=1.6.0->sentence-transformers==2.2.0) (1
+.3.0)
+Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/lib/python3.10/site-packages (from jinja2->torch>=1.6.0->sentence-transformers==2.2.0) (3.0.3)
+Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/site-packages (from requests->transformers<5.0.0,>=4.6.0->sentence-transformers==2.2.0)
+ (3.13)
+Requirement already satisfied: certifi>=2023.5.7 in /usr/local/lib/python3.10/site-packages (from requests->transformers<5.0.0,>=4.6.0->sentence-transformers==2
+.2.0) (2026.4.22)
+Requirement already satisfied: urllib3<3,>=1.26 in /usr/local/lib/python3.10/site-packages (from requests->transformers<5.0.0,>=4.6.0->sentence-transformers==2.
+2.0) (2.6.3)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.10/site-packages (from requests->transformers<5.0.0,>=4.6.0->sentence-transfor
+mers==2.2.0) (3.4.7)
+Building wheels for collected packages: sentence-transformers
+  Building wheel for sentence-transformers (setup.py) ... done
+  Created wheel for sentence-transformers: filename=sentence_transformers-2.2.0-py3-none-any.whl size=120803 sha256=98a12a0b5ff892e1a825731a40307f365a8b605bb5e2
+5d504ea56500ba6fb46a
+  Stored in directory: /root/.cache/pip/wheels/54/0d/ea/b89527acdff464eb4476a68607f6ca4e8ad24b6f6d5e8cfacb
+Successfully built sentence-transformers
+Installing collected packages: sentencepiece, nltk, sentence-transformers
+  Attempting uninstall: sentence-transformers
+    Found existing installation: sentence-transformers 5.4.1
+    Uninstalling sentence-transformers-5.4.1:
+      Successfully uninstalled sentence-transformers-5.4.1
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following depende
+ncy conflicts.
+mteb 1.36.8 requires sentence_transformers>=3.0.0, but you have sentence-transformers 2.2.0 which is incompatible.
+Successfully installed nltk-3.9.4 sentence-transformers-2.2.0 sentencepiece-0.2.1
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a v
+irtual environment instead: https://pip.pypa.io/warnings/venv
+
+[notice] A new release of pip is available: 23.0.1 -> 26.1.1
+[notice] To update, run: pip install --upgrade pip
+root@64523a81e6e9:/app# mteb download sts12; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 17, in <module>
+    from sentence_transformers import CrossEncoder, SentenceTransformer
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/__init__.py", line 3, in <module>
+    from .datasets import SentencesDataset, ParallelSentencesDataset
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/datasets/__init__.py", line 3, in <module>
+    from .ParallelSentencesDataset import ParallelSentencesDataset
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/datasets/ParallelSentencesDataset.py", line 4, in <module>
+    from .. import SentenceTransformer
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/SentenceTransformer.py", line 12, in <module>
+    from huggingface_hub import HfApi, HfFolder, Repository, hf_hub_url, cached_download
+ImportError: cannot import name 'cached_download' from 'huggingface_hub' (/usr/local/lib/python3.10/site-packages/huggingface_hub/__init__.py)
+root@64523a81e6e9:/app# mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model comm
+it id}}/sts12.json --score cosine_spearman; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 17, in <module>
+    from sentence_transformers import CrossEncoder, SentenceTransformer
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/__init__.py", line 3, in <module>
+    from .datasets import SentencesDataset, ParallelSentencesDataset
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/datasets/__init__.py", line 3, in <module>
+    from .ParallelSentencesDataset import ParallelSentencesDataset
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/datasets/ParallelSentencesDataset.py", line 4, in <module>
+    from .. import SentenceTransformer
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/SentenceTransformer.py", line 12, in <module>
+    from huggingface_hub import HfApi, HfFolder, Repository, hf_hub_url, cached_download
+ImportError: cannot import name 'cached_download' from 'huggingface_hub' (/usr/local/lib/python3.10/site-packages/huggingface_hub/__init__.py)
+root@64523a81e6e9:/app# pip install huggingface_hub==0.10.1; tmux wait -S done
+Collecting huggingface_hub==0.10.1
+  Downloading huggingface_hub-0.10.1-py3-none-any.whl (163 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 163.5/163.5 kB 5.4 MB/s eta 0:00:00
+Requirement already satisfied: pyyaml>=5.1 in /usr/local/lib/python3.10/site-packages (from huggingface_hub==0.10.1) (6.0.3)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/site-packages (from huggingface_hub==0.10.1) (3.29.0)
+Requirement already satisfied: typing-extensions>=3.7.4.3 in /usr/local/lib/python3.10/site-packages (from huggingface_hub==0.10.1) (4.15.0)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/site-packages (from huggingface_hub==0.10.1) (2.33.1)
+Requirement already satisfied: tqdm in /usr/local/lib/python3.10/site-packages (from huggingface_hub==0.10.1) (4.67.3)
+Requirement already satisfied: packaging>=20.9 in /usr/local/lib/python3.10/site-packages (from huggingface_hub==0.10.1) (26.2)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.10/site-packages (from requests->huggingface_hub==0.10.1) (3.4.7)
+Requirement already satisfied: urllib3<3,>=1.26 in /usr/local/lib/python3.10/site-packages (from requests->huggingface_hub==0.10.1) (2.6.3)
+Requirement already satisfied: certifi>=2023.5.7 in /usr/local/lib/python3.10/site-packages (from requests->huggingface_hub==0.10.1) (2026.4.22)
+Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/site-packages (from requests->huggingface_hub==0.10.1) (3.13)
+Installing collected packages: huggingface_hub
+  Attempting uninstall: huggingface_hub
+    Found existing installation: huggingface_hub 0.36.2
+    Uninstalling huggingface_hub-0.36.2:
+      Successfully uninstalled huggingface_hub-0.36.2
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following depende
+ncy conflicts.
+tokenizers 0.22.2 requires huggingface-hub<2.0,>=0.16.4, but you have huggingface-hub 0.10.1 which is incompatible.
+mteb 1.36.8 requires sentence_transformers>=3.0.0, but you have sentence-transformers 2.2.0 which is incompatible.
+datasets 2.21.0 requires huggingface-hub>=0.21.2, but you have huggingface-hub 0.10.1 which is incompatible.
+Successfully installed huggingface_hub-0.10.1
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a v
+irtual environment instead: https://pip.pypa.io/warnings/venv
+
+[notice] A new release of pip is available: 23.0.1 -> 26.1.1
+[notice] To update, run: pip install --upgrade pip
+root@64523a81e6e9:/app# pip install sentence-transformers==2.2.0; tmux wait -S done
+Requirement already satisfied: sentence-transformers==2.2.0 in /usr/local/lib/python3.10/site-packages (2.2.0)
+Requirement already satisfied: tqdm in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (4.67.3)
+Requirement already satisfied: torchvision in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (0.26.0)
+Requirement already satisfied: scikit-learn in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (1.7.2)
+Requirement already satisfied: nltk in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (3.9.4)
+Requirement already satisfied: huggingface-hub in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (0.10.1)
+Requirement already satisfied: sentencepiece in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (0.2.1)
+Requirement already satisfied: torch>=1.6.0 in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (2.11.0)
+Requirement already satisfied: scipy in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (1.15.3)
+Requirement already satisfied: numpy in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (2.2.6)
+Requirement already satisfied: transformers<5.0.0,>=4.6.0 in /usr/local/lib/python3.10/site-packages (from sentence-transformers==2.2.0) (4.17.0)
+Requirement already satisfied: cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2 in /usr/local/lib/python3.10
+/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (13.0.2)
+Requirement already satisfied: triton==3.6.0 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (3.6.0)
+Requirement already satisfied: cuda-bindings<14,>=13.0.3 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (13.2.0)
+Requirement already satisfied: sympy>=1.13.3 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (1.14.0)
+Requirement already satisfied: typing-extensions>=4.10.0 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (4.15.0)
+Requirement already satisfied: setuptools<82 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (79.0.1)
+Requirement already satisfied: jinja2 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (3.1.6)
+Requirement already satisfied: fsspec>=0.8.5 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (2024.6.1)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (3.29.0)
+Requirement already satisfied: nvidia-cusparselt-cu13==0.8.0 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (0.8.0
+)
+Requirement already satisfied: networkx>=2.5.1 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (3.4.2)
+Requirement already satisfied: nvidia-nvshmem-cu13==3.4.5 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (3.4.5)
+Requirement already satisfied: nvidia-nccl-cu13==2.28.9 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (2.28.9)
+Requirement already satisfied: nvidia-cudnn-cu13==9.19.0.56 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==2.2.0) (9.19.0
+.56)
+Requirement already satisfied: nvidia-cuda-runtime==13.0.96.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,cur
+and,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (13.0.96)
+Requirement already satisfied: nvidia-curand==10.4.0.35.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,
+cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (10.4.0.35)
+Requirement already satisfied: nvidia-nvtx==13.0.85.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cuso
+lver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (13.0.85)
+Requirement already satisfied: nvidia-cufft==12.0.0.61.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,c
+usolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (12.0.0.61)
+Requirement already satisfied: nvidia-cusolver==12.0.4.66.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curan
+d,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (12.0.4.66)
+Requirement already satisfied: nvidia-cublas==13.1.0.3.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,c
+usolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (13.1.0.3)
+Requirement already satisfied: nvidia-cusparse==12.6.3.3.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand
+,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (12.6.3.3)
+Requirement already satisfied: nvidia-cuda-nvrtc==13.0.88.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curan
+d,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (13.0.88)
+Requirement already satisfied: nvidia-cufile==1.15.1.6.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,c
+usolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (1.15.1.6)
+Requirement already satisfied: nvidia-cuda-cupti==13.0.85.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curan
+d,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (13.0.85)
+Requirement already satisfied: nvidia-nvjitlink==13.0.88.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand
+,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==2.2.0) (13.0.88)
+Requirement already satisfied: sacremoses in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=4.6.0->sentence-transformers==2.2.0) (0.1.1)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=4.6.0->sentence-transformers==2.2.0) (202
+6.4.4)
+Requirement already satisfied: tokenizers!=0.11.3,>=0.11.1 in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=4.6.0->sentence-transformers==2
+.2.0) (0.22.2)
+Requirement already satisfied: pyyaml>=5.1 in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=4.6.0->sentence-transformers==2.2.0) (6.0.3)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=4.6.0->sentence-transformers==2.2.0) (2.33.1)
+Requirement already satisfied: packaging>=20.0 in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=4.6.0->sentence-transformers==2.2.0) (26.2)
+Requirement already satisfied: joblib in /usr/local/lib/python3.10/site-packages (from nltk->sentence-transformers==2.2.0) (1.5.3)
+Requirement already satisfied: click in /usr/local/lib/python3.10/site-packages (from nltk->sentence-transformers==2.2.0) (8.3.3)
+Requirement already satisfied: threadpoolctl>=3.1.0 in /usr/local/lib/python3.10/site-packages (from scikit-learn->sentence-transformers==2.2.0) (3.6.0)
+Requirement already satisfied: pillow!=8.3.*,>=5.3.0 in /usr/local/lib/python3.10/site-packages (from torchvision->sentence-transformers==2.2.0) (12.2.0)
+Requirement already satisfied: cuda-pathfinder~=1.1 in /usr/local/lib/python3.10/site-packages (from cuda-bindings<14,>=13.0.3->torch>=1.6.0->sentence-transform
+ers==2.2.0) (1.5.4)
+Requirement already satisfied: mpmath<1.4,>=1.1.0 in /usr/local/lib/python3.10/site-packages (from sympy>=1.13.3->torch>=1.6.0->sentence-transformers==2.2.0) (1
+.3.0)
+Collecting huggingface-hub
+  Using cached huggingface_hub-0.36.2-py3-none-any.whl (566 kB)
+Requirement already satisfied: hf-xet<2.0.0,>=1.1.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub->sentence-transformers==2.2.0) (1.5.0)
+Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/lib/python3.10/site-packages (from jinja2->torch>=1.6.0->sentence-transformers==2.2.0) (3.0.3)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.10/site-packages (from requests->transformers<5.0.0,>=4.6.0->sentence-transfor
+mers==2.2.0) (3.4.7)
+Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/site-packages (from requests->transformers<5.0.0,>=4.6.0->sentence-transformers==2.2.0)
+ (3.13)
+Requirement already satisfied: urllib3<3,>=1.26 in /usr/local/lib/python3.10/site-packages (from requests->transformers<5.0.0,>=4.6.0->sentence-transformers==2.
+2.0) (2.6.3)
+Requirement already satisfied: certifi>=2023.5.7 in /usr/local/lib/python3.10/site-packages (from requests->transformers<5.0.0,>=4.6.0->sentence-transformers==2
+.2.0) (2026.4.22)
+Installing collected packages: huggingface-hub
+  Attempting uninstall: huggingface-hub
+    Found existing installation: huggingface-hub 0.10.1
+    Uninstalling huggingface-hub-0.10.1:
+      Successfully uninstalled huggingface-hub-0.10.1
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following depende
+ncy conflicts.
+mteb 1.36.8 requires sentence_transformers>=3.0.0, but you have sentence-transformers 2.2.0 which is incompatible.
+Successfully installed huggingface-hub-0.36.2
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a v
+irtual environment instead: https://pip.pypa.io/warnings/venv
+
+[notice] A new release of pip is available: 23.0.1 -> 26.1.1
+[notice] To update, run: pip install --upgrade pip
+root@64523a81e6e9:/app# mteb download sts12; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 17, in <module>
+    from sentence_transformers import CrossEncoder, SentenceTransformer
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/__init__.py", line 3, in <module>
+    from .datasets import SentencesDataset, ParallelSentencesDataset
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/datasets/__init__.py", line 3, in <module>
+    from .ParallelSentencesDataset import ParallelSentencesDataset
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/datasets/ParallelSentencesDataset.py", line 4, in <module>
+    from .. import SentenceTransformer
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/SentenceTransformer.py", line 12, in <module>
+    from huggingface_hub import HfApi, HfFolder, Repository, hf_hub_url, cached_download
+ImportError: cannot import name 'cached_download' from 'huggingface_hub' (/usr/local/lib/python3.10/site-packages/huggingface_hub/__init__.py)
+root@64523a81e6e9:/app# mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model comm
+it id}}/sts12.json --score cosine_spearman; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 17, in <module>
+    from sentence_transformers import CrossEncoder, SentenceTransformer
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/__init__.py", line 3, in <module>
+    from .datasets import SentencesDataset, ParallelSentencesDataset
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/datasets/__init__.py", line 3, in <module>
+    from .ParallelSentencesDataset import ParallelSentencesDataset
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/datasets/ParallelSentencesDataset.py", line 4, in <module>
+    from .. import SentenceTransformer
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/SentenceTransformer.py", line 12, in <module>
+    from huggingface_hub import HfApi, HfFolder, Repository, hf_hub_url, cached_download
+ImportError: cannot import name 'cached_download' from 'huggingface_hub' (/usr/local/lib/python3.10/site-packages/huggingface_hub/__init__.py)
+root@64523a81e6e9:/app# pip install sentence-transformers==1.2.0; tmux wait -S done
+Collecting sentence-transformers==1.2.0
+  Downloading sentence-transformers-1.2.0.tar.gz (81 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 81.4/81.4 kB 4.0 MB/s eta 0:00:00
+  Preparing metadata (setup.py) ... done
+Requirement already satisfied: transformers<5.0.0,>=3.1.0 in /usr/local/lib/python3.10/site-packages (from sentence-transformers==1.2.0) (4.17.0)
+Requirement already satisfied: tqdm in /usr/local/lib/python3.10/site-packages (from sentence-transformers==1.2.0) (4.67.3)
+Requirement already satisfied: torch>=1.6.0 in /usr/local/lib/python3.10/site-packages (from sentence-transformers==1.2.0) (2.11.0)
+Requirement already satisfied: torchvision in /usr/local/lib/python3.10/site-packages (from sentence-transformers==1.2.0) (0.26.0)
+Requirement already satisfied: numpy in /usr/local/lib/python3.10/site-packages (from sentence-transformers==1.2.0) (2.2.6)
+Requirement already satisfied: scikit-learn in /usr/local/lib/python3.10/site-packages (from sentence-transformers==1.2.0) (1.7.2)
+Requirement already satisfied: scipy in /usr/local/lib/python3.10/site-packages (from sentence-transformers==1.2.0) (1.15.3)
+Requirement already satisfied: nltk in /usr/local/lib/python3.10/site-packages (from sentence-transformers==1.2.0) (3.9.4)
+Requirement already satisfied: sentencepiece in /usr/local/lib/python3.10/site-packages (from sentence-transformers==1.2.0) (0.2.1)
+Requirement already satisfied: fsspec>=0.8.5 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==1.2.0) (2024.6.1)
+Requirement already satisfied: networkx>=2.5.1 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==1.2.0) (3.4.2)
+Requirement already satisfied: typing-extensions>=4.10.0 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==1.2.0) (4.15.0)
+Requirement already satisfied: cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2 in /usr/local/lib/python3.10
+/site-packages (from torch>=1.6.0->sentence-transformers==1.2.0) (13.0.2)
+Requirement already satisfied: nvidia-nvshmem-cu13==3.4.5 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==1.2.0) (3.4.5)
+Requirement already satisfied: nvidia-nccl-cu13==2.28.9 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==1.2.0) (2.28.9)
+Requirement already satisfied: setuptools<82 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==1.2.0) (79.0.1)
+Requirement already satisfied: jinja2 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==1.2.0) (3.1.6)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==1.2.0) (3.29.0)
+Requirement already satisfied: cuda-bindings<14,>=13.0.3 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==1.2.0) (13.2.0)
+Requirement already satisfied: nvidia-cusparselt-cu13==0.8.0 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==1.2.0) (0.8.0
+)
+Requirement already satisfied: triton==3.6.0 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==1.2.0) (3.6.0)
+Requirement already satisfied: nvidia-cudnn-cu13==9.19.0.56 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==1.2.0) (9.19.0
+.56)
+Requirement already satisfied: sympy>=1.13.3 in /usr/local/lib/python3.10/site-packages (from torch>=1.6.0->sentence-transformers==1.2.0) (1.14.0)
+Requirement already satisfied: nvidia-curand==10.4.0.35.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,
+cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==1.2.0) (10.4.0.35)
+Requirement already satisfied: nvidia-cusolver==12.0.4.66.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curan
+d,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==1.2.0) (12.0.4.66)
+Requirement already satisfied: nvidia-cuda-nvrtc==13.0.88.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curan
+d,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==1.2.0) (13.0.88)
+Requirement already satisfied: nvidia-cuda-cupti==13.0.85.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curan
+d,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==1.2.0) (13.0.85)
+Requirement already satisfied: nvidia-cublas==13.1.0.3.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,c
+usolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==1.2.0) (13.1.0.3)
+Requirement already satisfied: nvidia-nvtx==13.0.85.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cuso
+lver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==1.2.0) (13.0.85)
+Requirement already satisfied: nvidia-nvjitlink==13.0.88.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand
+,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==1.2.0) (13.0.88)
+Requirement already satisfied: nvidia-cusparse==12.6.3.3.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand
+,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==1.2.0) (12.6.3.3)
+Requirement already satisfied: nvidia-cufft==12.0.0.61.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,c
+usolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==1.2.0) (12.0.0.61)
+Requirement already satisfied: nvidia-cufile==1.15.1.6.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,c
+usolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==1.2.0) (1.15.1.6)
+Requirement already satisfied: nvidia-cuda-runtime==13.0.96.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,cur
+and,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.6.0->sentence-transformers==1.2.0) (13.0.96)
+Requirement already satisfied: huggingface-hub<1.0,>=0.1.0 in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=3.1.0->sentence-transformers==1
+.2.0) (0.36.2)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=3.1.0->sentence-transformers==1.2.0) (2.33.1)
+Requirement already satisfied: sacremoses in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=3.1.0->sentence-transformers==1.2.0) (0.1.1)
+Requirement already satisfied: pyyaml>=5.1 in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=3.1.0->sentence-transformers==1.2.0) (6.0.3)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=3.1.0->sentence-transformers==1.2.0) (202
+6.4.4)
+Requirement already satisfied: tokenizers!=0.11.3,>=0.11.1 in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=3.1.0->sentence-transformers==1
+.2.0) (0.22.2)
+Requirement already satisfied: packaging>=20.0 in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=3.1.0->sentence-transformers==1.2.0) (26.2)
+Requirement already satisfied: click in /usr/local/lib/python3.10/site-packages (from nltk->sentence-transformers==1.2.0) (8.3.3)
+Requirement already satisfied: joblib in /usr/local/lib/python3.10/site-packages (from nltk->sentence-transformers==1.2.0) (1.5.3)
+Requirement already satisfied: threadpoolctl>=3.1.0 in /usr/local/lib/python3.10/site-packages (from scikit-learn->sentence-transformers==1.2.0) (3.6.0)
+Requirement already satisfied: pillow!=8.3.*,>=5.3.0 in /usr/local/lib/python3.10/site-packages (from torchvision->sentence-transformers==1.2.0) (12.2.0)
+Requirement already satisfied: cuda-pathfinder~=1.1 in /usr/local/lib/python3.10/site-packages (from cuda-bindings<14,>=13.0.3->torch>=1.6.0->sentence-transform
+ers==1.2.0) (1.5.4)
+Requirement already satisfied: hf-xet<2.0.0,>=1.1.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.1.0->transformers<5.0.0,>=3.1.0->se
+ntence-transformers==1.2.0) (1.5.0)
+Requirement already satisfied: mpmath<1.4,>=1.1.0 in /usr/local/lib/python3.10/site-packages (from sympy>=1.13.3->torch>=1.6.0->sentence-transformers==1.2.0) (1
+.3.0)
+Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/lib/python3.10/site-packages (from jinja2->torch>=1.6.0->sentence-transformers==1.2.0) (3.0.3)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.10/site-packages (from requests->transformers<5.0.0,>=3.1.0->sentence-transfor
+mers==1.2.0) (3.4.7)
+Requirement already satisfied: certifi>=2023.5.7 in /usr/local/lib/python3.10/site-packages (from requests->transformers<5.0.0,>=3.1.0->sentence-transformers==1
+.2.0) (2026.4.22)
+Requirement already satisfied: urllib3<3,>=1.26 in /usr/local/lib/python3.10/site-packages (from requests->transformers<5.0.0,>=3.1.0->sentence-transformers==1.
+2.0) (2.6.3)
+Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/site-packages (from requests->transformers<5.0.0,>=3.1.0->sentence-transformers==1.2.0)
+ (3.13)
+Building wheels for collected packages: sentence-transformers
+  Building wheel for sentence-transformers (setup.py) ... done
+  Created wheel for sentence-transformers: filename=sentence_transformers-1.2.0-py3-none-any.whl size=123392 sha256=6551d313385072aa0340735aa0103a5da34b5d9335ea
+07f1494c5fc54a9e6417
+  Stored in directory: /root/.cache/pip/wheels/ef/c3/ce/320c01964e87e0487a9fba07e2d22cebc4e09e805d465667d9
+Successfully built sentence-transformers
+Installing collected packages: sentence-transformers
+  Attempting uninstall: sentence-transformers
+    Found existing installation: sentence-transformers 2.2.0
+    Uninstalling sentence-transformers-2.2.0:
+      Successfully uninstalled sentence-transformers-2.2.0
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following depende
+ncy conflicts.
+mteb 1.36.8 requires sentence_transformers>=3.0.0, but you have sentence-transformers 1.2.0 which is incompatible.
+Successfully installed sentence-transformers-1.2.0
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a v
+irtual environment instead: https://pip.pypa.io/warnings/venv
+
+[notice] A new release of pip is available: 23.0.1 -> 26.1.1
+[notice] To update, run: pip install --upgrade pip
+root@64523a81e6e9:/app# mteb download sts12; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/blip2_models.py", line 10, in <module>
+    from transformers import Blip2Processor
+ImportError: cannot import name 'Blip2Processor' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model comm
+it id}}/sts12.json --score cosine_spearman; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/blip2_models.py", line 10, in <module>
+    from transformers import Blip2Processor
+ImportError: cannot import name 'Blip2Processor' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# pip install transformers==4.20.1; tmux wait -S done
+Collecting transformers==4.20.1
+  Downloading transformers-4.20.1-py3-none-any.whl (4.4 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.4/4.4 MB 49.4 MB/s eta 0:00:00
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/site-packages (from transformers==4.20.1) (2026.4.4)
+Requirement already satisfied: huggingface-hub<1.0,>=0.1.0 in /usr/local/lib/python3.10/site-packages (from transformers==4.20.1) (0.36.2)
+Collecting tokenizers!=0.11.3,<0.13,>=0.11.1
+  Downloading tokenizers-0.12.1-cp310-cp310-manylinux_2_12_x86_64.manylinux2010_x86_64.whl (6.6 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.6/6.6 MB 169.3 MB/s eta 0:00:00
+Requirement already satisfied: tqdm>=4.27 in /usr/local/lib/python3.10/site-packages (from transformers==4.20.1) (4.67.3)
+Requirement already satisfied: pyyaml>=5.1 in /usr/local/lib/python3.10/site-packages (from transformers==4.20.1) (6.0.3)
+Requirement already satisfied: numpy>=1.17 in /usr/local/lib/python3.10/site-packages (from transformers==4.20.1) (2.2.6)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/site-packages (from transformers==4.20.1) (2.33.1)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/site-packages (from transformers==4.20.1) (3.29.0)
+Requirement already satisfied: packaging>=20.0 in /usr/local/lib/python3.10/site-packages (from transformers==4.20.1) (26.2)
+Requirement already satisfied: typing-extensions>=3.7.4.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.1.0->transformers==4.20.1) (4
+.15.0)
+Requirement already satisfied: fsspec>=2023.5.0 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.1.0->transformers==4.20.1) (2024.6.1)
+Requirement already satisfied: hf-xet<2.0.0,>=1.1.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.1.0->transformers==4.20.1) (1.5.0)
+Requirement already satisfied: certifi>=2023.5.7 in /usr/local/lib/python3.10/site-packages (from requests->transformers==4.20.1) (2026.4.22)
+Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/site-packages (from requests->transformers==4.20.1) (3.13)
+Requirement already satisfied: urllib3<3,>=1.26 in /usr/local/lib/python3.10/site-packages (from requests->transformers==4.20.1) (2.6.3)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.10/site-packages (from requests->transformers==4.20.1) (3.4.7)
+Installing collected packages: tokenizers, transformers
+  Attempting uninstall: tokenizers
+    Found existing installation: tokenizers 0.22.2
+    Uninstalling tokenizers-0.22.2:
+      Successfully uninstalled tokenizers-0.22.2
+  Attempting uninstall: transformers
+    Found existing installation: transformers 4.17.0
+    Uninstalling transformers-4.17.0:
+      Successfully uninstalled transformers-4.17.0
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following depende
+ncy conflicts.
+mteb 1.36.8 requires sentence_transformers>=3.0.0, but you have sentence-transformers 1.2.0 which is incompatible.
+Successfully installed tokenizers-0.12.1 transformers-4.20.1
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a v
+irtual environment instead: https://pip.pypa.io/warnings/venv
+
+[notice] A new release of pip is available: 23.0.1 -> 26.1.1
+[notice] To update, run: pip install --upgrade pip
+root@64523a81e6e9:/app# mteb download sts12; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/blip2_models.py", line 10, in <module>
+    from transformers import Blip2Processor
+ImportError: cannot import name 'Blip2Processor' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model comm
+it id}}/sts12.json --score cosine_spearman; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/blip2_models.py", line 10, in <module>
+    from transformers import Blip2Processor
+ImportError: cannot import name 'Blip2Processor' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# pip install git+https://github.com/UKPLab/mteb.git@v0.9.0; tmux wait -S done
+Collecting git+https://github.com/UKPLab/mteb.git@v0.9.0
+  Cloning https://github.com/UKPLab/mteb.git (to revision v0.9.0) to /tmp/pip-req-build-e6qinuaz
+  ERROR: Error [Errno 2] No such file or directory: 'git' while executing command git version
+ERROR: Cannot find command 'git' - do you have 'git' installed and in your PATH?
+
+[notice] A new release of pip is available: 23.0.1 -> 26.1.1
+[notice] To update, run: pip install --upgrade pip
+root@64523a81e6e9:/app# mteb download sts12; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/blip2_models.py", line 10, in <module>
+    from transformers import Blip2Processor
+ImportError: cannot import name 'Blip2Processor' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model comm
+it id}}/sts12.json --score cosine_spearman; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/blip2_models.py", line 10, in <module>
+    from transformers import Blip2Processor
+ImportError: cannot import name 'Blip2Processor' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# sed -i 's/from transformers import Blip2Processor/from transformers import AutoProcessor as Blip2Processor/' /usr/local/lib/python3.10/s
+ite-packages/mteb/models/blip2_models.py; tmux wait -S done
+root@64523a81e6e9:/app# mteb download sts12; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/blip_models.py", line 11, in <module>
+    from transformers import BlipForImageTextRetrieval, BlipProcessor
+ImportError: cannot import name 'BlipForImageTextRetrieval' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model comm
+it id}}/sts12.json --score cosine_spearman; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/blip_models.py", line 11, in <module>
+    from transformers import BlipForImageTextRetrieval, BlipProcessor
+ImportError: cannot import name 'BlipForImageTextRetrieval' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# sed -i 's/from transformers import BlipForImageTextRetrieval/from transformers import AutoModelForVision2Seq as BlipForImageTextRetrieva
+l/' /usr/local/lib/python3.10/site-packages/mteb/models/blip_models.py; tmux wait -S done
+root@64523a81e6e9:/app# sed -i 's/from transformers import BlipProcessor/from transformers import AutoProcessor as BlipProcessor/' /usr/local/lib/python3.10/sit
+e-packages/mteb/models/blip_models.py; tmux wait -S done
+root@64523a81e6e9:/app# mteb download sts12; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/blip_models.py", line 11, in <module>
+    from transformers import AutoModelForVision2Seq as BlipForImageTextRetrieval, BlipProcessor
+ImportError: cannot import name 'BlipProcessor' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model comm
+it id}}/sts12.json --score cosine_spearman; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/blip_models.py", line 11, in <module>
+    from transformers import AutoModelForVision2Seq as BlipForImageTextRetrieval, BlipProcessor
+ImportError: cannot import name 'BlipProcessor' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# sed -i 's/from transformers import BlipProcessor/from transformers import AutoProcessor as BlipProcessor/' /usr/local/lib/python3.10/sit
+e-packages/mteb/models/blip_models.py; tmux wait -S done
+root@64523a81e6e9:/app# mteb download sts12; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/blip_models.py", line 11, in <module>
+    from transformers import AutoModelForVision2Seq as BlipForImageTextRetrieval, BlipProcessor
+ImportError: cannot import name 'BlipProcessor' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model comm
+it id}}/sts12.json --score cosine_spearman; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/blip_models.py", line 11, in <module>
+    from transformers import AutoModelForVision2Seq as BlipForImageTextRetrieval, BlipProcessor
+ImportError: cannot import name 'BlipProcessor' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# pip install git+https://github.com/UKPLab/mteb.git@v0.8.0; tmux wait -S done
+Collecting git+https://github.com/UKPLab/mteb.git@v0.8.0
+  Cloning https://github.com/UKPLab/mteb.git (to revision v0.8.0) to /tmp/pip-req-build-s3mrx559
+  ERROR: Error [Errno 2] No such file or directory: 'git' while executing command git version
+ERROR: Cannot find command 'git' - do you have 'git' installed and in your PATH?
+
+[notice] A new release of pip is available: 23.0.1 -> 26.1.1
+[notice] To update, run: pip install --upgrade pip
+root@64523a81e6e9:/app# mteb download sts12; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/blip_models.py", line 11, in <module>
+    from transformers import AutoModelForVision2Seq as BlipForImageTextRetrieval, BlipProcessor
+ImportError: cannot import name 'BlipProcessor' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model comm
+it id}}/sts12.json --score cosine_spearman; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/blip_models.py", line 11, in <module>
+    from transformers import AutoModelForVision2Seq as BlipForImageTextRetrieval, BlipProcessor
+ImportError: cannot import name 'BlipProcessor' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# mteb evaluate --task sts12 --model sentence-transformers/all-MiniLM-L6-v2 --results results/sentence-transformers__all-MiniLM-L6-v2/{{mo
+del commit id}}/sts12.json --score cosine_spearman; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/blip_models.py", line 11, in <module>
+    from transformers import AutoModelForVision2Seq as BlipForImageTextRetrieval, BlipProcessor
+ImportError: cannot import name 'BlipProcessor' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app#

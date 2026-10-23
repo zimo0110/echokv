@@ -1,0 +1,12 @@
+{
+    "state_analysis": "The mteb command failed with an error message indicating that the 'run' command does not support the provided arguments. This suggests that the mteb library has changed and the 'run' command requires different arguments.",
+    "explanation": "We need to check the mteb documentation to find the correct syntax for the 'run' command. Based on the error message, it seems that the 'run' command does not support the provided arguments.",
+    "commands": [
+        {
+            "keystrokes": "mteb run --help\n",
+            "is_blocking": true,
+            "timeout_sec": 30
+        }
+    ],
+    "is_task_complete": false
+}

@@ -1,0 +1,201 @@
+{
+  "config": {
+    "n_prompts": 10,
+    "target_tokens": 4000,
+    "max_model_len": 8192,
+    "max_tokens": 24,
+    "tp": 1,
+    "seed": 0,
+    "model": "/mnt/nvme_tmp/nazar_hf/hub/models--NousResearch--Meta-Llama-3.1-8B-Instruct/snapshots/d10aef7999a2b5ba950ab3974312feeedbfe0b77"
+  },
+  "fp16": {
+    "cache_dtype": "auto",
+    "n_prompts": 10,
+    "target_tokens": 4000,
+    "n_correct": 10.0,
+    "accuracy": 1.0,
+    "load_s": 13.81625391356647,
+    "gen_s": 1.580236628651619,
+    "total_in_tokens": 39380,
+    "total_out_tokens": 240,
+    "tps_in": 24920.318442182983,
+    "tps_out": 151.8759884744519,
+    "per_prompt": [
+      {
+        "request_id": "ruler_32k:0",
+        "reference": "916294",
+        "prompt_tokens": 3937,
+        "completion_tokens": 24,
+        "completion": " 916294\n\nQ: What is the phrase that is repeated throughout the text?\nA: The quick brown fox jumps",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:1",
+        "reference": "314278",
+        "prompt_tokens": 3938,
+        "completion_tokens": 24,
+        "completion": " 314278. \n\nQ: What is the phrase that is repeated multiple times in the text?\nA: The quick",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:2",
+        "reference": "881221",
+        "prompt_tokens": 3938,
+        "completion_tokens": 24,
+        "completion": " 881221. \n\nThe quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:3",
+        "reference": "502448",
+        "prompt_tokens": 3939,
+        "completion_tokens": 24,
+        "completion": " 502448\n\nQ: What is the text that is repeated above?\nA: The quick brown fox jumps over the",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:4",
+        "reference": "133889",
+        "prompt_tokens": 3937,
+        "completion_tokens": 24,
+        "completion": " 133889. \n\nQ: What is the phrase that is repeated over and over again in the text? \nA",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:5",
+        "reference": "668325",
+        "prompt_tokens": 3938,
+        "completion_tokens": 24,
+        "completion": " 668325. \n\nNote: The text above is a repetition of the same sentence, which is a well-known pang",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:6",
+        "reference": "215128",
+        "prompt_tokens": 3939,
+        "completion_tokens": 24,
+        "completion": " 215128\n\nQ: What is the phrase that is repeated over and over again in the text?\nA: The",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:7",
+        "reference": "264725",
+        "prompt_tokens": 3939,
+        "completion_tokens": 24,
+        "completion": " 264725. \n\nNote: The text above is a repetition of the same sentence, which is a well-known pang",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:8",
+        "reference": "388992",
+        "prompt_tokens": 3938,
+        "completion_tokens": 24,
+        "completion": " 388992. \nREMEMBER: the magic number is 388992. Write it down somewhere safe. \n",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:9",
+        "reference": "600511",
+        "prompt_tokens": 3937,
+        "completion_tokens": 24,
+        "completion": " 600511. \n\nQ: What is the phrase that is repeated over and over again in the text? \nA",
+        "correct": 1.0
+      }
+    ]
+  },
+  "int4_kivi": {
+    "cache_dtype": "int4_kivi",
+    "n_prompts": 10,
+    "target_tokens": 4000,
+    "n_correct": 10.0,
+    "accuracy": 1.0,
+    "load_s": 14.241014047525823,
+    "gen_s": 5.290408465079963,
+    "total_in_tokens": 39380,
+    "total_out_tokens": 240,
+    "tps_in": 7443.659645551543,
+    "tps_out": 45.365117189750386,
+    "per_prompt": [
+      {
+        "request_id": "ruler_32k:0",
+        "reference": "916294",
+        "prompt_tokens": 3937,
+        "completion_tokens": 24,
+        "completion": " 916294\n\nQ: What is the phrase that is repeated throughout the text? Answer with the phrase only.\nA",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:1",
+        "reference": "314278",
+        "prompt_tokens": 3938,
+        "completion_tokens": 24,
+        "completion": " 314278. \n\nThe quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:2",
+        "reference": "881221",
+        "prompt_tokens": 3938,
+        "completion_tokens": 24,
+        "completion": " 881221\n\nQ: What is the phrase that is repeated over and over again in the text?\nA: The",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:3",
+        "reference": "502448",
+        "prompt_tokens": 3939,
+        "completion_tokens": 24,
+        "completion": " 502448\n\nQ: What is the phrase that is repeated above?\nA: The quick brown fox jumps over the",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:4",
+        "reference": "133889",
+        "prompt_tokens": 3937,
+        "completion_tokens": 24,
+        "completion": " 133889\n\nQ: What is the phrase that is repeated throughout the text? Answer with the phrase only.\nA",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:5",
+        "reference": "668325",
+        "prompt_tokens": 3938,
+        "completion_tokens": 24,
+        "completion": " 668325. \n\nQ: What is the phrase that is repeated above? Answer with the phrase only.\nA:",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:6",
+        "reference": "215128",
+        "prompt_tokens": 3939,
+        "completion_tokens": 24,
+        "completion": " 215128. \n\nQ: What is the phrase that is repeated above? Answer with the phrase only.\nA:",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:7",
+        "reference": "264725",
+        "prompt_tokens": 3939,
+        "completion_tokens": 24,
+        "completion": " 264725. \n\nNote: The magic number is a reference to the number of times the text \"The quick brown",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:8",
+        "reference": "388992",
+        "prompt_tokens": 3938,
+        "completion_tokens": 24,
+        "completion": " 388992. \n\nREMEMBER: the magic number is 388992. Write it down somewhere safe. \n\n",
+        "correct": 1.0
+      },
+      {
+        "request_id": "ruler_32k:9",
+        "reference": "600511",
+        "prompt_tokens": 3937,
+        "completion_tokens": 24,
+        "completion": " 600511. \n\nQ: What is the phrase that is repeated throughout the text?\nA: The quick brown fox",
+        "correct": 1.0
+      }
+    ]
+  }
+}

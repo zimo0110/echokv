@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We are now at the south side of the house, and we still can't find a way to open the egg",
+    "explanation": "Let's try to explore other areas around the house. We can try to go around to the east side of the house",
+    "commands": [
+        {
+            "keystrokes": "go east\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

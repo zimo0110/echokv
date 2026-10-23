@@ -1,0 +1,40 @@
+root@c63a4192bda5:/app/astropy# cd astropy/io/ascii/qdp.py
+bash: cd: astropy/io/ascii/qdp.py: Not a directory
+root@c63a4192bda5:/app/astropy# vim +/QDP +/line  qdp.py
+bash: vim: command not found
+root@c63a4192bda5:/app/astropy#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

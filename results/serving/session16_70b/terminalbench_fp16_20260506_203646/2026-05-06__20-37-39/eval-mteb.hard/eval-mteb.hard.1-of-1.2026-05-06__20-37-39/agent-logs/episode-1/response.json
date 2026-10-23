@@ -1,0 +1,22 @@
+{
+    "state_analysis": "The mteb installation failed due to an ImportError. The 'AutoModelForVision2Seq' class is not found in the 'transformers' library.",
+    "explanation": "The issue seems to be related to the version of the transformers library. We need to downgrade the transformers library to a version that includes the 'AutoModelForVision2Seq' class.",
+    "commands": [
+        {
+            "keystrokes": "pip install transformers==4.17.0\n",
+            "is_blocking": true,
+            "timeout_sec": 300
+        },
+        {
+            "keystrokes": "mteb download sts12\n",
+            "is_blocking": true,
+            "timeout_sec": 300
+        },
+        {
+            "keystrokes": "mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model commit id}}/sts12.json --score cosine_spearman\n",
+            "is_blocking": true,
+            "timeout_sec": 300
+        }
+    ],
+    "is_task_complete": false
+}

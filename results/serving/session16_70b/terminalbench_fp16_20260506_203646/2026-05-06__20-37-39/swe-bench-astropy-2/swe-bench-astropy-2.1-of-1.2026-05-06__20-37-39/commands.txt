@@ -1,0 +1,25 @@
+['asciinema rec --stdin /logs/agent.cast', 'Enter']
+['clear', 'Enter']
+'cd astropy/io/ascii/qdp.py\n'
+'vim +/QDP +/line  qdp.py\n'
+'apt-get update && apt-get install -y vim\n'
+'vim +/QDP qdp.py\n'
+'/read\n'
+'i\n'
+'.lower()\n'
+'Esc\n'
+':wq\n'
+':wq!\n'
+'Esc\n'
+':wq!\n'
+'C-[ ZZ\n'
+'Ctrl+C\n'
+':q!\n'
+'Ctrl+Z\n'
+'kill %1\n'
+'C-b d\n'
+['asciinema rec --stdin /logs/tests.cast', 'Enter']
+['clear', 'Enter']
+['bash ', '/tests/run-tests.sh', 'Enter']
+['C-d']
+['C-d']

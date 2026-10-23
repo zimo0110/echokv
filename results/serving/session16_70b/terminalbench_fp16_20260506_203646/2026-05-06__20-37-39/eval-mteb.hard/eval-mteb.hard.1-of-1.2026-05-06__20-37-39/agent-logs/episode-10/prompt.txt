@@ -1,0 +1,40 @@
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/blip_models.py", line 11, in <module>
+    from transformers import AutoModelForVision2Seq as BlipForImageTextRetrieval, BlipProcessor
+ImportError: cannot import name 'BlipProcessor' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app# mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model comm
+it id}}/sts12.json --score cosine_spearman; tmux wait -S done
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/blip_models.py", line 11, in <module>
+    from transformers import AutoModelForVision2Seq as BlipForImageTextRetrieval, BlipProcessor
+ImportError: cannot import name 'BlipProcessor' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+root@64523a81e6e9:/app#

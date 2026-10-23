@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We have taken stock of our inventory, and we have the egg and the leaflet",
+    "explanation": "Let's read the leaflet to see if it contains any clues or information that can help us open the egg",
+    "commands": [
+        {
+            "keystrokes": "read leaflet\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

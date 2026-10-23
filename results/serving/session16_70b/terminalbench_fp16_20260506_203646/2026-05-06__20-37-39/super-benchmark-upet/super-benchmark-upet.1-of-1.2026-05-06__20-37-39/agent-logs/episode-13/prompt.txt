@@ -1,0 +1,40 @@
+Using the `WANDB_DISABLED` environment variable is deprecated and will be removed in v5. Use the --report_to flag to control the integrations used for logging r
+esult (for instance --report_to none).
+05/06/2026 20:42:47 - WARNING - __main__ - Process rank: 0, device: cpu, n_gpu: 0distributed training: True, 16-bits training: False
+/usr/local/lib/python3.10/site-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.
+0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+05/06/2026 20:42:48 - WARNING - datasets.builder - Using custom data configuration ax-463e6525be82f7fe
+Downloading and preparing dataset None/ax to /root/.cache/huggingface/datasets/parquet/ax-463e6525be82f7fe/0.0.0/2a3b91fbd88a2c90d1dbbb32b460cf621d31bd5b05b9344
+92fdef7d8d6f236ec...
+Downloading data files: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████| 3/3 [00:00<00:00, 3285.36it/s]
+Extracting data files: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 3/3 [00:00<00:00, 459.50it/s]
+Traceback (most recent call last):
+  File "/app/UPET/run.py", line 128, in <module>
+    trainer, predict_dataset = get_trainer(args)
+  File "/app/UPET/tasks/glue/get_trainer.py", line 32, in get_trainer
+    dataset = GlueDataset(tokenizer, data_args, training_args, semi_training_args=semi_training_args, use_prompt=use_prompt)
+  File "/app/UPET/tasks/glue/dataset.py", line 100, in __init__
+    raw_datasets = load_dataset("glue", data_args.dataset_name)
+  File "/usr/local/lib/python3.10/site-packages/datasets/load.py", line 1758, in load_dataset
+    builder_instance.download_and_prepare(
+  File "/usr/local/lib/python3.10/site-packages/datasets/builder.py", line 860, in download_and_prepare
+    self._download_and_prepare(
+  File "/usr/local/lib/python3.10/site-packages/datasets/builder.py", line 953, in _download_and_prepare
+    self._prepare_split(split_generator, **prepare_split_kwargs)
+  File "/usr/local/lib/python3.10/site-packages/datasets/builder.py", line 1669, in _prepare_split
+    split_info = self.info.splits[split_generator.name]
+  File "/usr/local/lib/python3.10/site-packages/datasets/splits.py", line 530, in __getitem__
+    instructions = make_file_instructions(
+  File "/usr/local/lib/python3.10/site-packages/datasets/arrow_reader.py", line 112, in make_file_instructions
+    name2filenames = {
+  File "/usr/local/lib/python3.10/site-packages/datasets/arrow_reader.py", line 113, in <dictcomp>
+    info.name: filenames_for_dataset_split(
+  File "/usr/local/lib/python3.10/site-packages/datasets/naming.py", line 71, in filenames_for_dataset_split
+    prefix = filename_prefix_for_split(dataset_name, split)
+  File "/usr/local/lib/python3.10/site-packages/datasets/naming.py", line 54, in filename_prefix_for_split
+    if os.path.basename(name) != name:
+  File "/usr/local/lib/python3.10/posixpath.py", line 142, in basename
+    p = os.fspath(p)
+TypeError: expected str, bytes or os.PathLike object, not NoneType
+root@06103092c99e:/app/UPET#

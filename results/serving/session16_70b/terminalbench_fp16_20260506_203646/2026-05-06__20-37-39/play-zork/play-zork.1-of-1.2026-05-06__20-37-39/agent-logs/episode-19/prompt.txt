@@ -1,0 +1,40 @@
+ West of House                                                                                                                    Score: 5        Moves: 18
+
+>take egg
+Taken.
+
+>down
+Forest Path
+
+>go north
+Clearing
+You are in a clearing, with a forest surrounding you on all sides. A path leads south.
+On the ground is a pile of leaves.
+
+>examine leaves
+There's nothing special about the pile of leaves.
+
+>go south
+Forest Path
+
+>go north
+Clearing
+On the ground is a pile of leaves.
+
+>open egg
+You have neither the tools nor the expertise.
+
+>go south
+Forest Path
+
+>go south
+North of House
+
+>examine house
+The house is a beautiful colonial house which is painted white. It is clear that the owners must have been extremely wealthy.
+
+>go west
+West of House
+There is a small mailbox here.
+
+>

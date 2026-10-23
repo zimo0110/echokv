@@ -1,0 +1,40 @@
+Requirement already satisfied: fsspec in /usr/local/lib/python3.10/site-packages (from torch) (2023.6.0)
+Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/lib/python3.10/site-packages (from jinja2->torch) (3.0.3)
+Requirement already satisfied: mpmath>=0.19 in /usr/local/lib/python3.10/site-packages (from sympy->torch) (1.4.1)
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your syst
+em unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you a
+re doing and want to suppress this warning.
+root@06103092c99e:/app/UPET# python -m pip install transformers; tmux wait -S done
+Requirement already satisfied: transformers in /usr/local/lib/python3.10/site-packages (4.40.2)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/site-packages (from transformers) (3.29.0)
+Requirement already satisfied: huggingface-hub<1.0,>=0.19.3 in /usr/local/lib/python3.10/site-packages (from transformers) (0.36.2)
+Requirement already satisfied: numpy>=1.17 in /usr/local/lib/python3.10/site-packages (from transformers) (1.25.2)
+Requirement already satisfied: packaging>=20.0 in /usr/local/lib/python3.10/site-packages (from transformers) (26.2)
+Requirement already satisfied: pyyaml>=5.1 in /usr/local/lib/python3.10/site-packages (from transformers) (6.0.3)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/site-packages (from transformers) (2023.12.25)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/site-packages (from transformers) (2.33.1)
+Requirement already satisfied: tokenizers<0.20,>=0.19 in /usr/local/lib/python3.10/site-packages (from transformers) (0.19.1)
+Requirement already satisfied: safetensors>=0.4.1 in /usr/local/lib/python3.10/site-packages (from transformers) (0.7.0)
+Requirement already satisfied: tqdm>=4.27 in /usr/local/lib/python3.10/site-packages (from transformers) (4.66.4)
+Requirement already satisfied: fsspec>=2023.5.0 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.19.3->transformers) (2023.6.0)
+Requirement already satisfied: hf-xet<2.0.0,>=1.1.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.19.3->transformers) (1.5.0)
+Requirement already satisfied: typing-extensions>=3.7.4.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.19.3->transformers) (4.15.0)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.10/site-packages (from requests->transformers) (3.4.7)
+Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/site-packages (from requests->transformers) (3.13)
+Requirement already satisfied: urllib3<3,>=1.26 in /usr/local/lib/python3.10/site-packages (from requests->transformers) (2.0.7)
+Requirement already satisfied: certifi>=2023.5.7 in /usr/local/lib/python3.10/site-packages (from requests->transformers) (2026.4.22)
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your syst
+em unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you a
+re doing and want to suppress this warning.
+root@06103092c99e:/app/UPET# python run.py --model_name roberta-base --task RTE --num_train_epochs 1 --examples_per_label 5 --seed 42; tmux wait -S done
+Traceback (most recent call last):
+  File "/app/UPET/run.py", line 12, in <module>
+    from arguments import get_args
+  File "/app/UPET/arguments.py", line 9, in <module>
+    from tasks.utils import *
+  File "/app/UPET/tasks/utils.py", line 1, in <module>
+    from tasks.glue.dataset import task_to_keys as glue_tasks
+  File "/app/UPET/tasks/glue/dataset.py", line 5, in <module>
+    from datasets.load import load_dataset, load_metric
+ImportError: cannot import name 'load_metric' from 'datasets.load' (/usr/local/lib/python3.10/site-packages/datasets/load.py)
+root@06103092c99e:/app/UPET#

@@ -1,0 +1,344 @@
+[07:54:27] FP16 + KIVI-INT4
+2026-05-08 07:54:31,061 WARNING Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+2026-05-08 07:54:34,720 INFO loading /mnt/nvme_tmp10/qwen2.5-72b tp=4 max_model_len=8192
+INFO 05-08 07:54:34 [utils.py:223] non-default args: {'dtype': 'bfloat16', 'max_model_len': 8192, 'tensor_parallel_size': 4, 'enable_prefix_caching': False, 'gpu_memory_utilization': 0.85, 'max_num_seqs': 8, 'disable_log_stats': True, 'enforce_eager': True, 'model': '/mnt/nvme_tmp10/qwen2.5-72b'}
+INFO 05-08 07:54:34 [model.py:529] Resolved architecture: Qwen2ForCausalLM
+INFO 05-08 07:54:34 [model.py:1549] Using max model len 8192
+INFO 05-08 07:54:34 [scheduler.py:224] Chunked prefill is enabled with max_num_batched_tokens=16384.
+INFO 05-08 07:54:34 [vllm.py:689] Asynchronous scheduling is enabled.
+WARNING 05-08 07:54:34 [vllm.py:727] Enforce eager set, overriding optimization level to -O0
+INFO 05-08 07:54:34 [vllm.py:845] Cudagraph is disabled under eager mode
+WARNING 05-08 07:54:35 [serial_utils.py:57] Allowing insecure serialization using pickle due to VLLM_ALLOW_INSECURE_SERIALIZATION=1
+WARNING 05-08 07:54:35 [system_utils.py:140] We must use the `spawn` multiprocessing start method. Overriding VLLM_WORKER_MULTIPROC_METHOD to 'spawn'. See https://docs.vllm.ai/en/latest/usage/troubleshooting.html#python-multiprocessing for more information. Reasons: CUDA is initialized
+Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+(EngineCore_DP0 pid=1710719) INFO 05-08 07:54:40 [core.py:97] Initializing a V1 LLM engine (v0.16.0) with config: model='/mnt/nvme_tmp10/qwen2.5-72b', speculative_config=None, tokenizer='/mnt/nvme_tmp10/qwen2.5-72b', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=8192, download_dir=None, load_format=auto, tensor_parallel_size=4, pipeline_parallel_size=1, data_parallel_size=1, disable_custom_all_reduce=False, quantization=None, enforce_eager=True, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_fallback=False, disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False), seed=0, served_model_name=/mnt/nvme_tmp10/qwen2.5-72b, enable_prefix_caching=False, enable_chunked_prefill=True, pooler_config=None, compilation_config={'level': None, 'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all'], 'splitting_ops': [], 'compile_mm_encoder': False, 'compile_sizes': [], 'compile_ranges_split_points': [16384], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.NONE: 0>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': False, 'fuse_act_quant': False, 'fuse_attn_quant': False, 'eliminate_noops': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'fuse_act_padding': False}, 'max_cudagraph_capture_size': 0, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': True, 'static_all_moe_layers': []}
+(EngineCore_DP0 pid=1710719) WARNING 05-08 07:54:40 [multiproc_executor.py:921] Reducing Torch parallelism from 104 threads to 1 to avoid unnecessary CPU contention. Set OMP_NUM_THREADS in the external environment to tune this value as needed.
+Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+INFO 05-08 07:54:49 [parallel_state.py:1234] world_size=4 rank=0 local_rank=0 distributed_init_method=tcp://127.0.0.1:41749 backend=nccl
+INFO 05-08 07:54:49 [parallel_state.py:1234] world_size=4 rank=1 local_rank=1 distributed_init_method=tcp://127.0.0.1:41749 backend=nccl
+INFO 05-08 07:54:49 [parallel_state.py:1234] world_size=4 rank=3 local_rank=3 distributed_init_method=tcp://127.0.0.1:41749 backend=nccl
+INFO 05-08 07:54:49 [parallel_state.py:1234] world_size=4 rank=2 local_rank=2 distributed_init_method=tcp://127.0.0.1:41749 backend=nccl
+INFO 05-08 07:54:49 [pynccl.py:111] vLLM is using nccl==2.27.5
+INFO 05-08 07:54:51 [parallel_state.py:1445] rank 0 in world size 4 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A
+INFO 05-08 07:54:51 [parallel_state.py:1445] rank 1 in world size 4 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 1, EP rank N/A
+INFO 05-08 07:54:51 [parallel_state.py:1445] rank 2 in world size 4 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 2, EP rank N/A
+INFO 05-08 07:54:51 [parallel_state.py:1445] rank 3 in world size 4 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 3, EP rank N/A
+(Worker_TP0 pid=1711051) INFO 05-08 07:54:51 [gpu_model_runner.py:4137] Starting to load model /mnt/nvme_tmp10/qwen2.5-72b...
+(Worker_TP0 pid=1711051) INFO 05-08 07:54:52 [cuda.py:367] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:   0% Completed | 0/37 [00:00<?, ?it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:   3% Completed | 1/37 [00:00<00:06,  5.33it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:   5% Completed | 2/37 [00:00<00:10,  3.22it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:   8% Completed | 3/37 [00:00<00:11,  2.96it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  11% Completed | 4/37 [00:01<00:11,  2.95it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  14% Completed | 5/37 [00:01<00:10,  2.94it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  16% Completed | 6/37 [00:02<00:11,  2.80it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  19% Completed | 7/37 [00:02<00:10,  2.80it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  22% Completed | 8/37 [00:02<00:10,  2.83it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  24% Completed | 9/37 [00:03<00:09,  2.87it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  27% Completed | 10/37 [00:03<00:09,  2.78it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  30% Completed | 11/37 [00:03<00:09,  2.82it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  32% Completed | 12/37 [00:04<00:08,  2.89it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  35% Completed | 13/37 [00:04<00:08,  2.92it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  38% Completed | 14/37 [00:04<00:08,  2.80it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  41% Completed | 15/37 [00:05<00:07,  2.87it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  43% Completed | 16/37 [00:05<00:07,  2.99it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  46% Completed | 17/37 [00:05<00:06,  3.03it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  49% Completed | 18/37 [00:06<00:06,  3.00it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  51% Completed | 19/37 [00:06<00:05,  3.02it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  54% Completed | 20/37 [00:06<00:05,  3.05it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  57% Completed | 21/37 [00:07<00:05,  3.06it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  59% Completed | 22/37 [00:07<00:05,  2.98it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  62% Completed | 23/37 [00:07<00:04,  3.09it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  65% Completed | 24/37 [00:08<00:04,  3.10it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  68% Completed | 25/37 [00:08<00:03,  3.08it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  70% Completed | 26/37 [00:08<00:03,  2.91it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  73% Completed | 27/37 [00:09<00:03,  2.89it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  76% Completed | 28/37 [00:09<00:03,  2.94it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  78% Completed | 29/37 [00:09<00:02,  2.93it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  81% Completed | 30/37 [00:10<00:02,  2.82it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  84% Completed | 31/37 [00:10<00:02,  2.80it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  86% Completed | 32/37 [00:10<00:01,  2.80it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  89% Completed | 33/37 [00:11<00:01,  2.92it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  92% Completed | 34/37 [00:11<00:01,  2.85it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  95% Completed | 35/37 [00:11<00:00,  2.89it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards:  97% Completed | 36/37 [00:12<00:00,  2.91it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards: 100% Completed | 37/37 [00:12<00:00,  3.24it/s]
+(Worker_TP0 pid=1711051) Loading safetensors checkpoint shards: 100% Completed | 37/37 [00:12<00:00,  2.96it/s]
+(Worker_TP0 pid=1711051) 
+(Worker_TP0 pid=1711051) INFO 05-08 07:55:05 [default_loader.py:293] Loading weights took 12.52 seconds
+(Worker_TP0 pid=1711051) INFO 05-08 07:55:05 [gpu_model_runner.py:4234] Model loading took 34.01 GiB memory and 12.947981 seconds
+(Worker_TP0 pid=1711051) INFO 05-08 07:55:09 [gpu_worker.py:373] Available KV cache memory: 30.68 GiB
+(EngineCore_DP0 pid=1710719) INFO 05-08 07:55:09 [kv_cache_utils.py:1307] GPU KV cache size: 402,128 tokens
+(EngineCore_DP0 pid=1710719) INFO 05-08 07:55:09 [kv_cache_utils.py:1312] Maximum concurrency for 8,192 tokens per request: 49.09x
+(Worker_TP1 pid=1711052) INFO 05-08 07:55:09 [kernel_warmup.py:44] Skipping FlashInfer autotune because it is disabled.
+(Worker_TP0 pid=1711051) INFO 05-08 07:55:09 [kernel_warmup.py:44] Skipping FlashInfer autotune because it is disabled.
+(Worker_TP2 pid=1711053) INFO 05-08 07:55:09 [kernel_warmup.py:44] Skipping FlashInfer autotune because it is disabled.
+(Worker_TP3 pid=1711054) INFO 05-08 07:55:09 [kernel_warmup.py:44] Skipping FlashInfer autotune because it is disabled.
+(EngineCore_DP0 pid=1710719) INFO 05-08 07:55:09 [core.py:278] init engine (profile, create kv cache, warmup model) took 3.85 seconds
+(EngineCore_DP0 pid=1710719) WARNING 05-08 07:55:11 [serial_utils.py:57] Allowing insecure serialization using pickle due to VLLM_ALLOW_INSECURE_SERIALIZATION=1
+(EngineCore_DP0 pid=1710719) INFO 05-08 07:55:11 [vllm.py:689] Asynchronous scheduling is enabled.
+(EngineCore_DP0 pid=1710719) WARNING 05-08 07:55:11 [vllm.py:734] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+(EngineCore_DP0 pid=1710719) INFO 05-08 07:55:11 [vllm.py:845] Cudagraph is disabled under eager mode
+INFO 05-08 07:55:11 [llm.py:355] Supported tasks: ('generate',)
+2026-05-08 07:55:11,428 INFO loaded in 36.7s
+2026-05-08 07:55:12,568 INFO warmup: 4 prompts
+2026-05-08 07:55:14,332 INFO === fp16  n=500 ===
+2026-05-08 07:55:14,332 INFO [fp16_70b_hotpotqa] running 500 prompts
+2026-05-08 07:56:11,424 INFO     fp16: acc=0.680 wall=57.1s
+2026-05-08 07:56:11,428 INFO wrote /home/nazar/echokv/results/serving/qwen72b/hotpotqa_static.json
+2026-05-08 07:56:11,429 INFO === static_int4  n=500 ===
+2026-05-08 07:56:11,439 INFO static_int4: installed hooks per rank: [80, 80, 80, 80]
+2026-05-08 07:56:11,439 INFO [static_int4_70b_hotpotqa] running 500 prompts
+2026-05-08 07:57:16,905 INFO     static_int4: acc=0.670 wall=65.4s
+2026-05-08 07:57:16,913 INFO wrote /home/nazar/echokv/results/serving/qwen72b/hotpotqa_static.json
+2026-05-08 07:57:16,921 INFO wrote /home/nazar/echokv/results/serving/qwen72b/hotpotqa_static.json
+(Worker_TP0 pid=1711051) INFO 05-08 07:57:16 [multiproc_executor.py:732] Parent process exited, terminating worker
+(Worker_TP3 pid=1711054) INFO 05-08 07:57:16 [multiproc_executor.py:732] Parent process exited, terminating worker
+(Worker_TP2 pid=1711053) INFO 05-08 07:57:16 [multiproc_executor.py:732] Parent process exited, terminating worker
+(Worker_TP1 pid=1711052) INFO 05-08 07:57:16 [multiproc_executor.py:732] Parent process exited, terminating worker
+(Worker_TP3 pid=1711054) INFO 05-08 07:57:16 [multiproc_executor.py:785] WorkerProc shutting down.
+(Worker_TP2 pid=1711053) INFO 05-08 07:57:16 [multiproc_executor.py:785] WorkerProc shutting down.
+(Worker_TP0 pid=1711051) INFO 05-08 07:57:16 [multiproc_executor.py:785] WorkerProc shutting down.
+(Worker_TP1 pid=1711052) INFO 05-08 07:57:16 [multiproc_executor.py:785] WorkerProc shutting down.
+
+========================================================================
+Session 14 / 70B HotpotQA (500 prompts, max_new_tokens=64)
+========================================================================
+          config   accuracy   wall (s)
+            fp16      0.680       57.1
+     static_int4      0.670       65.4
+========================================================================
+VERDICT: INT4 lower than FP16 by 0.010 but within noise at n=500.
+[07:57:21] Static INT8
+2026-05-08 07:57:25,097 WARNING Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+2026-05-08 07:57:28,629 INFO loading /mnt/nvme_tmp10/qwen2.5-72b tp=4 max_model_len=8192
+INFO 05-08 07:57:28 [utils.py:223] non-default args: {'dtype': 'bfloat16', 'max_model_len': 8192, 'tensor_parallel_size': 4, 'enable_prefix_caching': False, 'gpu_memory_utilization': 0.85, 'max_num_seqs': 8, 'disable_log_stats': True, 'enforce_eager': True, 'model': '/mnt/nvme_tmp10/qwen2.5-72b'}
+INFO 05-08 07:57:28 [model.py:529] Resolved architecture: Qwen2ForCausalLM
+INFO 05-08 07:57:28 [model.py:1549] Using max model len 8192
+INFO 05-08 07:57:28 [scheduler.py:224] Chunked prefill is enabled with max_num_batched_tokens=16384.
+INFO 05-08 07:57:28 [vllm.py:689] Asynchronous scheduling is enabled.
+WARNING 05-08 07:57:28 [vllm.py:727] Enforce eager set, overriding optimization level to -O0
+INFO 05-08 07:57:28 [vllm.py:845] Cudagraph is disabled under eager mode
+WARNING 05-08 07:57:29 [serial_utils.py:57] Allowing insecure serialization using pickle due to VLLM_ALLOW_INSECURE_SERIALIZATION=1
+WARNING 05-08 07:57:29 [system_utils.py:140] We must use the `spawn` multiprocessing start method. Overriding VLLM_WORKER_MULTIPROC_METHOD to 'spawn'. See https://docs.vllm.ai/en/latest/usage/troubleshooting.html#python-multiprocessing for more information. Reasons: CUDA is initialized
+Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+(EngineCore_DP0 pid=1713405) INFO 05-08 07:57:34 [core.py:97] Initializing a V1 LLM engine (v0.16.0) with config: model='/mnt/nvme_tmp10/qwen2.5-72b', speculative_config=None, tokenizer='/mnt/nvme_tmp10/qwen2.5-72b', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=8192, download_dir=None, load_format=auto, tensor_parallel_size=4, pipeline_parallel_size=1, data_parallel_size=1, disable_custom_all_reduce=False, quantization=None, enforce_eager=True, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_fallback=False, disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False), seed=0, served_model_name=/mnt/nvme_tmp10/qwen2.5-72b, enable_prefix_caching=False, enable_chunked_prefill=True, pooler_config=None, compilation_config={'level': None, 'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all'], 'splitting_ops': [], 'compile_mm_encoder': False, 'compile_sizes': [], 'compile_ranges_split_points': [16384], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.NONE: 0>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': False, 'fuse_act_quant': False, 'fuse_attn_quant': False, 'eliminate_noops': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'fuse_act_padding': False}, 'max_cudagraph_capture_size': 0, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': True, 'static_all_moe_layers': []}
+(EngineCore_DP0 pid=1713405) WARNING 05-08 07:57:34 [multiproc_executor.py:921] Reducing Torch parallelism from 104 threads to 1 to avoid unnecessary CPU contention. Set OMP_NUM_THREADS in the external environment to tune this value as needed.
+Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+INFO 05-08 07:57:42 [parallel_state.py:1234] world_size=4 rank=0 local_rank=0 distributed_init_method=tcp://127.0.0.1:50797 backend=nccl
+INFO 05-08 07:57:42 [parallel_state.py:1234] world_size=4 rank=1 local_rank=1 distributed_init_method=tcp://127.0.0.1:50797 backend=nccl
+INFO 05-08 07:57:43 [parallel_state.py:1234] world_size=4 rank=2 local_rank=2 distributed_init_method=tcp://127.0.0.1:50797 backend=nccl
+INFO 05-08 07:57:43 [parallel_state.py:1234] world_size=4 rank=3 local_rank=3 distributed_init_method=tcp://127.0.0.1:50797 backend=nccl
+INFO 05-08 07:57:43 [pynccl.py:111] vLLM is using nccl==2.27.5
+INFO 05-08 07:57:45 [parallel_state.py:1445] rank 0 in world size 4 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A
+INFO 05-08 07:57:45 [parallel_state.py:1445] rank 2 in world size 4 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 2, EP rank N/A
+INFO 05-08 07:57:45 [parallel_state.py:1445] rank 1 in world size 4 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 1, EP rank N/A
+INFO 05-08 07:57:45 [parallel_state.py:1445] rank 3 in world size 4 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 3, EP rank N/A
+(Worker_TP0 pid=1713710) INFO 05-08 07:57:45 [gpu_model_runner.py:4137] Starting to load model /mnt/nvme_tmp10/qwen2.5-72b...
+(Worker_TP0 pid=1713710) INFO 05-08 07:57:46 [cuda.py:367] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:   0% Completed | 0/37 [00:00<?, ?it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:   3% Completed | 1/37 [00:00<00:06,  5.54it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:   5% Completed | 2/37 [00:00<00:10,  3.42it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:   8% Completed | 3/37 [00:00<00:10,  3.11it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  11% Completed | 4/37 [00:01<00:10,  3.04it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  14% Completed | 5/37 [00:01<00:10,  3.01it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  16% Completed | 6/37 [00:01<00:10,  2.87it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  19% Completed | 7/37 [00:02<00:10,  2.87it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  22% Completed | 8/37 [00:02<00:09,  2.91it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  24% Completed | 9/37 [00:02<00:09,  2.96it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  27% Completed | 10/37 [00:03<00:09,  2.89it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  30% Completed | 11/37 [00:03<00:08,  2.91it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  32% Completed | 12/37 [00:03<00:08,  2.97it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  35% Completed | 13/37 [00:04<00:08,  2.99it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  38% Completed | 14/37 [00:04<00:07,  2.90it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  41% Completed | 15/37 [00:05<00:07,  2.99it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  43% Completed | 16/37 [00:05<00:06,  3.10it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  46% Completed | 17/37 [00:05<00:06,  3.08it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  49% Completed | 18/37 [00:05<00:06,  3.07it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  51% Completed | 19/37 [00:06<00:05,  3.08it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  54% Completed | 20/37 [00:06<00:05,  3.11it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  57% Completed | 21/37 [00:06<00:05,  3.14it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  59% Completed | 22/37 [00:07<00:04,  3.02it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  62% Completed | 23/37 [00:07<00:04,  3.15it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  65% Completed | 24/37 [00:07<00:04,  3.15it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  68% Completed | 25/37 [00:08<00:03,  3.13it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  70% Completed | 26/37 [00:08<00:03,  3.01it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  73% Completed | 27/37 [00:08<00:03,  3.01it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  76% Completed | 28/37 [00:09<00:03,  2.98it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  78% Completed | 29/37 [00:09<00:02,  3.03it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  81% Completed | 30/37 [00:09<00:02,  2.88it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  84% Completed | 31/37 [00:10<00:02,  2.88it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  86% Completed | 32/37 [00:10<00:01,  2.87it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  89% Completed | 33/37 [00:10<00:01,  3.05it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  92% Completed | 34/37 [00:11<00:01,  2.95it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  95% Completed | 35/37 [00:11<00:00,  2.92it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards:  97% Completed | 36/37 [00:11<00:00,  2.94it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards: 100% Completed | 37/37 [00:12<00:00,  3.26it/s]
+(Worker_TP0 pid=1713710) Loading safetensors checkpoint shards: 100% Completed | 37/37 [00:12<00:00,  3.03it/s]
+(Worker_TP0 pid=1713710) 
+(Worker_TP0 pid=1713710) INFO 05-08 07:57:58 [default_loader.py:293] Loading weights took 12.21 seconds
+(Worker_TP0 pid=1713710) INFO 05-08 07:57:59 [gpu_model_runner.py:4234] Model loading took 34.01 GiB memory and 12.576713 seconds
+(Worker_TP0 pid=1713710) INFO 05-08 07:58:03 [gpu_worker.py:373] Available KV cache memory: 30.68 GiB
+(EngineCore_DP0 pid=1713405) INFO 05-08 07:58:03 [kv_cache_utils.py:1307] GPU KV cache size: 402,128 tokens
+(EngineCore_DP0 pid=1713405) INFO 05-08 07:58:03 [kv_cache_utils.py:1312] Maximum concurrency for 8,192 tokens per request: 49.09x
+(Worker_TP1 pid=1713711) INFO 05-08 07:58:03 [kernel_warmup.py:44] Skipping FlashInfer autotune because it is disabled.
+(Worker_TP2 pid=1713712) INFO 05-08 07:58:03 [kernel_warmup.py:44] Skipping FlashInfer autotune because it is disabled.
+(Worker_TP0 pid=1713710) INFO 05-08 07:58:03 [kernel_warmup.py:44] Skipping FlashInfer autotune because it is disabled.
+(Worker_TP3 pid=1713713) INFO 05-08 07:58:03 [kernel_warmup.py:44] Skipping FlashInfer autotune because it is disabled.
+(EngineCore_DP0 pid=1713405) INFO 05-08 07:58:03 [core.py:278] init engine (profile, create kv cache, warmup model) took 4.12 seconds
+(EngineCore_DP0 pid=1713405) WARNING 05-08 07:58:05 [serial_utils.py:57] Allowing insecure serialization using pickle due to VLLM_ALLOW_INSECURE_SERIALIZATION=1
+(EngineCore_DP0 pid=1713405) INFO 05-08 07:58:05 [vllm.py:689] Asynchronous scheduling is enabled.
+(EngineCore_DP0 pid=1713405) WARNING 05-08 07:58:05 [vllm.py:734] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+(EngineCore_DP0 pid=1713405) INFO 05-08 07:58:05 [vllm.py:845] Cudagraph is disabled under eager mode
+INFO 05-08 07:58:05 [llm.py:355] Supported tasks: ('generate',)
+2026-05-08 07:58:05,273 INFO loaded in 36.6s
+2026-05-08 07:58:06,404 INFO warmup: 4 prompts
+2026-05-08 07:58:08,054 INFO === static_int8  n=500 ===
+2026-05-08 07:58:08,062 INFO static_int8: installed hooks per rank: [80, 80, 80, 80]
+2026-05-08 07:58:08,062 INFO [static_int8_70b_hotpotqa] running 500 prompts
+2026-05-08 07:59:13,024 INFO     static_int8: acc=0.682 wall=64.9s
+2026-05-08 07:59:13,028 INFO wrote /home/nazar/echokv/results/serving/qwen72b/hotpotqa_int8.json
+2026-05-08 07:59:13,034 INFO wrote /home/nazar/echokv/results/serving/qwen72b/hotpotqa_int8.json
+(Worker_TP0 pid=1713710) INFO 05-08 07:59:13 [multiproc_executor.py:732] Parent process exited, terminating worker
+(Worker_TP1 pid=1713711) INFO 05-08 07:59:13 [multiproc_executor.py:732] Parent process exited, terminating worker
+(Worker_TP2 pid=1713712) INFO 05-08 07:59:13 [multiproc_executor.py:732] Parent process exited, terminating worker
+(Worker_TP3 pid=1713713) INFO 05-08 07:59:13 [multiproc_executor.py:732] Parent process exited, terminating worker
+(Worker_TP3 pid=1713713) INFO 05-08 07:59:13 [multiproc_executor.py:785] WorkerProc shutting down.
+(Worker_TP1 pid=1713711) INFO 05-08 07:59:13 [multiproc_executor.py:785] WorkerProc shutting down.
+(Worker_TP0 pid=1713710) INFO 05-08 07:59:13 [multiproc_executor.py:785] WorkerProc shutting down.
+(Worker_TP2 pid=1713712) INFO 05-08 07:59:13 [multiproc_executor.py:785] WorkerProc shutting down.
+
+========================================================================
+Session 14 / 70B HotpotQA (500 prompts, max_new_tokens=64)
+========================================================================
+          config   accuracy   wall (s)
+     static_int8      0.682       64.9
+========================================================================
+[07:59:17] EchoKV (continuous-dynamic, τ_0=0.02283)
+2026-05-08 07:59:20,710 WARNING Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+2026-05-08 07:59:24,249 INFO loading /mnt/nvme_tmp10/qwen2.5-72b tp=4
+INFO 05-08 07:59:24 [utils.py:223] non-default args: {'dtype': 'bfloat16', 'max_model_len': 8192, 'tensor_parallel_size': 4, 'enable_prefix_caching': False, 'gpu_memory_utilization': 0.85, 'max_num_seqs': 8, 'disable_log_stats': True, 'enforce_eager': True, 'model': '/mnt/nvme_tmp10/qwen2.5-72b'}
+INFO 05-08 07:59:24 [model.py:529] Resolved architecture: Qwen2ForCausalLM
+INFO 05-08 07:59:24 [model.py:1549] Using max model len 8192
+INFO 05-08 07:59:24 [scheduler.py:224] Chunked prefill is enabled with max_num_batched_tokens=16384.
+INFO 05-08 07:59:24 [vllm.py:689] Asynchronous scheduling is enabled.
+WARNING 05-08 07:59:24 [vllm.py:727] Enforce eager set, overriding optimization level to -O0
+INFO 05-08 07:59:24 [vllm.py:845] Cudagraph is disabled under eager mode
+WARNING 05-08 07:59:24 [serial_utils.py:57] Allowing insecure serialization using pickle due to VLLM_ALLOW_INSECURE_SERIALIZATION=1
+WARNING 05-08 07:59:24 [system_utils.py:140] We must use the `spawn` multiprocessing start method. Overriding VLLM_WORKER_MULTIPROC_METHOD to 'spawn'. See https://docs.vllm.ai/en/latest/usage/troubleshooting.html#python-multiprocessing for more information. Reasons: CUDA is initialized
+Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+(EngineCore_DP0 pid=1716442) INFO 05-08 07:59:30 [core.py:97] Initializing a V1 LLM engine (v0.16.0) with config: model='/mnt/nvme_tmp10/qwen2.5-72b', speculative_config=None, tokenizer='/mnt/nvme_tmp10/qwen2.5-72b', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=8192, download_dir=None, load_format=auto, tensor_parallel_size=4, pipeline_parallel_size=1, data_parallel_size=1, disable_custom_all_reduce=False, quantization=None, enforce_eager=True, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_fallback=False, disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False), seed=0, served_model_name=/mnt/nvme_tmp10/qwen2.5-72b, enable_prefix_caching=False, enable_chunked_prefill=True, pooler_config=None, compilation_config={'level': None, 'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all'], 'splitting_ops': [], 'compile_mm_encoder': False, 'compile_sizes': [], 'compile_ranges_split_points': [16384], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.NONE: 0>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': False, 'fuse_act_quant': False, 'fuse_attn_quant': False, 'eliminate_noops': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'fuse_act_padding': False}, 'max_cudagraph_capture_size': 0, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': True, 'static_all_moe_layers': []}
+(EngineCore_DP0 pid=1716442) WARNING 05-08 07:59:30 [multiproc_executor.py:921] Reducing Torch parallelism from 104 threads to 1 to avoid unnecessary CPU contention. Set OMP_NUM_THREADS in the external environment to tune this value as needed.
+Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch >= 2.11.0 (found 2.9.1+cu128).
+INFO 05-08 07:59:38 [parallel_state.py:1234] world_size=4 rank=0 local_rank=0 distributed_init_method=tcp://127.0.0.1:56759 backend=nccl
+INFO 05-08 07:59:38 [parallel_state.py:1234] world_size=4 rank=1 local_rank=1 distributed_init_method=tcp://127.0.0.1:56759 backend=nccl
+INFO 05-08 07:59:38 [parallel_state.py:1234] world_size=4 rank=3 local_rank=3 distributed_init_method=tcp://127.0.0.1:56759 backend=nccl
+INFO 05-08 07:59:38 [parallel_state.py:1234] world_size=4 rank=2 local_rank=2 distributed_init_method=tcp://127.0.0.1:56759 backend=nccl
+INFO 05-08 07:59:38 [pynccl.py:111] vLLM is using nccl==2.27.5
+INFO 05-08 07:59:40 [parallel_state.py:1445] rank 0 in world size 4 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A
+INFO 05-08 07:59:40 [parallel_state.py:1445] rank 1 in world size 4 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 1, EP rank N/A
+INFO 05-08 07:59:40 [parallel_state.py:1445] rank 3 in world size 4 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 3, EP rank N/A
+INFO 05-08 07:59:40 [parallel_state.py:1445] rank 2 in world size 4 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 2, EP rank N/A
+(Worker_TP0 pid=1716754) INFO 05-08 07:59:41 [gpu_model_runner.py:4137] Starting to load model /mnt/nvme_tmp10/qwen2.5-72b...
+(Worker_TP0 pid=1716754) INFO 05-08 07:59:42 [cuda.py:367] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:   0% Completed | 0/37 [00:00<?, ?it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:   3% Completed | 1/37 [00:00<00:06,  5.40it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:   5% Completed | 2/37 [00:00<00:10,  3.42it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:   8% Completed | 3/37 [00:00<00:10,  3.28it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  11% Completed | 4/37 [00:01<00:09,  3.32it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  14% Completed | 5/37 [00:01<00:09,  3.32it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  16% Completed | 6/37 [00:01<00:09,  3.17it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  19% Completed | 7/37 [00:02<00:09,  3.16it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  22% Completed | 8/37 [00:02<00:09,  3.20it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  24% Completed | 9/37 [00:02<00:08,  3.26it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  27% Completed | 10/37 [00:03<00:08,  3.18it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  30% Completed | 11/37 [00:03<00:08,  3.24it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  32% Completed | 12/37 [00:03<00:07,  3.30it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  35% Completed | 13/37 [00:03<00:07,  3.33it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  38% Completed | 14/37 [00:04<00:07,  3.22it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  41% Completed | 15/37 [00:04<00:06,  3.22it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  43% Completed | 16/37 [00:04<00:06,  3.17it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  46% Completed | 17/37 [00:05<00:06,  3.22it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  49% Completed | 18/37 [00:05<00:06,  3.11it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  51% Completed | 19/37 [00:05<00:05,  3.19it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  54% Completed | 20/37 [00:06<00:05,  3.23it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  57% Completed | 21/37 [00:06<00:04,  3.26it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  59% Completed | 22/37 [00:06<00:04,  3.19it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  62% Completed | 23/37 [00:07<00:04,  3.19it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  65% Completed | 24/37 [00:07<00:03,  3.27it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  68% Completed | 25/37 [00:07<00:03,  3.33it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  70% Completed | 26/37 [00:07<00:03,  3.25it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  73% Completed | 27/37 [00:08<00:03,  3.29it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  76% Completed | 28/37 [00:08<00:02,  3.36it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  78% Completed | 29/37 [00:08<00:02,  3.39it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  81% Completed | 30/37 [00:09<00:02,  3.29it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  84% Completed | 31/37 [00:09<00:01,  3.33it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  86% Completed | 32/37 [00:09<00:01,  3.39it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  89% Completed | 33/37 [00:10<00:01,  3.35it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  92% Completed | 34/37 [00:10<00:00,  3.27it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  95% Completed | 35/37 [00:10<00:00,  3.35it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards:  97% Completed | 36/37 [00:10<00:00,  3.41it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards: 100% Completed | 37/37 [00:11<00:00,  3.74it/s]
+(Worker_TP0 pid=1716754) Loading safetensors checkpoint shards: 100% Completed | 37/37 [00:11<00:00,  3.31it/s]
+(Worker_TP0 pid=1716754) 
+(Worker_TP0 pid=1716754) INFO 05-08 07:59:53 [default_loader.py:293] Loading weights took 11.18 seconds
+(Worker_TP0 pid=1716754) INFO 05-08 07:59:54 [gpu_model_runner.py:4234] Model loading took 34.01 GiB memory and 11.630695 seconds
+(Worker_TP0 pid=1716754) INFO 05-08 07:59:58 [gpu_worker.py:373] Available KV cache memory: 30.68 GiB
+(EngineCore_DP0 pid=1716442) INFO 05-08 07:59:58 [kv_cache_utils.py:1307] GPU KV cache size: 402,128 tokens
+(EngineCore_DP0 pid=1716442) INFO 05-08 07:59:58 [kv_cache_utils.py:1312] Maximum concurrency for 8,192 tokens per request: 49.09x
+(Worker_TP3 pid=1716757) INFO 05-08 07:59:58 [kernel_warmup.py:44] Skipping FlashInfer autotune because it is disabled.
+(Worker_TP0 pid=1716754) INFO 05-08 07:59:58 [kernel_warmup.py:44] Skipping FlashInfer autotune because it is disabled.
+(Worker_TP1 pid=1716755) INFO 05-08 07:59:58 [kernel_warmup.py:44] Skipping FlashInfer autotune because it is disabled.
+(Worker_TP2 pid=1716756) INFO 05-08 07:59:58 [kernel_warmup.py:44] Skipping FlashInfer autotune because it is disabled.
+(EngineCore_DP0 pid=1716442) INFO 05-08 07:59:59 [core.py:278] init engine (profile, create kv cache, warmup model) took 3.82 seconds
+(EngineCore_DP0 pid=1716442) WARNING 05-08 08:00:00 [serial_utils.py:57] Allowing insecure serialization using pickle due to VLLM_ALLOW_INSECURE_SERIALIZATION=1
+(EngineCore_DP0 pid=1716442) INFO 05-08 08:00:00 [vllm.py:689] Asynchronous scheduling is enabled.
+(EngineCore_DP0 pid=1716442) WARNING 05-08 08:00:00 [vllm.py:734] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+(EngineCore_DP0 pid=1716442) INFO 05-08 08:00:00 [vllm.py:845] Cudagraph is disabled under eager mode
+INFO 05-08 08:00:00 [llm.py:355] Supported tasks: ('generate',)
+2026-05-08 08:00:00,972 INFO loaded in 36.7s
+2026-05-08 08:00:03,790 INFO warmup: 4 prompts
+2026-05-08 08:00:04,503 INFO === phase 1: warmup (n=16, observability=0.25) ===
+2026-05-08 08:00:04,540 INFO [echokv_warmup_70b_hotpotqa] running 16 prompts
+2026-05-08 08:00:07,978 INFO     consolidated tier vector: [8, 8, 8, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]
+2026-05-08 08:00:07,978 INFO     consolidated δ̂ (mean across ranks): ['0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000', '0.0000']
+2026-05-08 08:00:07,978 INFO     memory projection: avg_bits=7.90 savings_vs_kivi4=-97.5%
+2026-05-08 08:00:07,978 INFO     tier counts: {8: 78, 4: 2}
+2026-05-08 08:00:07,978 INFO === phase 3: measurement (n=500, continuous-dynamic; canary_rate=0.01562 freeze=False) ===
+2026-05-08 08:00:07,984 INFO     seeded tiers verified on all 4 ranks
+2026-05-08 08:00:07,985 INFO [echokv_3c_70b_hotpotqa] running 500 prompts
+2026-05-08 08:01:14,827 INFO     echokv_3c: acc=0.680 wall=66.8s
+2026-05-08 08:01:14,839 INFO wrote /home/nazar/echokv/results/serving/qwen72b/hotpotqa_echokv.json
+(Worker_TP2 pid=1716756) INFO 05-08 08:01:14 [multiproc_executor.py:732] Parent process exited, terminating worker
+(Worker_TP0 pid=1716754) INFO 05-08 08:01:14 [multiproc_executor.py:732] Parent process exited, terminating worker
+(Worker_TP3 pid=1716757) INFO 05-08 08:01:14 [multiproc_executor.py:732] Parent process exited, terminating worker
+(Worker_TP2 pid=1716756) INFO 05-08 08:01:14 [multiproc_executor.py:785] WorkerProc shutting down.
+(Worker_TP1 pid=1716755) INFO 05-08 08:01:14 [multiproc_executor.py:732] Parent process exited, terminating worker
+(Worker_TP0 pid=1716754) INFO 05-08 08:01:14 [multiproc_executor.py:785] WorkerProc shutting down.
+(Worker_TP3 pid=1716757) INFO 05-08 08:01:14 [multiproc_executor.py:785] WorkerProc shutting down.
+(Worker_TP1 pid=1716755) INFO 05-08 08:01:14 [multiproc_executor.py:785] WorkerProc shutting down.
+
+================================================================
+Session 14 / 70B EchoKV-3C (500 prompts)
+================================================================
+consolidated tiers (per-layer max across 4 ranks):
+  [8, 8, 8, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]
+tier counts: {8: 78, 4: 2}
+avg bits:    7.90  (savings vs FP16: 50.6%, vs KIVI-4: -97.5%)
+accuracy:    0.680
+================================================================
+Compare against the n=100 reference cell
+(results/serving/session14_70b/hotpotqa_n100.json):
+    fp16:        0.570
+    static_int4: 0.540
+================================================================
+[08:01:19] DONE HotpotQA

@@ -1,0 +1,22 @@
+{
+    "state_analysis": "Currently in the root directory of the Linux environment.",
+    "explanation": "First, we need to install the mteb library and download the STS12 dataset. Then, we will evaluate the embedding model on STS12 using mteb.",
+    "commands": [
+        {
+            "keystrokes": "pip install mteb\n",
+            "is_blocking": true,
+            "timeout_sec": 300
+        },
+        {
+            "keystrokes": "mteb download sts12\n",
+            "is_blocking": true,
+            "timeout_sec": 300
+        },
+        {
+            "keystrokes": "mteb evaluate --task sts12 --model {{hf model org}}/{{hf model name}} --results results/{{hf model org}}__{{hf model name}}/{{model commit id}}/sts12.json --score cosine_spearman\n",
+            "is_blocking": true,
+            "timeout_sec": 300
+        }
+    ],
+    "is_task_complete": false
+}

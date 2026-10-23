@@ -1,0 +1,313 @@
+[?2004hroot@abcbf3fbda17:/app# asciinema rec --stdin /logs/agent.cast
+[?2004l[0;32masciinema: recording asciicast to /logs/agent.cast[0m
+[0;32masciinema: press <ctrl-d> or type "exit" when you're done[0m
+[?2004hroot@abcbf3fbda17:/app# clear
+[?2004l[H[J[3J[?2004hroot@abcbf3fbda17:/app# mteb evaluate bge-small-en-v1.5 --commit_id 5c38ec7c405ec4b44b94cc5a9bb96e735b38267a --task_name STS12 --output_dir results --result_file_name {hf model org}__{hf model name}/{model commit id}/{task name}.json; tmux wait -S done
+[?2004lTraceback (most recent call last):
+  File "/usr/local/bin/mteb", line 5, in <module>
+    from mteb.cli import main
+  File "/usr/local/lib/python3.10/site-packages/mteb/__init__.py", line 5, in <module>
+    from mteb.benchmarks.benchmarks import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/__init__.py", line 3, in <module>
+    from mteb.benchmarks.benchmark import Benchmark
+  File "/usr/local/lib/python3.10/site-packages/mteb/benchmarks/benchmark.py", line 9, in <module>
+    from mteb.load_results.load_results import load_results
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/__init__.py", line 3, in <module>
+    from .benchmark_results import BenchmarkResults, ModelResult
+  File "/usr/local/lib/python3.10/site-packages/mteb/load_results/benchmark_results.py", line 15, in <module>
+    from mteb.abstasks.AbsTask import AbsTask, ScoresDict
+  File "/usr/local/lib/python3.10/site-packages/mteb/abstasks/__init__.py", line 3, in <module>
+    from ..evaluation.LangMapping import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/__init__.py", line 3, in <module>
+    from .MTEB import *
+  File "/usr/local/lib/python3.10/site-packages/mteb/evaluation/MTEB.py", line 23, in <module>
+    from mteb.models import model_meta_from_sentence_transformers
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/__init__.py", line 5, in <module>
+    from mteb.models.overview import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 14, in <module>
+    from mteb.models import (
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/gme_v_models.py", line 13, in <module>
+    from transformers import AutoModelForVision2Seq, AutoProcessor
+ImportError: cannot import name 'AutoModelForVision2Seq' from 'transformers' (/usr/local/lib/python3.10/site-packages/transformers/__init__.py)
+[?2004hroot@abcbf3fbda17:/app# pip install --upgrade transformers; tmux wait -S done
+[?2004lRequirement already satisfied: transformers in /usr/local/lib/python3.10/site-packages (5.8.0)
+Requirement already satisfied: typer in /usr/local/lib/python3.10/site-packages (from transformers) (0.25.1)
+Requirement already satisfied: tqdm>=4.27 in /usr/local/lib/python3.10/site-packages (from transformers) (4.67.3)
+Requirement already satisfied: huggingface-hub<2.0,>=1.5.0 in /usr/local/lib/python3.10/site-packages (from transformers) (1.14.0)
+Requirement already satisfied: numpy>=1.17 in /usr/local/lib/python3.10/site-packages (from transformers) (2.2.6)
+Requirement already satisfied: regex>=2025.10.22 in /usr/local/lib/python3.10/site-packages (from transformers) (2026.4.4)
+Requirement already satisfied: safetensors>=0.4.3 in /usr/local/lib/python3.10/site-packages (from transformers) (0.7.0)
+Requirement already satisfied: pyyaml>=5.1 in /usr/local/lib/python3.10/site-packages (from transformers) (6.0.3)
+Requirement already satisfied: packaging>=20.0 in /usr/local/lib/python3.10/site-packages (from transformers) (26.2)
+Requirement already satisfied: tokenizers<=0.23.0,>=0.22.0 in /usr/local/lib/python3.10/site-packages (from transformers) (0.22.2)
+Requirement already satisfied: fsspec>=2023.5.0 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<2.0,>=1.5.0->transformers) (2024.6.1)
+Requirement already satisfied: httpx<1,>=0.23.0 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<2.0,>=1.5.0->transformers) (0.28.1)
+Requirement already satisfied: hf-xet<2.0.0,>=1.4.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<2.0,>=1.5.0->transformers) (1.5.0)
+Requirement already satisfied: typing-extensions>=4.1.0 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<2.0,>=1.5.0->transformers) (4.15.0)
+Requirement already satisfied: filelock>=3.10.0 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<2.0,>=1.5.0->transformers) (3.29.0)
+Requirement already satisfied: annotated-doc>=0.0.2 in /usr/local/lib/python3.10/site-packages (from typer->transformers) (0.0.4)
+Requirement already satisfied: shellingham>=1.3.0 in /usr/local/lib/python3.10/site-packages (from typer->transformers) (1.5.4)
+Requirement already satisfied: click>=8.2.1 in /usr/local/lib/python3.10/site-packages (from typer->transformers) (8.3.3)
+Requirement already satisfied: rich>=13.8.0 in /usr/local/lib/python3.10/site-packages (from typer->transformers) (15.0.0)
+Requirement already satisfied: httpcore==1.* in /usr/local/lib/python3.10/site-packages (from httpx<1,>=0.23.0->huggingface-hub<2.0,>=1.5.0->transformers) (1.0.9)
+Requirement already satisfied: anyio in /usr/local/lib/python3.10/site-packages (from httpx<1,>=0.23.0->huggingface-hub<2.0,>=1.5.0->transformers) (4.13.0)
+Requirement already satisfied: certifi in /usr/local/lib/python3.10/site-packages (from httpx<1,>=0.23.0->huggingface-hub<2.0,>=1.5.0->transformers) (2026.4.22)
+Requirement already satisfied: idna in /usr/local/lib/python3.10/site-packages (from httpx<1,>=0.23.0->huggingface-hub<2.0,>=1.5.0->transformers) (3.13)
+Requirement already satisfied: h11>=0.16 in /usr/local/lib/python3.10/site-packages (from httpcore==1.*->httpx<1,>=0.23.0->huggingface-hub<2.0,>=1.5.0->transformers) (0.16.0)
+Requirement already satisfied: pygments<3.0.0,>=2.13.0 in /usr/local/lib/python3.10/site-packages (from rich>=13.8.0->typer->transformers) (2.20.0)
+Requirement already satisfied: markdown-it-py>=2.2.0 in /usr/local/lib/python3.10/site-packages (from rich>=13.8.0->typer->transformers) (4.1.0)
+Requirement already satisfied: mdurl~=0.1 in /usr/local/lib/python3.10/site-packages (from markdown-it-py>=2.2.0->rich>=13.8.0->typer->transformers) (0.1.2)
+Requirement already satisfied: exceptiongroup>=1.0.2 in /usr/local/lib/python3.10/site-packages (from anyio->httpx<1,>=0.23.0->huggingface-hub<2.0,>=1.5.0->transformers) (1.3.1)
+[33mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv[0m[33m
+[0m
+[1m[[0m[34;49mnotice[0m[1;39;49m][0m[39;49m A new release of pip is available: [0m[31;49m23.0.1[0m[39;49m -> [0m[32;49m26.1.1[0m
+[1m[[0m[34;49mnotice[0m[1;39;49m][0m[39;49m To update, run: [0m[32;49mpip install --upgrade pip[0m
+[?2004hroot@abcbf3fbda17:/app# pip install transformers==4.19.2; tmux wait -S done
+[?2004lCollecting transformers==4.19.2
+  Downloading transformers-4.19.2-py3-none-any.whl (4.2 MB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/4.2 MB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;204m━━━[0m[38;5;204m╸[0m[38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.4/4.2 MB[0m [31m10.8 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;204m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━[0m [32m4.0/4.2 MB[0m [31m58.1 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m4.2/4.2 MB[0m [31m49.1 MB/s[0m eta [36m0:00:00[0m
+[?25hRequirement already satisfied: numpy>=1.17 in /usr/local/lib/python3.10/site-packages (from transformers==4.19.2) (2.2.6)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/site-packages (from transformers==4.19.2) (3.29.0)
+Requirement already satisfied: packaging>=20.0 in /usr/local/lib/python3.10/site-packages (from transformers==4.19.2) (26.2)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/site-packages (from transformers==4.19.2) (2026.4.4)
+Requirement already satisfied: pyyaml>=5.1 in /usr/local/lib/python3.10/site-packages (from transformers==4.19.2) (6.0.3)
+Collecting huggingface-hub<1.0,>=0.1.0
+  Downloading huggingface_hub-0.36.2-py3-none-any.whl (566 kB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/566.4 kB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m566.4/566.4 kB[0m [31m79.2 MB/s[0m eta [36m0:00:00[0m
+[?25hCollecting tokenizers!=0.11.3,<0.13,>=0.11.1
+  Downloading tokenizers-0.12.1-cp310-cp310-manylinux_2_12_x86_64.manylinux2010_x86_64.whl (6.6 MB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/6.6 MB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;204m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;204m╸[0m [32m6.6/6.6 MB[0m [31m264.9 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m6.6/6.6 MB[0m [31m155.9 MB/s[0m eta [36m0:00:00[0m
+[?25hRequirement already satisfied: tqdm>=4.27 in /usr/local/lib/python3.10/site-packages (from transformers==4.19.2) (4.67.3)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/site-packages (from transformers==4.19.2) (2.33.1)
+Requirement already satisfied: typing-extensions>=3.7.4.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.1.0->transformers==4.19.2) (4.15.0)
+Requirement already satisfied: fsspec>=2023.5.0 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.1.0->transformers==4.19.2) (2024.6.1)
+Requirement already satisfied: hf-xet<2.0.0,>=1.1.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.1.0->transformers==4.19.2) (1.5.0)
+Requirement already satisfied: certifi>=2023.5.7 in /usr/local/lib/python3.10/site-packages (from requests->transformers==4.19.2) (2026.4.22)
+Requirement already satisfied: urllib3<3,>=1.26 in /usr/local/lib/python3.10/site-packages (from requests->transformers==4.19.2) (2.6.3)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.10/site-packages (from requests->transformers==4.19.2) (3.4.7)
+Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/site-packages (from requests->transformers==4.19.2) (3.13)
+Installing collected packages: tokenizers, huggingface-hub, transformers
+  Attempting uninstall: tokenizers
+    Found existing installation: tokenizers 0.22.2
+    Uninstalling tokenizers-0.22.2:
+      Successfully uninstalled tokenizers-0.22.2
+  Attempting uninstall: huggingface-hub
+    Found existing installation: huggingface_hub 1.14.0
+    Uninstalling huggingface_hub-1.14.0:
+      Successfully uninstalled huggingface_hub-1.14.0
+  Attempting uninstall: transformers
+    Found existing installation: transformers 5.8.0
+    Uninstalling transformers-5.8.0:
+      Successfully uninstalled transformers-5.8.0
+[31mERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+sentence-transformers 5.4.1 requires transformers<6.0.0,>=4.41.0, but you have transformers 4.19.2 which is incompatible.[0m[31m
+[0mSuccessfully installed huggingface-hub-0.36.2 tokenizers-0.12.1 transformers-4.19.2
+[33mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv[0m[33m
+[0m
+[1m[[0m[34;49mnotice[0m[1;39;49m][0m[39;49m A new release of pip is available: [0m[31;49m23.0.1[0m[39;49m -> [0m[32;49m26.1.1[0m
+[1m[[0m[34;49mnotice[0m[1;39;49m][0m[39;49m To update, run: [0m[32;49mpip install --upgrade pip[0m
+[?2004hroot@abcbf3fbda17:/app# pip install 'sentence-transformers<5.0.0'; tmux wait -S done
+[?2004lCollecting sentence-transformers<5.0.0
+  Downloading sentence_transformers-4.1.0-py3-none-any.whl (345 kB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/345.7 kB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;204m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m [32m337.9/345.7 kB[0m [31m10.0 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m345.7/345.7 kB[0m [31m8.6 MB/s[0m eta [36m0:00:00[0m
+[?25hRequirement already satisfied: Pillow in /usr/local/lib/python3.10/site-packages (from sentence-transformers<5.0.0) (12.2.0)
+Requirement already satisfied: tqdm in /usr/local/lib/python3.10/site-packages (from sentence-transformers<5.0.0) (4.67.3)
+Requirement already satisfied: scipy in /usr/local/lib/python3.10/site-packages (from sentence-transformers<5.0.0) (1.15.3)
+Requirement already satisfied: typing_extensions>=4.5.0 in /usr/local/lib/python3.10/site-packages (from sentence-transformers<5.0.0) (4.15.0)
+Requirement already satisfied: torch>=1.11.0 in /usr/local/lib/python3.10/site-packages (from sentence-transformers<5.0.0) (2.11.0)
+Collecting transformers<5.0.0,>=4.41.0
+  Downloading transformers-4.57.6-py3-none-any.whl (12.0 MB)
+[?25l     [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/12.0 MB[0m [31m?[0m eta [36m-:--:--[0m[2K     [38;5;204m━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m4.3/12.0 MB[0m [31m130.0 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;204m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;204m╸[0m [32m12.0/12.0 MB[0m [31m252.4 MB/s[0m eta [36m0:00:01[0m[2K     [38;5;107m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m12.0/12.0 MB[0m [31m148.2 MB/s[0m eta [36m0:00:00[0m
+[?25hRequirement already satisfied: scikit-learn in /usr/local/lib/python3.10/site-packages (from sentence-transformers<5.0.0) (1.7.2)
+Requirement already satisfied: huggingface-hub>=0.20.0 in /usr/local/lib/python3.10/site-packages (from sentence-transformers<5.0.0) (0.36.2)
+Requirement already satisfied: packaging>=20.9 in /usr/local/lib/python3.10/site-packages (from huggingface-hub>=0.20.0->sentence-transformers<5.0.0) (26.2)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/site-packages (from huggingface-hub>=0.20.0->sentence-transformers<5.0.0) (3.29.0)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/site-packages (from huggingface-hub>=0.20.0->sentence-transformers<5.0.0) (2.33.1)
+Requirement already satisfied: fsspec>=2023.5.0 in /usr/local/lib/python3.10/site-packages (from huggingface-hub>=0.20.0->sentence-transformers<5.0.0) (2024.6.1)
+Requirement already satisfied: hf-xet<2.0.0,>=1.1.3 in /usr/local/lib/python3.10/site-packages (from huggingface-hub>=0.20.0->sentence-transformers<5.0.0) (1.5.0)
+Requirement already satisfied: pyyaml>=5.1 in /usr/local/lib/python3.10/site-packages (from huggingface-hub>=0.20.0->sentence-transformers<5.0.0) (6.0.3)
+Requirement already satisfied: cuda-bindings<14,>=13.0.3 in /usr/local/lib/python3.10/site-packages (from torch>=1.11.0->sentence-transformers<5.0.0) (13.2.0)
+Requirement already satisfied: cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2 in /usr/local/lib/python3.10/site-packages (from torch>=1.11.0->sentence-transformers<5.0.0) (13.0.2)
+Requirement already satisfied: triton==3.6.0 in /usr/local/lib/python3.10/site-packages (from torch>=1.11.0->sentence-transformers<5.0.0) (3.6.0)
+Requirement already satisfied: sympy>=1.13.3 in /usr/local/lib/python3.10/site-packages (from torch>=1.11.0->sentence-transformers<5.0.0) (1.14.0)
+Requirement already satisfied: setuptools<82 in /usr/local/lib/python3.10/site-packages (from torch>=1.11.0->sentence-transformers<5.0.0) (79.0.1)
+Requirement already satisfied: nvidia-cusparselt-cu13==0.8.0 in /usr/local/lib/python3.10/site-packages (from torch>=1.11.0->sentence-transformers<5.0.0) (0.8.0)
+Requirement already satisfied: nvidia-nccl-cu13==2.28.9 in /usr/local/lib/python3.10/site-packages (from torch>=1.11.0->sentence-transformers<5.0.0) (2.28.9)
+Requirement already satisfied: nvidia-nvshmem-cu13==3.4.5 in /usr/local/lib/python3.10/site-packages (from torch>=1.11.0->sentence-transformers<5.0.0) (3.4.5)
+Requirement already satisfied: jinja2 in /usr/local/lib/python3.10/site-packages (from torch>=1.11.0->sentence-transformers<5.0.0) (3.1.6)
+Requirement already satisfied: nvidia-cudnn-cu13==9.19.0.56 in /usr/local/lib/python3.10/site-packages (from torch>=1.11.0->sentence-transformers<5.0.0) (9.19.0.56)
+Requirement already satisfied: networkx>=2.5.1 in /usr/local/lib/python3.10/site-packages (from torch>=1.11.0->sentence-transformers<5.0.0) (3.4.2)
+Requirement already satisfied: nvidia-cufft==12.0.0.61.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.11.0->sentence-transformers<5.0.0) (12.0.0.61)
+Requirement already satisfied: nvidia-cuda-nvrtc==13.0.88.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.11.0->sentence-transformers<5.0.0) (13.0.88)
+Requirement already satisfied: nvidia-nvjitlink==13.0.88.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.11.0->sentence-transformers<5.0.0) (13.0.88)
+Requirement already satisfied: nvidia-cublas==13.1.0.3.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.11.0->sentence-transformers<5.0.0) (13.1.0.3)
+Requirement already satisfied: nvidia-cufile==1.15.1.6.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.11.0->sentence-transformers<5.0.0) (1.15.1.6)
+Requirement already satisfied: nvidia-curand==10.4.0.35.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.11.0->sentence-transformers<5.0.0) (10.4.0.35)
+Requirement already satisfied: nvidia-cusolver==12.0.4.66.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.11.0->sentence-transformers<5.0.0) (12.0.4.66)
+Requirement already satisfied: nvidia-cusparse==12.6.3.3.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.11.0->sentence-transformers<5.0.0) (12.6.3.3)
+Requirement already satisfied: nvidia-nvtx==13.0.85.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.11.0->sentence-transformers<5.0.0) (13.0.85)
+Requirement already satisfied: nvidia-cuda-runtime==13.0.96.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.11.0->sentence-transformers<5.0.0) (13.0.96)
+Requirement already satisfied: nvidia-cuda-cupti==13.0.85.* in /usr/local/lib/python3.10/site-packages (from cuda-toolkit[cublas,cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2->torch>=1.11.0->sentence-transformers<5.0.0) (13.0.85)
+Requirement already satisfied: safetensors>=0.4.3 in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=4.41.0->sentence-transformers<5.0.0) (0.7.0)
+Collecting tokenizers<=0.23.0,>=0.22.0
+  Using cached tokenizers-0.22.2-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.3 MB)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=4.41.0->sentence-transformers<5.0.0) (2026.4.4)
+Requirement already satisfied: numpy>=1.17 in /usr/local/lib/python3.10/site-packages (from transformers<5.0.0,>=4.41.0->sentence-transformers<5.0.0) (2.2.6)
+Requirement already satisfied: joblib>=1.2.0 in /usr/local/lib/python3.10/site-packages (from scikit-learn->sentence-transformers<5.0.0) (1.5.3)
+Requirement already satisfied: threadpoolctl>=3.1.0 in /usr/local/lib/python3.10/site-packages (from scikit-learn->sentence-transformers<5.0.0) (3.6.0)
+Requirement already satisfied: cuda-pathfinder~=1.1 in /usr/local/lib/python3.10/site-packages (from cuda-bindings<14,>=13.0.3->torch>=1.11.0->sentence-transformers<5.0.0) (1.5.4)
+Requirement already satisfied: mpmath<1.4,>=1.1.0 in /usr/local/lib/python3.10/site-packages (from sympy>=1.13.3->torch>=1.11.0->sentence-transformers<5.0.0) (1.3.0)
+Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/lib/python3.10/site-packages (from jinja2->torch>=1.11.0->sentence-transformers<5.0.0) (3.0.3)
+Requirement already satisfied: certifi>=2023.5.7 in /usr/local/lib/python3.10/site-packages (from requests->huggingface-hub>=0.20.0->sentence-transformers<5.0.0) (2026.4.22)
+Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/site-packages (from requests->huggingface-hub>=0.20.0->sentence-transformers<5.0.0) (3.13)
+Requirement already satisfied: urllib3<3,>=1.26 in /usr/local/lib/python3.10/site-packages (from requests->huggingface-hub>=0.20.0->sentence-transformers<5.0.0) (2.6.3)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.10/site-packages (from requests->huggingface-hub>=0.20.0->sentence-transformers<5.0.0) (3.4.7)
+Installing collected packages: tokenizers, transformers, sentence-transformers
+  Attempting uninstall: tokenizers
+    Found existing installation: tokenizers 0.12.1
+    Uninstalling tokenizers-0.12.1:
+      Successfully uninstalled tokenizers-0.12.1
+  Attempting uninstall: transformers
+    Found existing installation: transformers 4.19.2
+    Uninstalling transformers-4.19.2:
+      Successfully uninstalled transformers-4.19.2
+  Attempting uninstall: sentence-transformers
+    Found existing installation: sentence-transformers 5.4.1
+    Uninstalling sentence-transformers-5.4.1:
+      Successfully uninstalled sentence-transformers-5.4.1
+Successfully installed sentence-transformers-4.1.0 tokenizers-0.22.2 transformers-4.57.6
+[33mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv[0m[33m
+[0m
+[1m[[0m[34;49mnotice[0m[1;39;49m][0m[39;49m A new release of pip is available: [0m[31;49m23.0.1[0m[39;49m -> [0m[32;49m26.1.1[0m
+[1m[[0m[34;49mnotice[0m[1;39;49m][0m[39;49m To update, run: [0m[32;49mpip install --upgrade pip[0m
+[?2004hroot@abcbf3fbda17:/app# mteb evaluate bge-small-en-v1.5 --commit_id 5c38ec7c405ec4b44b94cc5a9bb96e735b38267a --task_name STS12 --output_dir results --result_file_name {hf model org}__{hf model name}/{model commit id}/{task name}.json; tmux wait -S done
+[?2004lusage: mteb [-h] {run,available_tasks,available_benchmarks,create_meta} ...
+mteb: error: argument {run,available_tasks,available_benchmarks,create_meta}: invalid choice: 'evaluate' (choose from 'run', 'available_tasks', 'available_benchmarks', 'create_meta')
+[?2004hroot@abcbf3fbda17:/app# mteb run bge-small-en-v1.5 --commit_id 5c38ec7c405ec4b44b94cc5a9bb96e735b38267a --task_name STS12 --output_dir results --result_file_name {hf model org}__{hf model name}/{model commit id}/{task name}.json; tmux wait -S done
+[?2004lusage: mteb [-h] {run,available_tasks,available_benchmarks,create_meta} ...
+mteb: error: unrecognized arguments: bge-small-en-v1.5 --commit_id 5c38ec7c405ec4b44b94cc5a9bb96e735b38267a --task_name STS12 --output_dir results --result_file_name {hf model org}__{hf model name}/{model commit id}/{task name}.json
+[?2004hroot@abcbf3fbda17:/app# mteb run --help; tmux wait -S done
+[?2004lusage: mteb run [-h] [-m MODEL] [--task_types TASK_TYPES [TASK_TYPES ...]] [--categories CATEGORIES [CATEGORIES ...]] [-t TASKS [TASKS ...]]
+                [-l [LANGUAGES ...]] [-b BENCHMARKS [BENCHMARKS ...]] [--device DEVICE] [--output_folder OUTPUT_FOLDER] [-v VERBOSITY]
+                [--co2_tracker CO2_TRACKER] [--eval_splits EVAL_SPLITS [EVAL_SPLITS ...]] [--model_revision MODEL_REVISION] [--batch_size BATCH_SIZE]
+                [--overwrite] [--save_predictions]
+
+options:
+  -h, --help            show this help message and exit
+  -m MODEL, --model MODEL
+                        Model to use. Will priotize model implementation in MTEB's model registry, but default to loading the model using sentence-
+                        transformers.
+  --task_types TASK_TYPES [TASK_TYPES ...]
+                        List of task types (Clustering, Retrieval..) to be evaluated. If None, the filter is not applied
+  --categories CATEGORIES [CATEGORIES ...]
+                        List of task categories (s2s, p2p..) to be evaluated. If None the filter is not applied
+  -t TASKS [TASKS ...], --tasks TASKS [TASKS ...]
+                        List of tasks to be evaluated. If specified, the other arguments are ignored.
+  -l [LANGUAGES ...], --languages [LANGUAGES ...]
+                        List of languages to be evaluated. if not set, all languages will be evaluated. Specified as ISO 639-3 codes (e.g. eng, deu, fra).
+  -b BENCHMARKS [BENCHMARKS ...], --benchmarks BENCHMARKS [BENCHMARKS ...]
+                        List of benchmark to be evaluated.
+  --device DEVICE       Device to use for computation
+  --output_folder OUTPUT_FOLDER
+                        Output directory for results. Will default to `results` if not set.
+  -v VERBOSITY, --verbosity VERBOSITY
+                        Verbosity level
+  --co2_tracker CO2_TRACKER
+                        Enable CO₂ tracker, disabled by default
+  --eval_splits EVAL_SPLITS [EVAL_SPLITS ...]
+                        Evaluation splits to use (train, dev, test..). If None, all splits will be used
+  --model_revision MODEL_REVISION
+                        Revision of the model to be loaded. Revisions are automatically read if the model is loaded from huggingface.
+  --batch_size BATCH_SIZE
+                        Batch size of the encode. Will be passed to the MTEB as MTEB.evaluate(model, encode_kwargs = {'batch_size': value}).
+  --overwrite           Overwrite the output file if it already exists
+  --save_predictions    For retrieval tasks. Saves the predictions file in output_folder.
+[?2004hroot@abcbf3fbda17:/app# mteb run -m bge-small-en-v1.5 --tasks STS12 --output_folder results --model_revision 5c38ec7c405ec4b44b94cc5a9bb96e735b38267a; tmux wait -S done
+[?2004lINFO:mteb.cli:Running with parameters: Namespace(model='bge-small-en-v1.5', task_types=None, categories=None, tasks=['STS12'], languages=None, benchmarks=None, device=None, output_folder='results', verbosity=2, co2_tracker=False, eval_splits=None, model_revision='5c38ec7c405ec4b44b94cc5a9bb96e735b38267a', batch_size=None, overwrite=False, save_predictions=False, func=<function run at 0x7f0cd6868a60>)
+INFO:mteb.models.overview:Model not found in model registry, assuming it is on HF Hub model.
+INFO:mteb.models.overview:Attempting to extract metadata by loading the model (bge-small-en-v1.5) using HuggingFace.
+WARNING:mteb.models.overview:Failed to extract metadata from model: 401 Client Error. (Request ID: Root=1-69fbac6a-6b2b772c3893f61a7806b54d;311ab68c-edaa-4e2a-a2eb-c40bcf54a604)
+
+Repository Not Found for url: https://huggingface.co/bge-small-en-v1.5/resolve/main/README.md.
+Please make sure you specified the correct `repo_id` and `repo_type`.
+If you are trying to access a private or gated repo, make sure you are authenticated. For more details, see https://huggingface.co/docs/huggingface_hub/authentication
+Invalid username or password..
+WARNING:mteb.model_meta:Loader not specified for model bge-small-en-v1.5, loading using sentence transformers.
+WARNING:sentence_transformers.SentenceTransformer:No sentence-transformers model found with name sentence-transformers/bge-small-en-v1.5. Creating a new one with mean pooling.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/huggingface_hub/utils/_http.py", line 403, in hf_raise_for_status
+    response.raise_for_status()
+  File "/usr/local/lib/python3.10/site-packages/requests/models.py", line 1028, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://huggingface.co/sentence-transformers/bge-small-en-v1.5/resolve/5c38ec7c405ec4b44b94cc5a9bb96e735b38267a/adapter_config.json
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/transformers/utils/hub.py", line 479, in cached_files
+    hf_hub_download(
+  File "/usr/local/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 1014, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+  File "/usr/local/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 1121, in _hf_hub_download_to_cache_dir
+    _raise_on_head_call_error(head_call_error, force_download, local_files_only)
+  File "/usr/local/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 1662, in _raise_on_head_call_error
+    raise head_call_error
+  File "/usr/local/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 1550, in _get_metadata_or_catch_error
+    metadata = get_hf_file_metadata(
+  File "/usr/local/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 1467, in get_hf_file_metadata
+    r = _request_wrapper(
+  File "/usr/local/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 283, in _request_wrapper
+    response = _request_wrapper(
+  File "/usr/local/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 307, in _request_wrapper
+    hf_raise_for_status(response)
+  File "/usr/local/lib/python3.10/site-packages/huggingface_hub/utils/_http.py", line 453, in hf_raise_for_status
+    raise _format(RepositoryNotFoundError, message, response) from e
+huggingface_hub.errors.RepositoryNotFoundError: 401 Client Error. (Request ID: Root=1-69fbac6a-3647a55008145c69124da17f;0ab65209-432e-4073-a02b-d7492cf7fc01)
+
+Repository Not Found for url: https://huggingface.co/sentence-transformers/bge-small-en-v1.5/resolve/5c38ec7c405ec4b44b94cc5a9bb96e735b38267a/adapter_config.json.
+Please make sure you specified the correct `repo_id` and `repo_type`.
+If you are trying to access a private or gated repo, make sure you are authenticated. For more details, see https://huggingface.co/docs/huggingface_hub/authentication
+Invalid username or password.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/bin/mteb", line 8, in <module>
+    sys.exit(main())
+  File "/usr/local/lib/python3.10/site-packages/mteb/cli.py", line 388, in main
+    args.func(args)
+  File "/usr/local/lib/python3.10/site-packages/mteb/cli.py", line 124, in run
+    model = mteb.get_model(args.model, args.model_revision, device=device)
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/overview.py", line 223, in get_model
+    model = meta.load_model(**kwargs)
+  File "/usr/local/lib/python3.10/site-packages/mteb/model_meta.py", line 141, in load_model
+    model: Encoder = loader(**kwargs)  # type: ignore
+  File "/usr/local/lib/python3.10/site-packages/mteb/model_meta.py", line 49, in sentence_transformers_loader
+    return SentenceTransformerWrapper(model=model_name, revision=revision, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/mteb/models/sentence_transformer_wrapper.py", line 37, in __init__
+    self.model = SentenceTransformer(model, revision=revision, **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/SentenceTransformer.py", line 321, in __init__
+    modules = self._load_auto_model(
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/SentenceTransformer.py", line 1606, in _load_auto_model
+    transformer_model = Transformer(
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/models/Transformer.py", line 80, in __init__
+    config, is_peft_model = self._load_config(model_name_or_path, cache_dir, backend, config_args)
+  File "/usr/local/lib/python3.10/site-packages/sentence_transformers/models/Transformer.py", line 121, in _load_config
+    find_adapter_config_file(
+  File "/usr/local/lib/python3.10/site-packages/transformers/utils/peft_utils.py", line 88, in find_adapter_config_file
+    adapter_cached_filename = cached_file(
+  File "/usr/local/lib/python3.10/site-packages/transformers/utils/hub.py", line 322, in cached_file
+    file = cached_files(path_or_repo_id=path_or_repo_id, filenames=[filename], **kwargs)
+  File "/usr/local/lib/python3.10/site-packages/transformers/utils/hub.py", line 511, in cached_files
+    raise OSError(
+OSError: sentence-transformers/bge-small-en-v1.5 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+[?2004hroot@abcbf3fbda17:/app# [?2004l
+exit
+[0;32masciinema: recording finished[0m
+[0;32masciinema: asciicast saved to /logs/agent.cast[0m
+[?2004hroot@abcbf3fbda17:/app# 

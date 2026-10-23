@@ -1,0 +1,22 @@
+{
+    "state_analysis": "Currently in the /app directory as root user.",
+    "explanation": "Clone the UPET repository and checkout the specified commit hash.",
+    "commands": [
+        {
+            "keystrokes": "git clone https://github.com/wjn1996/UPET.git\n",
+            "is_blocking": true,
+            "timeout_sec": 10
+        },
+        {
+            "keystrokes": "cd UPET\n",
+            "is_blocking": true,
+            "timeout_sec": 2
+        },
+        {
+            "keystrokes": "git checkout 4701c3c62441077cc44a6553bf6ae909d99b8351\n",
+            "is_blocking": true,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We are asked what we want to light",
+    "explanation": "Let's try to light the area with the clove of garlic, it might have some special property",
+    "commands": [
+        {
+            "keystrokes": "light garlic\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

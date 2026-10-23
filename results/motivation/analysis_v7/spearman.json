@@ -1,0 +1,47 @@
+{
+  "per_workload": {
+    "gsm8k_cot": 0.06636827549214527,
+    "ruler_32k": 0.028704717617940453,
+    "humaneval": -0.029121379891991896
+  },
+  "pooled": 0.5494530096953205,
+  "n": 584,
+  "reports": [
+    {
+      "workload": "gsm8k_cot",
+      "n": 220,
+      "rho": 0.06636827549214527,
+      "accuracy_mean": 0.7954545454545454,
+      "accuracy_stdev": 0.4033690761204284,
+      "delta_nll_mean": -0.09231351194056597,
+      "delta_nll_stdev": 0.14315904969486726,
+      "outcome": "uninformative"
+    },
+    {
+      "workload": "humaneval",
+      "n": 164,
+      "rho": -0.029121379891991896,
+      "accuracy_mean": null,
+      "accuracy_stdev": null,
+      "delta_nll_mean": 0.009040597406011529,
+      "delta_nll_stdev": 0.03239988317989961,
+      "outcome": "undetermined"
+    },
+    {
+      "workload": "ruler_32k",
+      "n": 200,
+      "rho": 0.028704717617940453,
+      "accuracy_mean": 1.0,
+      "accuracy_stdev": 0.0,
+      "delta_nll_mean": -0.010910464832559228,
+      "delta_nll_stdev": 0.15989461606202857,
+      "outcome": "uninformative"
+    }
+  ],
+  "gate": {
+    "decision": "fail",
+    "rationale": "\u03b4 failed to predict \u0394NLL on workload(s) with variance: gsm8k_cot (\u03c1=+0.07, \u0394NLL_\u03c3=0.143), ruler_32k (\u03c1=+0.03, \u0394NLL_\u03c3=0.160). Pivot: evaluate attention entropy / per-head kurtosis.",
+    "rho_threshold": 0.4,
+    "low_variance_stdev": 0.1
+  }
+}

@@ -1,0 +1,50 @@
+Previous command:
+keystrokes='pip install packaging\n' is_blocking=True timeout_sec=60.0
+
+The previous command timed out after 60.0 seconds
+
+It is possible that the command is not yet finished executing. If that is the case, then do nothing. It is also possible that you have entered an interactive shell and should continue sending keystrokes as normal.
+
+Here is the current state of the terminal:
+
+  File "<stdin>", line 1
+    Ctrl+d; tmux wait -S done
+                 ^
+SyntaxError: invalid syntax
+>>> Ctrl+d; tmux wait -S done
+  File "<stdin>", line 1
+    Ctrl+d; tmux wait -S done
+                 ^
+SyntaxError: invalid syntax
+>>> quit(); tmux wait -S done
+  File "<stdin>", line 1
+    quit(); tmux wait -S done
+                 ^
+SyntaxError: invalid syntax
+>>> exit(); tmux wait -S done
+  File "<stdin>", line 1
+    exit(); tmux wait -S done
+                 ^
+SyntaxError: invalid syntax
+>>> exit(); tmux wait -S done
+  File "<stdin>", line 1
+    exit(); tmux wait -S done
+                 ^
+SyntaxError: invalid syntax
+>>> Ctrl+dpip install packaging; tmux wait -S done
+  File "<stdin>", line 1
+    Ctrl+dpip install packaging; tmux wait -S done
+              ^
+SyntaxError: invalid syntax
+>>> Ctrl+c; tmux wait -S done
+  File "<stdin>", line 1
+    Ctrl+c; tmux wait -S done
+                 ^
+SyntaxError: invalid syntax
+>>> Ctrl+dCtrl+dCtrl+dpip install packaging; tmux wait -S done
+  File "<stdin>", line 1
+    Ctrl+dCtrl+dCtrl+dpip install packaging; tmux wait -S done
+                          ^
+SyntaxError: invalid syntax
+>>>
+ 

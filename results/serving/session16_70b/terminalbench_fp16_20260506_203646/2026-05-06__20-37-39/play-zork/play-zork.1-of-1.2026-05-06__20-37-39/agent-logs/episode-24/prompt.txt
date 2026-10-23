@@ -1,0 +1,40 @@
+ West of House                                                                                                                    Score: 5        Moves: 23
+
+>open egg
+You have neither the tools nor the expertise.
+
+>go south
+Forest Path
+
+>go south
+North of House
+
+>examine house
+The house is a beautiful colonial house which is painted white. It is clear that the owners must have been extremely wealthy.
+
+>go west
+West of House
+There is a small mailbox here.
+
+>open mailbox
+It is already open.
+
+>inventory
+You are carrying:
+  A jewel-encrusted egg
+  A leaflet
+
+>read leaflet
+"WELCOME TO ZORK!
+
+ZORK is a game of adventure, danger, and low cunning. In it you will explore some of the most amazing territory ever seen by mortals. No computer should be
+without one!"
+
+
+>examine egg
+The jewel-encrusted egg is closed.
+
+>go east
+The door is boarded and you can't remove the boards.
+
+>

@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We are now standing north of the house, and there is a narrow path to the north",
+    "explanation": "Follow the path to see where it leads",
+    "commands": [
+        {
+            "keystrokes": "follow path\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

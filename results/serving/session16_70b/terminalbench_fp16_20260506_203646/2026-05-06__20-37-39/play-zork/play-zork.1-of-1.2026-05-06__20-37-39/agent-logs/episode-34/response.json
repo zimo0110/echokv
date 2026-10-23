@@ -1,0 +1,12 @@
+{
+    "state_analysis": "We have examined the sack and it's closed",
+    "explanation": "Let's open the sack to see what's inside",
+    "commands": [
+        {
+            "keystrokes": "open sack\n",
+            "is_blocking": false,
+            "timeout_sec": 5
+        }
+    ],
+    "is_task_complete": false
+}

@@ -1,0 +1,235 @@
+{
+  "session": "20260506_15_70b_taubench",
+  "model": "/mnt/nvme_tmp6/llama-70b",
+  "tensor_parallel_size": 8,
+  "n_tasks": 3,
+  "max_turns": 12,
+  "max_new_tokens": 512,
+  "max_num_seqs": 8,
+  "configs": [
+    "fp16"
+  ],
+  "cells": [
+    {
+      "label": "taubench_airline_fp16",
+      "wall_clock_s": 35.579144885763526,
+      "n_prompts": 3,
+      "completed": 3,
+      "n_correct": 0,
+      "accuracy": 0.0,
+      "p50_tpot_s": null,
+      "p99_tpot_s": null,
+      "mean_ttft_s": null,
+      "total_input_tokens": 0,
+      "total_output_tokens": 1139,
+      "output_throughput_tps": 32.01313588780921,
+      "per_request": [
+        {
+          "request_id": "taubench_airline:0",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 5,
+          "decode_tokens": 195,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "mia_li_3668"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "New York",
+                "destination": "Seattle",
+                "date": "2024-05-20",
+                "departure_time": "11:00"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "New York",
+                "destination": "Seattle",
+                "date": "2024-05-20"
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "New York",
+                "destination": "Seattle",
+                "date": "2024-05-20"
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "Sorry, I couldn't find any flights from New York to Seattle on May 20 that match your preferences. Would you like to consider other dates or options?"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:1",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 9,
+          "decode_tokens": 473,
+          "finished_reason": "ok",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "olivia_gonzalez_2305"
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "Z7GOZK"
+              }
+            },
+            {
+              "name": "think",
+              "kwargs": {
+                "thought": "The user has a reservation Z7GOZK with a return flight from IAH to EWR on May 28th, departing at 3pm. The user wants to change to a later flight on the same day, or if not possible, the earliest flight the next day. The user does not accept JFK, only EWR. The user is willing to cancel the trip using the travel insurance if basic economy cannot be modified."
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "IAH",
+                "destination": "EWR",
+                "date": "2024-05-28",
+                "departure_time": "18:00"
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "IAH",
+                "destination": "EWR",
+                "date": "2024-05-28"
+              }
+            },
+            {
+              "name": "think",
+              "kwargs": {
+                "thought": "There are no later flights on the same day that depart after 3pm. The earliest flight the next day should be searched."
+              }
+            },
+            {
+              "name": "search_direct_flight",
+              "kwargs": {
+                "origin": "IAH",
+                "destination": "EWR",
+                "date": "2024-05-29"
+              }
+            },
+            {
+              "name": "think",
+              "kwargs": {
+                "thought": "The user has a basic economy ticket, which cannot be modified. The user is willing to cancel the trip using the travel insurance if basic economy cannot be modified. The agent should ask the user to confirm if they want to cancel the trip."
+              }
+            },
+            {
+              "name": "respond",
+              "kwargs": {
+                "content": "I found flights for the next day, but since you have a basic economy ticket, it cannot be modified. You mentioned earlier that you are willing to cancel the trip using the travel insurance if basic economy cannot be modified. Would you like to cancel the trip?"
+              }
+            }
+          ]
+        },
+        {
+          "request_id": "taubench_airline:2",
+          "correct": 0,
+          "reward": 0.0,
+          "n_turns": 12,
+          "decode_tokens": 471,
+          "finished_reason": "max_turns",
+          "actions": [
+            {
+              "name": "get_user_details",
+              "kwargs": {
+                "user_id": "omar_davis_3817"
+              }
+            },
+            {
+              "name": "think",
+              "kwargs": {
+                "thought": "The user wants to downgrade all business flights to economy without changing the flights or passengers. I need to calculate the total amount saved."
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "JG7FMM"
+              }
+            },
+            {
+              "name": "think",
+              "kwargs": {
+                "thought": "The reservation JG7FMM is a one-way business flight with 2 passengers. I need to calculate the price difference between business and economy class for this reservation."
+              }
+            },
+            {
+              "name": "search_onestop_flight",
+              "kwargs": {
+                "origin": "MCO",
+                "destination": "CLT",
+                "date": "2024-05-21"
+              }
+            },
+            {
+              "name": "think",
+              "kwargs": {
+                "thought": "The prices for economy class for the flights in reservation JG7FMM are 140 and 167. I need to calculate the price difference between business and economy class for this reservation."
+              }
+            },
+            {
+              "name": "calculate",
+              "kwargs": {
+                "expression": "1859 + 1679 - (140 + 167) * 2"
+              }
+            },
+            {
+              "name": "think",
+              "kwargs": {
+                "thought": "The total amount saved for reservation JG7FMM is 2924. I need to repeat the process for the remaining reservations."
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "LQ940Q"
+              }
+            },
+            {
+              "name": "think",
+              "kwargs": {
+                "thought": "The reservation LQ940Q is already in economy class, so no downgrade is needed. I can move on to the next reservation."
+              }
+            },
+            {
+              "name": "get_reservation_details",
+              "kwargs": {
+                "reservation_id": "2FBBAH"
+              }
+            },
+            {
+              "name": "think",
+              "kwargs": {
+                "thought": "The reservation 2FBBAH is a round-trip business flight. I need to calculate the price difference between business and economy class for this reservation."
+              }
+            }
+          ]
+        }
+      ],
+      "canary_report": null,
+      "config": "fp16"
+    }
+  ],
+  "partial": false
+}

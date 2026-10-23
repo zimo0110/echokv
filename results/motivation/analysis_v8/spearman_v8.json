@@ -1,0 +1,44 @@
+{
+  "n_requests": 200,
+  "n_evaluated": 200,
+  "thresholds": {
+    "pass_raw": 0.15,
+    "selective_raw": 0.1,
+    "fail_raw": 0.05,
+    "min_steps": 4
+  },
+  "per_workload": [
+    {
+      "workload": "gsm8k_cot",
+      "n_requests": 100,
+      "n_evaluated": 100,
+      "mean_rho_raw": -0.05170083325650445,
+      "se_rho_raw": 0.009787837997073607,
+      "mean_rho_diff": -0.01647372354381665,
+      "se_rho_diff": 0.008018349372534506,
+      "mean_rho_first": -0.03884882102913221,
+      "mean_rho_second": -0.061698347789460414,
+      "pct_positive_raw": 0.29,
+      "mean_delta": 0.008472471062889191,
+      "mean_delta_nll": 0.010352805721602814
+    },
+    {
+      "workload": "ruler_32k",
+      "n_requests": 100,
+      "n_evaluated": 100,
+      "mean_rho_raw": 0.05108543914853486,
+      "se_rho_raw": 0.011991822100624255,
+      "mean_rho_diff": 0.050730398145827776,
+      "se_rho_diff": 0.008293668105736233,
+      "mean_rho_first": 0.067414306989019,
+      "mean_rho_second": -0.01933170002672886,
+      "pct_positive_raw": 0.67,
+      "mean_delta": 0.052876763358265085,
+      "mean_delta_nll": 0.023103433729838082
+    }
+  ],
+  "gate": {
+    "decision": "weak",
+    "rationale": "between selective and fail thresholds"
+  }
+}

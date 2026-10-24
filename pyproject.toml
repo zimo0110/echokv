@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "echokv-vllm"
+version = "0.1.0"
+description = "EchoKV closed-loop mixed-precision KV cache as a vLLM attention-backend plugin"
+requires-python = ">=3.10"
+dependencies = ["torch"]
+
+[project.entry-points."vllm.general_plugins"]
+echokv = "echokv_vllm.plugin:register"
+
+[tool.setuptools]
+packages = ["echokv_vllm"]

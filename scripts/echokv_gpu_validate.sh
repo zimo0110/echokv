@@ -41,11 +41,16 @@ if [ ! -x .venv-gpu/bin/python ]; then
       || die "could not install uv"
   fi
   uv venv --python 3.12 .venv-gpu || die "uv venv failed"
-  uv pip install --python .venv-gpu/bin/python "vllm==0.32.0" datasets pytest "huggingface_hub[cli]" \
+  uv pip install --python .venv-gpu/bin/python "vllm==0.32.0" datasets pytest "huggingface_hub[cli]" ninja \
     || die "installing vLLM 0.32.0 failed"
   uv pip install --python .venv-gpu/bin/python -e . || die "installing echokv_vllm failed"
 fi
 PY=.venv-gpu/bin/python
+# torch.compile / JIT kernel builds spawn tools like ninja from PATH.
+export PATH="$PWD/.venv-gpu/bin:$HOME/.local/bin:$PATH"
+if ! command -v ninja >/dev/null; then  # venvs created before ninja was added
+  uv pip install --python "$PY" -q ninja || die "installing ninja failed"
+fi
 export VLLM_ALLOW_INSECURE_SERIALIZATION=1
 
 $PY - "$MODEL" <<'EOF' || die "cannot read $MODEL from Hugging Face: set HF_TOKEN (or run 'huggingface-cli login') with access to that repo"

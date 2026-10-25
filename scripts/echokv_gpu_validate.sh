@@ -31,8 +31,14 @@ NGPU=$(nvidia-smi --query-gpu=name --format=csv,noheader | wc -l)
 
 if [ ! -x .venv-gpu/bin/python ]; then
   echo "== installing (first run only, a few minutes)"
-  command -v uv >/dev/null || python3 -m pip install -q --user uv || die "could not install uv"
   export PATH="$HOME/.local/bin:$PATH"
+  if ! command -v uv >/dev/null; then
+    # pip --user is blocked on PEP 668 systems (Ubuntu 24.04, DGX OS): fall back
+    # to uv's official installer, which also installs into ~/.local/bin.
+    python3 -m pip install -q --user uv 2>/dev/null \
+      || curl -LsSf https://astral.sh/uv/install.sh | sh \
+      || die "could not install uv"
+  fi
   uv venv --python 3.12 .venv-gpu || die "uv venv failed"
   uv pip install --python .venv-gpu/bin/python "vllm==0.32.0" datasets pytest "huggingface_hub[cli]" \
     || die "installing vLLM 0.32.0 failed"

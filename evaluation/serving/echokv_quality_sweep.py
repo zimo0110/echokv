@@ -97,13 +97,26 @@ def child(args) -> None:
 
 
 def run(args, name: str, env_extra: dict) -> dict:
+    """Run one configuration in its own engine; on failure return {"error": ...}.
+
+    With --quiet the engine's output goes to <out>.<name>.log instead of the
+    terminal, and its last lines are printed if it fails.
+    """
     out = f"{args.out}.{name}.tmp"
+    log_path = f"{args.out}.{name}.log"
     env = dict(os.environ, VLLM_ALLOW_INSECURE_SERIALIZATION="1", **env_extra)
     cmd = [sys.executable, __file__, "--child-out", out] + [
         a for a in sys.argv[1:] if a != "--child-out"
     ]
-    subprocess.run(cmd, env=env, check=True, stdout=subprocess.DEVNULL if args.quiet else None,
-                   stderr=subprocess.DEVNULL if args.quiet else None)
+    with open(log_path, "w") if args.quiet else open(os.devnull, "w") as log:
+        stream = log if args.quiet else None
+        proc = subprocess.run(cmd, env=env, stdout=stream, stderr=subprocess.STDOUT if args.quiet else None)
+    if proc.returncode != 0:
+        print(f"[{name}] FAILED (exit {proc.returncode})" + (f", log: {log_path}" if args.quiet else ""))
+        if args.quiet:
+            with open(log_path) as f:
+                print("".join(f.readlines()[-25:]))
+        return {"error": f"exit {proc.returncode}"}
     with open(out) as f:
         res = json.load(f)
     os.remove(out)
@@ -137,11 +150,16 @@ def main() -> None:
         results[f"int{b}"] = run(args, f"int{b}", {**on, "ECHOKV_FIXED_BITS": str(b)})
     for t in args.taus:
         results[f"tau={t}"] = run(args, f"tau{t}", {**on, "ECHOKV_TAU0": str(t)})
+    if "error" in results["stock"]:
+        sys.exit("stock vLLM failed to run, so nothing can be compared; see its log above")
     base = results["stock"]["nll"]
     print(f"\n{args.model}   stock NLL {base:.4f}")
     print(f"{'config':<12} {'ΔNLL':>8} {'bits':>6}  tiers")
     for name, r in results.items():
         if name == "stock":
+            continue
+        if "error" in r:
+            print(f"{name:<12} FAILED ({r['error']})")
             continue
         r["delta_nll"] = r["nll"] - base
         tiers = r.get("tier_vector") or []
@@ -150,6 +168,8 @@ def main() -> None:
         print(f"{name:<12} {r['delta_nll']:>+8.4f} {bits if bits is None else round(bits, 2):>6}  {mix}")
     with open(args.out, "w") as f:
         json.dump({"model": args.model, "results": results}, f, indent=1)
+    if any("error" in r for r in results.values()):
+        sys.exit(1)
 
 
 if __name__ == "__main__":

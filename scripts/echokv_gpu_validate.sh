@@ -4,6 +4,7 @@
 #   export HF_TOKEN=hf_...                             # access to the gated Llama repos
 #   bash scripts/echokv_gpu_validate.sh                # Llama-3.1-8B, 1 GPU
 #   MODEL=meta-llama/Llama-3.1-70B-Instruct TP=4 bash scripts/echokv_gpu_validate.sh
+#   ECHOKV_GPU_UTIL=0.5 bash scripts/echokv_gpu_validate.sh   # if vLLM says free memory is too low
 #
 # Steps: install vLLM 0.32.0 + this plugin into ./.venv-gpu (Python 3.12 via
 # uv; vLLM 0.32 needs >= 3.11), run the unit tests (the Triton kernels

@@ -65,6 +65,11 @@ def child(args) -> None:
         block_size=args.block_size,
         tensor_parallel_size=args.tp,
     )
+    if torch.cuda.is_available():
+        # vLLM refuses to start unless free memory covers this fraction of the
+        # device, even with an explicit KV cache size. Its 0.92 default fails on
+        # shared/unified-memory machines (DGX Spark) and busy GPUs.
+        kw["gpu_memory_utilization"] = float(os.environ.get("ECHOKV_GPU_UTIL", "0.7"))
     echokv = os.environ.get("ECHOKV_ENABLE") == "1"
     if echokv and torch.cuda.is_available():
         kw["attention_config"] = {"backend": "CUSTOM"}

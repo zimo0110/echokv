@@ -156,13 +156,15 @@ if HAS_TRITON:
         if bits == 8:
             tl.store(pages_ptr + base + tl.arange(0, D), q.to(tl.uint8))
         elif bits == 4:
-            c = tl.reshape(q, [D // 2, 2])
-            sh = tl.arange(0, 2) * 4
-            tl.store(pages_ptr + base + tl.arange(0, D // 2), tl.sum(c << sh[None, :], axis=1).to(tl.uint8))
+            # Distinct names per branch: the compiler requires a name assigned in
+            # several branches to have one type, and these shapes differ.
+            c4 = tl.reshape(q, [D // 2, 2])
+            sh4 = tl.arange(0, 2) * 4
+            tl.store(pages_ptr + base + tl.arange(0, D // 2), tl.sum(c4 << sh4[None, :], axis=1).to(tl.uint8))
         else:
-            c = tl.reshape(q, [D // 4, 4])
-            sh = tl.arange(0, 4) * 2
-            tl.store(pages_ptr + base + tl.arange(0, D // 4), tl.sum(c << sh[None, :], axis=1).to(tl.uint8))
+            c2 = tl.reshape(q, [D // 4, 4])
+            sh2 = tl.arange(0, 4) * 2
+            tl.store(pages_ptr + base + tl.arange(0, D // 4), tl.sum(c2 << sh2[None, :], axis=1).to(tl.uint8))
 
     @triton.jit
     def _finalize_k_kernel(
@@ -208,15 +210,15 @@ if HAS_TRITON:
         if bits == 8:
             tl.store(pages_ptr + base[:, None] + offs_d[None, :], q.to(tl.uint8))
         elif bits == 4:
-            c = tl.reshape(q, [KG, D // 2, 2])
-            sh = tl.arange(0, 2) * 4
-            packed = tl.sum(c << sh[None, None, :], axis=2).to(tl.uint8)
-            tl.store(pages_ptr + base[:, None] + tl.arange(0, D // 2)[None, :], packed)
+            c4 = tl.reshape(q, [KG, D // 2, 2])
+            sh4 = tl.arange(0, 2) * 4
+            packed4 = tl.sum(c4 << sh4[None, None, :], axis=2).to(tl.uint8)
+            tl.store(pages_ptr + base[:, None] + tl.arange(0, D // 2)[None, :], packed4)
         else:
-            c = tl.reshape(q, [KG, D // 4, 4])
-            sh = tl.arange(0, 4) * 2
-            packed = tl.sum(c << sh[None, None, :], axis=2).to(tl.uint8)
-            tl.store(pages_ptr + base[:, None] + tl.arange(0, D // 4)[None, :], packed)
+            c2 = tl.reshape(q, [KG, D // 4, 4])
+            sh2 = tl.arange(0, 4) * 2
+            packed2 = tl.sum(c2 << sh2[None, None, :], axis=2).to(tl.uint8)
+            tl.store(pages_ptr + base[:, None] + tl.arange(0, D // 4)[None, :], packed2)
 
 
 def _common(store):

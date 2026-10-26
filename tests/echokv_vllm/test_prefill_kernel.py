@@ -49,3 +49,55 @@ def test_tiles_cover_every_query_row():
         assert all(n <= pf.block_m(gqa) for _, n, *_ in tiles.tolist())
         # Each tile's first query position is ctx - chunk + offset within the chunk.
         assert tiles[0].tolist()[2] == 0 and any(t[2] == 160 for t in tiles.tolist())
+
+
+@pytest.mark.parametrize("case", CASES)
+def test_dequant_dense_matches_gather(case):
+    if not TRITON_OK:
+        pytest.skip("needs CUDA or TRITON_INTERPRET=1")
+    store, table, prefill, req_of, _ = make_batch(case, 1, seed=3)
+    bs = store.layout.block_size
+    starts, g = [], 0
+    for _, _, ctx, _ in prefill:
+        starts.append(g)
+        g += ctx
+    prefill = [(qs, qe, ctx, s) for (qs, qe, ctx, _), s in zip(prefill, starts)]
+    work = pf.build_dequant_work(prefill, req_of, bs, DEVICE)
+    k, v = pf.dequant_dense(store, work, g, table, torch.float32)
+    for (_, _, ctx, s), r in zip(prefill, req_of):
+        pos = torch.arange(ctx, device=DEVICE)
+        kr, vr = store.gather(table[r].long()[pos // bs], pos % bs)
+        torch.testing.assert_close(k[s : s + ctx], kr, rtol=0, atol=0)
+        torch.testing.assert_close(v[s : s + ctx], vr, rtol=0, atol=0)
+
+
+@pytest.mark.parametrize("case", CASES)
+@pytest.mark.parametrize("gqa", [1, 4])
+@pytest.mark.parametrize("dtype", [torch.float32, torch.bfloat16])
+def test_dense_prefill_matches_reference(case, gqa, dtype):
+    """Dequantize + varlen attention: flash-attention for bf16 on CUDA, SDPA otherwise."""
+    if not TRITON_OK:
+        pytest.skip("needs CUDA or TRITON_INTERPRET=1")
+    store, table, prefill, req_of, query = make_batch(case, gqa, seed=4)
+    query = query.to(dtype)
+    d = query.shape[-1]
+    starts, g = [], 0
+    for _, _, ctx, _ in prefill:
+        starts.append(g)
+        g += ctx
+    prefill = [(qs, qe, ctx, s) for (qs, qe, ctx, _), s in zip(prefill, starts)]
+    nqs = [qe - qs for qs, qe, _, _ in prefill]
+    ctxs = [ctx for _, _, ctx, _ in prefill]
+    dense = (
+        pf.build_dequant_work(prefill, req_of, store.layout.block_size, DEVICE), g,
+        torch.cat([torch.arange(qs, qe) for qs, qe, _, _ in prefill]).to(DEVICE),
+        torch.tensor([0] + list(__import__("itertools").accumulate(nqs)), dtype=torch.int32, device=DEVICE),
+        torch.tensor([0] + list(__import__("itertools").accumulate(ctxs)), dtype=torch.int32, device=DEVICE),
+        max(nqs), max(ctxs),
+    )
+    ref = torch.zeros_like(query)
+    pf.prefill_attention_torch(store, query, ref, prefill, table, d**-0.5, req_of=req_of)
+    got = torch.zeros_like(query)
+    pf.prefill_attention_dense(store, query, got, prefill, table, d**-0.5, dense)
+    tol = 1e-5 if dtype == torch.float32 else 3e-2  # bf16 inputs (flash-attention on CUDA)
+    torch.testing.assert_close(got.float(), ref.float(), rtol=tol, atol=tol)

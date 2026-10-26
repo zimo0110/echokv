@@ -1,10 +1,17 @@
-"""Fused prefill (chunked-prefill) attention over a TieredKVCache.
+"""Prefill (chunked-prefill) attention over a TieredKVCache.
 
 A prefill chunk's queries attend to the request's whole cached context,
-which the write path has already stored, this chunk included. The Triton
-kernel reads K/V straight from the tiered pages and dequantizes tile by
-tile in registers, so no full-precision copy of the context is
-materialized (the PyTorch path gathers the context and calls SDPA).
+which the write path has already stored, this chunk included. Three paths:
+
+* dense (CUDA, the default): one Triton pass dequantizes every prefill
+  context into a packed bf16 buffer, then a single varlen flash-attention
+  call covers all prefill requests. Dequantization is linear in context
+  length.
+* fused (CUDA, tiny chunks only): the kernel below reads K/V straight from
+  the tiered pages and dequantizes tile by tile in registers. Every query
+  tile re-dequantizes the context, so it only wins when chunks are a few
+  dozen tokens.
+* PyTorch (CPU / fallback): gather, dequantize, SDPA per request.
 
 Work is split into query tiles: up to ``BLOCK_M`` consecutive query tokens
 of one request, times the GQA group of query heads that share a KV head,
@@ -61,6 +68,102 @@ def build_tiles(prefill: list[tuple[int, int, int, int]], req_of: list[int], gqa
     return tiles
 
 
+FUSED_MAX_CHUNK = 64  # use the fused kernel only when every chunk is this short
+
+
+def build_dequant_work(prefill, req_of, block_size: int, device) -> torch.Tensor:
+    """Dequantize work list ``[n, 4]`` int32: (request, block index, dense row of block start, ctx).
+
+    Contexts are packed back to back in ``prefill`` order (entry 4 of each
+    prefill tuple is the context's start row in the dense buffer).
+    """
+    rows = []
+    for (_, _, ctx, g0), r in zip(prefill, req_of):
+        for bi in range(-(-ctx // block_size)):
+            rows.append((r, bi, g0 + bi * block_size, ctx))
+    return torch.tensor(rows, dtype=torch.int32).reshape(-1, 4).to(device)
+
+
+def dequant_dense(store, work, total_ctx: int, block_table, dtype) -> tuple[torch.Tensor, torch.Tensor]:
+    """Dense ``[total_ctx, H, D]`` K and V for the contexts in ``work``."""
+    L = store.layout
+    h, d = L.num_kv_heads, L.head_size
+    k = torch.empty(total_ctx, h, d, device=store.device, dtype=dtype)
+    v = torch.empty_like(k)
+    if work.numel() == 0:
+        return k, v
+    res = store.res_k
+    _dequant_kernel[(work.shape[0], h)](
+        k, v, k.stride(0), k.stride(1),
+        work,
+        block_table, block_table.stride(0),
+        store.tag, store.tag.stride(0),
+        store.table, store.table.stride(0),
+        store.data, store.data.stride(0), store.data.stride(1),
+        store.k_scale, store.k_scale.stride(0), store.k_scale.stride(1), store.k_scale.stride(2),
+        store.k_min,
+        store.v_scale, store.v_scale.stride(0), store.v_scale.stride(1), store.v_scale.stride(2),
+        store.v_min,
+        res, res.stride(0), res.stride(1), res.stride(2),
+        store.block_res, store.res_group,
+        H=h, D=d, BS=L.block_size, KG=L.k_group, VG=L.v_group, KC=L.chunks_per_page,
+        TILE=min(32, L.block_size),
+    )
+    return k, v
+
+
+def _flash_varlen():
+    """vLLM's flash-attention varlen entry point and version, or None."""
+    try:
+        from vllm.v1.attention.backends.fa_utils import (
+            flash_attn_varlen_func,
+            get_flash_attn_version,
+            is_flash_attn_varlen_func_available,
+        )
+    except ImportError:
+        return None
+    if not is_flash_attn_varlen_func_available():
+        return None
+    return flash_attn_varlen_func, get_flash_attn_version
+
+
+def prefill_attention_dense(store, query, output, prefill, block_table, softmax_scale, dense) -> bool:
+    """Dequantize all prefill contexts once, then one varlen flash-attention call.
+
+    ``dense`` holds the per-step inputs built by the metadata builder:
+    (work, total_ctx, q_rows, cu_q, cu_k, max_q, max_k). Returns False when
+    flash-attention is unavailable (caller falls back).
+    """
+    fa = _flash_varlen()
+    work, total_ctx, q_rows, cu_q, cu_k, max_q, max_k = dense
+    k, v = dequant_dense(store, work, total_ctx, block_table, query.dtype)
+    q = query[q_rows]
+    if fa is not None and query.dtype in (torch.float16, torch.bfloat16):
+        fn, version = fa
+        kw = {}
+        ver = version(head_size=query.shape[-1])
+        if ver is not None:
+            kw["fa_version"] = ver
+        out = fn(
+            q=q, k=k, v=v, cu_seqlens_q=cu_q, cu_seqlens_k=cu_k, max_seqlen_q=max_q,
+            max_seqlen_k=max_k, softmax_scale=softmax_scale, causal=True, **kw,
+        )
+    else:
+        out = torch.empty_like(q)
+        cq, ck = cu_q.tolist(), cu_k.tolist()
+        for i in range(len(cq) - 1):
+            nq, ctx = cq[i + 1] - cq[i], ck[i + 1] - ck[i]
+            o = F.scaled_dot_product_attention(
+                q[cq[i] : cq[i + 1]].transpose(0, 1).unsqueeze(0),
+                k[ck[i] : ck[i + 1]].transpose(0, 1).unsqueeze(0),
+                v[ck[i] : ck[i + 1]].transpose(0, 1).unsqueeze(0),
+                attn_mask=causal_lower_right(nq, ctx), scale=softmax_scale, enable_gqa=True,
+            )
+            out[cq[i] : cq[i + 1]] = o.squeeze(0).transpose(0, 1)
+    output[q_rows] = out.to(output.dtype)
+    return True
+
+
 def prefill_attention(
     store: TieredKVCache,
     query: torch.Tensor,
@@ -71,6 +174,7 @@ def prefill_attention(
     softmax_scale: float,
     tiles: torch.Tensor | None = None,
     gather: tuple[torch.Tensor, torch.Tensor] | None = None,
+    dense: tuple | None = None,
 ) -> None:
     """Write attention for every prefill chunk into ``output [T, Hq, D]``.
 
@@ -80,6 +184,9 @@ def prefill_attention(
     if not prefill:
         return
     d = query.shape[-1]
+    if dense is not None and _use_triton(query.device):
+        prefill_attention_dense(store, query, output, prefill, block_table, softmax_scale, dense)
+        return
     if _use_triton(query.device) and d & (d - 1) == 0 and store.layout.block_size % 32 == 0:
         gqa = query.shape[1] // store.layout.num_kv_heads
         if tiles is None:
@@ -253,6 +360,73 @@ if HAS_TRITON:
             out.to(o_ptr.dtype.element_ty),
             mask=row_ok[:, None],
         )
+
+    @triton.jit
+    def _dequant_kernel(
+        k_out_ptr, v_out_ptr, out_s0, out_s1,
+        work_ptr,
+        bt_ptr, bt_s0,
+        tag_ptr, tag_s0,
+        table_ptr, table_s0,
+        data_ptr, data_s0, data_s1,
+        ks_ptr, ks_s0, ks_s1, ks_s2,
+        km_ptr,
+        vs_ptr, vs_s0, vs_s1, vs_s2,
+        vm_ptr,
+        res_ptr, res_s0, res_s1, res_s2,
+        block_res_ptr, res_group_ptr,
+        H: tl.constexpr, D: tl.constexpr, BS: tl.constexpr, KG: tl.constexpr,
+        VG: tl.constexpr, KC: tl.constexpr, TILE: tl.constexpr,
+    ):
+        w = tl.program_id(0)
+        h = tl.program_id(1)
+        req = tl.load(work_ptr + w * 4 + 0)
+        bi = tl.load(work_ptr + w * 4 + 1)
+        out_row0 = tl.load(work_ptr + w * 4 + 2).to(tl.int64)
+        ctx = tl.load(work_ptr + w * 4 + 3)
+        blk = tl.load(bt_ptr + req.to(tl.int64) * bt_s0 + bi).to(tl.int64)
+        bits = tl.load(tag_ptr + blk * tag_s0).to(tl.int32)
+        bits = tl.where(bits == 0, 2, bits)  # never-written block: stay in bounds
+        tpc = (2 * BS) // bits
+        side_bytes = (H * D * bits) // 8
+        head_off = h * ((D * bits) // 8)
+        offs_d = tl.arange(0, D)
+        byte_d = (offs_d * bits) // 8
+        shift_d = (offs_d * bits) % 8
+        mask_val = (1 << bits) - 1
+        rslot = tl.load(block_res_ptr + blk)
+        rgrp = tl.load(res_group_ptr + tl.maximum(rslot, 0))
+        for t0 in tl.static_range(0, BS, TILE):
+            offs_t = t0 + tl.arange(0, TILE)
+            valid = bi * BS + offs_t < ctx
+            j = offs_t // tpc
+            ext = (j > 0) & valid
+            ids = tl.load(table_ptr + blk * table_s0 + (j - 1), mask=ext, other=0).to(tl.int64)
+            page = tl.where(ext, ids // KC, blk)
+            slot = tl.where(ext, ids % KC, 0)
+            row = page * data_s0 + slot * data_s1 + ((offs_t % tpc) * (2 * side_bytes)).to(tl.int64)
+            k_raw = tl.load(data_ptr + row[:, None] + head_off + byte_d[None, :], mask=valid[:, None], other=0).to(tl.int32)
+            k_code = (k_raw >> shift_d[None, :]) & mask_val
+            grp = offs_t // KG
+            ks_off = blk * ks_s0 + grp[:, None] * ks_s1 + h * ks_s2 + offs_d[None, :]
+            k = k_code.to(tl.float32) * tl.load(ks_ptr + ks_off, mask=valid[:, None], other=0.0).to(tl.float32) \
+                + tl.load(km_ptr + ks_off, mask=valid[:, None], other=0.0).to(tl.float32)
+            in_res = valid & (rslot >= 0) & (grp == rgrp)
+            k_res = tl.load(
+                res_ptr + tl.maximum(rslot, 0) * res_s0 + (offs_t % KG)[:, None] * res_s1 + h * res_s2 + offs_d[None, :],
+                mask=in_res[:, None], other=0.0,
+            ).to(tl.float32)
+            k = tl.where(in_res[:, None], k_res, k)
+            v_raw = tl.load(
+                data_ptr + row[:, None] + side_bytes + head_off + byte_d[None, :], mask=valid[:, None], other=0
+            ).to(tl.int32)
+            v_code = (v_raw >> shift_d[None, :]) & mask_val
+            vs_off = blk * vs_s0 + offs_t[:, None] * vs_s1 + h * vs_s2 + (offs_d // VG)[None, :]
+            v = v_code.to(tl.float32) * tl.load(vs_ptr + vs_off, mask=valid[:, None], other=0.0).to(tl.float32) \
+                + tl.load(vm_ptr + vs_off, mask=valid[:, None], other=0.0).to(tl.float32)
+            dst = (out_row0 + offs_t)[:, None] * out_s0 + h * out_s1 + offs_d[None, :]
+            tl.store(k_out_ptr + dst, k.to(k_out_ptr.dtype.element_ty), mask=valid[:, None])
+            tl.store(v_out_ptr + dst, v.to(v_out_ptr.dtype.element_ty), mask=valid[:, None])
 
 
 def _prefill_triton(store, query, output, tiles, block_table, softmax_scale):

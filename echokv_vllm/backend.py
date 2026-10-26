@@ -21,6 +21,7 @@ kernels.
 
 from __future__ import annotations
 
+import itertools
 from dataclasses import dataclass, replace
 from typing import ClassVar
 
@@ -45,7 +46,12 @@ from echokv_vllm.canary import KRefRing, canary_kl
 from echokv_vllm.config import load_config
 from echokv_vllm.controller import LayerController
 from echokv_vllm.kernels.decode import _use_triton, decode_attention
-from echokv_vllm.kernels.prefill import build_tiles, prefill_attention
+from echokv_vllm.kernels.prefill import (
+    FUSED_MAX_CHUNK,
+    build_dequant_work,
+    build_tiles,
+    prefill_attention,
+)
 from echokv_vllm.quant import SUPPORTED_BITS
 from echokv_vllm.tiered_cache import TieredKVCache, TieredLayout
 from echokv_vllm.write_plan import WritePlan, WritePlanner
@@ -117,7 +123,8 @@ class EchoKVMetadata:
     decode_lens: torch.Tensor | None  # [nd] their cache lengths
     prefill: list[tuple[int, int, int, int]]  # (q_start, q_end, ctx, gather_start)
     prefill_reqs: list[int]  # request index (block-table row) of each prefill entry
-    prefill_tiles: torch.Tensor | None  # Triton prefill work list (see kernels/prefill.py)
+    prefill_tiles: torch.Tensor | None  # fused Triton prefill work list (tiny chunks)
+    prefill_dense: tuple | None  # dequantize + flash-attention inputs (see kernels/prefill.py)
     prefill_blk: torch.Tensor | None  # PyTorch path: gather index over all prefill contexts
     prefill_off: torch.Tensor | None
 
@@ -179,9 +186,25 @@ class EchoKVMetadataBuilder(AttentionMetadataBuilder[EchoKVMetadata]):
             decode_reqs = torch.tensor(d_reqs, device=dev)
             decode_lens = seq_lens_cpu[d_reqs].to(dev)
         prefill_reqs = [r for r, _ in gathers]
-        prefill_tiles = prefill_blk = prefill_off = None
+        prefill_tiles = prefill_dense = prefill_blk = prefill_off = None
         if gathers and self.use_triton:
-            prefill_tiles = build_tiles(prefill, prefill_reqs, self.gqa, dev)
+            nqs = [qe - qs for qs, qe, _, _ in prefill]
+            if max(nqs) <= FUSED_MAX_CHUNK:
+                prefill_tiles = build_tiles(prefill, prefill_reqs, self.gqa, dev)
+            else:
+                ctxs = [ctx for _, _, ctx, _ in prefill]
+                q_rows = torch.cat([torch.arange(qs, qe) for qs, qe, _, _ in prefill])
+                cu_q = torch.tensor([0] + list(itertools.accumulate(nqs)), dtype=torch.int32)
+                cu_k = torch.tensor([0] + list(itertools.accumulate(ctxs)), dtype=torch.int32)
+                prefill_dense = (
+                    build_dequant_work(prefill, prefill_reqs, bs, dev),
+                    g_start,
+                    q_rows.to(dev),
+                    cu_q.to(dev),
+                    cu_k.to(dev),
+                    max(nqs),
+                    max(ctxs),
+                )
         elif gathers:
             blks, offs = [], []
             for r, ctx in gathers:
@@ -205,6 +228,7 @@ class EchoKVMetadataBuilder(AttentionMetadataBuilder[EchoKVMetadata]):
             prefill=prefill,
             prefill_reqs=prefill_reqs,
             prefill_tiles=prefill_tiles,
+            prefill_dense=prefill_dense,
             prefill_blk=prefill_blk,
             prefill_off=prefill_off,
         )
@@ -339,7 +363,7 @@ class EchoKVAttentionImpl(AttentionImpl[EchoKVMetadata]):
                 gather = None if md.prefill_blk is None else (md.prefill_blk, md.prefill_off)
                 prefill_attention(
                     store, query, output, md.prefill, md.prefill_reqs, md.block_table,
-                    self.scale, tiles=md.prefill_tiles, gather=gather,
+                    self.scale, tiles=md.prefill_tiles, gather=gather, dense=md.prefill_dense,
                 )
         if md.decode_rows is not None:
             with record_function("echokv.decode_attn"):

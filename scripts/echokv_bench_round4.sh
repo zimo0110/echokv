@@ -4,7 +4,7 @@
 #   2. 32K-token contexts: throughput at fixed KV memory (stock / INT8 / INT4)
 #   3. serving latency: TTFT / TPOT / ITL at rising concurrency, 8K prompts
 #
-#   MODEL=unsloth/Llama-3.1-8B-Instruct bash scripts/echokv_bench_round3.sh
+#   MODEL=unsloth/Llama-3.1-8B-Instruct bash scripts/echokv_bench_round4.sh
 #
 # Results: results/echokv_gpu/<model>/round4_*. ~1 hour on a DGX Spark. Measures the async-H2D / deferred-canary fixes against round 3.
 set -uo pipefail

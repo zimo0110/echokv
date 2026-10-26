@@ -157,6 +157,9 @@ if HAS_TRITON:
         for bi in range(b_start, b_end):
             blk = tl.load(bt_ptr + seq * bt_s0 + bi).to(tl.int64)
             bits = tl.load(tag_ptr + blk * tag_s0).to(tl.int32)
+            # Never-written block (tag 0; vLLM's warmup/profiling batches read
+            # these): address it as INT2 so every access stays inside its page.
+            bits = tl.where(bits == 0, 2, bits)
             tok = bi * BS + offs_t
             valid = tok < seq_len
 

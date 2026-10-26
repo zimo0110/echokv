@@ -136,6 +136,7 @@ if HAS_TRITON:
         blk = slot_id // BS
         off = slot_id % BS
         bits = tl.load(pages_ptr + blk * PS).to(tl.int32)
+        bits = tl.where(bits == 0, 2, bits)  # never-opened block: stay in bounds
         levels = ((1 << bits) - 1).to(tl.float32)
 
         x = tl.load(v_ptr + row * v_s0 + h * v_s1 + tl.arange(0, D)).to(tl.float32)
@@ -182,6 +183,7 @@ if HAS_TRITON:
         grp = tl.load(grp_ptr + f)
         rslot = tl.load(rslot_ptr + f)
         bits = tl.load(pages_ptr + blk * PS).to(tl.int32)
+        bits = tl.where(bits == 0, 2, bits)  # never-opened block: stay in bounds
         levels = ((1 << bits) - 1).to(tl.float32)
 
         offs_p = tl.arange(0, KG)

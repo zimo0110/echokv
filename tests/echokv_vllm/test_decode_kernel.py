@@ -109,3 +109,24 @@ def test_triton_kernel_is_batch_invariant():
         nb = -(-lens[i] // bs)
         alone = dec._decode_triton(store, q[i : i + 1], table[i : i + 1, :nb], lens_t[i : i + 1], d**-0.5, 2)
         assert torch.equal(alone[0], full[i])
+
+
+@pytest.mark.parametrize("use_triton", [False, True])
+def test_reads_and_writes_of_never_opened_blocks_are_safe(use_triton):
+    """vLLM warmup batches point at blocks nothing has written (tag 0)."""
+    if use_triton and not TRITON_OK:
+        pytest.skip("needs CUDA or TRITON_INTERPRET=1")
+    h, d, bs = 2, 64, 64
+    store, table, lens_t = build(h, d, bs, 8, [70], [8])
+    used = set(table[0, :2].tolist())
+    unused = [x for x in range(store.num_blocks) if x not in used][:2]
+    fresh = torch.tensor([unused], dtype=torch.int32, device=DEVICE)
+    q = torch.randn(1, 2 * h, d, device=DEVICE)
+    fn = dec._decode_triton if use_triton else (lambda *a: dec.decode_attention_torch(*a[:5]))
+    out = fn(store, q, fresh, torch.tensor([100], device=DEVICE), d**-0.5, 4)
+    assert torch.isfinite(out).all()
+    # A mid-block write into a never-opened block opens it instead of using tier 0.
+    b = unused[0]
+    k = torch.randn(3, h, d, device=DEVICE)
+    store.write(k, k, b * bs + 5 + torch.arange(3, device=DEVICE), 4)
+    assert int(store.tag[b]) == 4

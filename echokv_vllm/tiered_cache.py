@@ -371,8 +371,15 @@ class TieredKVCache:
         L = self.layout
         for ev in plan.evictions:  # rare; before the slot is reused below
             self._seal(ev)
-        if plan.n_open:
-            self.open_blocks(plan.open_np, target_bits, protect=plan.touched_np)
+        opens = plan.open_np
+        if plan.touched_np.size:
+            # A write into a block that was never opened (no offset-0 write seen,
+            # e.g. vLLM warmup batches): open it rather than write with tier 0.
+            fresh = plan.touched_np[self._tag_h[plan.touched_np] == 0]
+            if fresh.size:
+                opens = np.union1d(opens, fresh)
+        if opens.size:
+            self.open_blocks(opens, target_bits, protect=plan.touched_np)
         if plan.slots_np.size:
             np.maximum.at(self._fill_h, plan.slots_np // L.block_size, plan.slots_np % L.block_size + 1)
             self._last_h[plan.touched_np] = plan.step

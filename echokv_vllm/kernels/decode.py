@@ -150,6 +150,7 @@ if HAS_TRITON:
             other=0.0,
         ).to(tl.float32)
 
+        q16 = q.to(tl.float16)
         m_i = tl.full([QBLOCK], float("-inf"), tl.float32)
         l_i = tl.zeros([QBLOCK], tl.float32)
         acc = tl.zeros([QBLOCK, D], tl.float32)
@@ -215,7 +216,9 @@ if HAS_TRITON:
                 v_min = tl.load(vm_ptr + vs_off, mask=valid[:, None], other=0.0).to(tl.float32)
                 v = v_code.to(tl.float32) * v_scale + v_min
 
-                s = tl.dot(q, tl.trans(k), input_precision="ieee") * softmax_scale
+                # fp16 operands, fp32 accumulation: tensor cores, as in stock
+                # attention kernels (|q|, |k|, |v| are far inside fp16 range, p <= 1).
+                s = tl.dot(q16, tl.trans(k.to(tl.float16))) * softmax_scale
                 s = tl.where(valid[None, :], s, float("-inf"))
                 m_new = tl.maximum(m_i, tl.max(s, axis=1))
                 # A tile can be fully masked while m_i is still -inf: keep exp() finite.
@@ -223,7 +226,7 @@ if HAS_TRITON:
                 alpha = tl.exp(m_i - m_safe)
                 p = tl.exp(s - m_safe[:, None])
                 l_i = l_i * alpha + tl.sum(p, axis=1)
-                acc = acc * alpha[:, None] + tl.dot(p, v, input_precision="ieee")
+                acc = acc * alpha[:, None] + tl.dot(p.to(tl.float16), v.to(tl.float16))
                 m_i = m_new
 
         out_row = (seq * (H * GQA) + h * GQA + offs_q) * num_splits + split

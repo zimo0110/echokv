@@ -95,7 +95,8 @@ def test_triton_kernel_matches_reference(case, splits):
         q = torch.randn(len(lens), gqa * h, d, device=DEVICE)
         ref = dec.decode_attention_torch(store, q, table, lens_t, d**-0.5)
         got = dec._decode_triton(store, q, table, lens_t, d**-0.5, splits)
-        torch.testing.assert_close(got, ref, rtol=2e-4, atol=2e-4)
+        # The kernel's dot products take fp16 operands (fp32 accumulation).
+        torch.testing.assert_close(got, ref, rtol=5e-3, atol=5e-3)
     assert store.residual_free < store.res_k.shape[0]  # residual path exercised
     assert len(set(store.tier_histogram()[b] > 0 for b in (2, 4, 8))) >= 1
 

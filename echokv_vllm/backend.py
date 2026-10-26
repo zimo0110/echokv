@@ -26,6 +26,7 @@ from typing import ClassVar
 
 import torch
 import torch.nn.functional as F
+from torch.nn.attention.bias import causal_lower_right
 
 from vllm.v1.attention.backend import (
     AttentionBackend,
@@ -107,6 +108,15 @@ class EchoKVMetadata:
     block_table: torch.Tensor
     slot_mapping: torch.Tensor
     write_plan: WritePlan
+    # Per-step batch layout, computed once by the builder for all layers.
+    last_rows: list[int]  # each request's newest query row (canary samples)
+    last_ctx: list[int]
+    decode_rows: torch.Tensor | None  # [nd] query rows of single-token requests
+    decode_reqs: torch.Tensor | None  # [nd] their request indices
+    decode_lens: torch.Tensor | None  # [nd] their cache lengths
+    prefill: list[tuple[int, int, int, int]]  # (q_start, q_end, ctx, gather_start)
+    prefill_blk: torch.Tensor | None  # gather index over every prefill request's context
+    prefill_off: torch.Tensor | None
 
 
 class EchoKVMetadataBuilder(AttentionMetadataBuilder[EchoKVMetadata]):
@@ -130,6 +140,40 @@ class EchoKVMetadataBuilder(AttentionMetadataBuilder[EchoKVMetadata]):
             raise NotImplementedError("EchoKV supports causal decoder attention only")
         n = cm.num_reqs
         plan = self.planner.plan(cm.slot_mapping[: cm.num_actual_tokens].cpu(), self.device)
+        qsl = cm.query_start_loc_cpu[: n + 1].tolist()
+        seq_lens_cpu = cm.seq_lens[:n].cpu()
+        lens = seq_lens_cpu.tolist()
+        bs = self.kv_cache_spec.block_size
+        last_rows, last_ctx, d_rows, d_reqs, prefill = [], [], [], [], []
+        gathers = []
+        g_start = 0
+        for r in range(n):
+            qs, qe, ctx = qsl[r], qsl[r + 1], lens[r]
+            if qe == qs or ctx == 0:
+                continue
+            last_rows.append(qe - 1)
+            last_ctx.append(ctx)
+            if qe - qs == 1:
+                d_rows.append(qs)
+                d_reqs.append(r)
+            else:
+                prefill.append((qs, qe, ctx, g_start))
+                gathers.append((r, ctx))
+                g_start += ctx
+        dev = self.device
+        decode_rows = decode_reqs = decode_lens = None
+        if d_rows:
+            decode_rows = torch.tensor(d_rows, device=dev)
+            decode_reqs = torch.tensor(d_reqs, device=dev)
+            decode_lens = seq_lens_cpu[d_reqs].to(dev)
+        prefill_blk = prefill_off = None
+        if gathers:
+            blks, offs = [], []
+            for r, ctx in gathers:
+                pos = torch.arange(ctx, device=dev)
+                blks.append(cm.block_table_tensor[r, pos // bs].long())
+                offs.append(pos % bs)
+            prefill_blk, prefill_off = torch.cat(blks), torch.cat(offs)
         return EchoKVMetadata(
             num_actual_tokens=cm.num_actual_tokens,
             num_reqs=n,
@@ -138,6 +182,14 @@ class EchoKVMetadataBuilder(AttentionMetadataBuilder[EchoKVMetadata]):
             block_table=cm.block_table_tensor,
             slot_mapping=cm.slot_mapping,
             write_plan=plan,
+            last_rows=last_rows,
+            last_ctx=last_ctx,
+            decode_rows=decode_rows,
+            decode_reqs=decode_reqs,
+            decode_lens=decode_lens,
+            prefill=prefill,
+            prefill_blk=prefill_blk,
+            prefill_off=prefill_off,
         )
 
 
@@ -262,57 +314,46 @@ class EchoKVAttentionImpl(AttentionImpl[EchoKVMetadata]):
             return output
         store = self._get_store(kv_cache)
         md = attn_metadata
-        bs = store.layout.block_size
-        qsl = md.query_start_loc_cpu.tolist()
-        seq_lens = md.seq_lens_cpu.tolist()
-        # The canary samples each request's newest query (prefill or decode).
-        last_rows: list[int] = []
-        last_ctx: list[int] = []
-        decode_reqs: list[int] = []
-        for r in range(md.num_reqs):
-            qs, qe, ctx = qsl[r], qsl[r + 1], seq_lens[r]
-            if qe == qs or ctx == 0:
-                continue
-            last_rows.append(qe - 1)
-            last_ctx.append(ctx)
-            if qe - qs == 1:
-                decode_reqs.append(r)
-                continue
-            pos = torch.arange(ctx, device=query.device)
-            blocks = md.block_table[r, : -(-ctx // bs)].long()
-            k, v = store.gather(blocks[pos // bs], pos % bs)
-            output[qs:qe] = self._attend(query[qs:qe], k, v).to(output.dtype)
-        if decode_reqs:
-            reqs = torch.tensor(decode_reqs, device=query.device)
-            rows = torch.tensor([qsl[r] for r in decode_reqs], device=query.device)
+        if md.prefill:
+            # One gather for every prefill request's context, then per-request
+            # attention in the model dtype with a bottom-right causal mask
+            # (lets PyTorch pick its fused SDPA kernels).
+            k_all, v_all = store.gather(md.prefill_blk, md.prefill_off)
+            k_all, v_all = k_all.to(query.dtype), v_all.to(query.dtype)
+            for qs, qe, ctx, g in md.prefill:
+                output[qs:qe] = self._attend(query[qs:qe], k_all[g : g + ctx], v_all[g : g + ctx]).to(
+                    output.dtype
+                )
+        if md.decode_rows is not None:
             out = decode_attention(
                 store,
-                query[rows],
-                md.block_table[reqs],
-                md.seq_lens_cpu[decode_reqs].to(query.device),
+                query[md.decode_rows],
+                md.block_table[md.decode_reqs],
+                md.decode_lens,
                 self.scale,
             )
-            output[rows] = out.to(output.dtype)
+            output[md.decode_rows] = out.to(output.dtype)
 
         self._step += 1
         if self._step % self.cfg.canary_interval == 0:
             self._fire_pending = True
-        if self._fire_pending and last_rows:
+        if self._fire_pending and md.last_rows:
             self._fire_pending = False
-            self._fire(query, last_rows, last_ctx)
+            self._fire(query, md.last_rows, md.last_ctx)
         return output
 
     def _attend(self, q: torch.Tensor, k: torch.Tensor, v: torch.Tensor) -> torch.Tensor:
-        """Causal attention of ``q [nq, Hq, D]`` over a request's whole context."""
+        """Causal attention of ``q [nq, Hq, D]`` over a request's whole context ``k, v [ctx, H, D]``."""
         nq, ctx = q.shape[0], k.shape[0]
-        rep = self.num_heads // self.num_kv_heads
-        qh = q.float().transpose(0, 1)
-        kh = k.repeat_interleave(rep, dim=1).transpose(0, 1)
-        vh = v.repeat_interleave(rep, dim=1).transpose(0, 1)
-        qpos = torch.arange(ctx - nq, ctx, device=q.device).unsqueeze(1)
-        mask = torch.arange(ctx, device=q.device).unsqueeze(0) <= qpos
-        out = F.scaled_dot_product_attention(qh, kh, vh, attn_mask=mask, scale=self.scale)
-        return out.transpose(0, 1)
+        out = F.scaled_dot_product_attention(
+            q.transpose(0, 1).unsqueeze(0),
+            k.transpose(0, 1).unsqueeze(0),
+            v.transpose(0, 1).unsqueeze(0),
+            attn_mask=causal_lower_right(nq, ctx),
+            scale=self.scale,
+            enable_gqa=True,
+        )
+        return out.squeeze(0).transpose(0, 1)
 
     # -- canary + controller ----------------------------------------------
 

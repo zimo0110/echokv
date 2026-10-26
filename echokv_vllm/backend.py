@@ -42,6 +42,7 @@ from vllm.forward_context import get_forward_context
 from vllm.v1.attention.backends.utils import get_num_attention_heads_from_layers
 from vllm.v1.kv_cache_interface import AttentionSpec
 
+from echokv_vllm._util import to_device
 from echokv_vllm.canary import KRefRing, canary_kl
 from echokv_vllm.config import load_config
 from echokv_vllm.controller import LayerController
@@ -182,9 +183,8 @@ class EchoKVMetadataBuilder(AttentionMetadataBuilder[EchoKVMetadata]):
         dev = self.device
         decode_rows = decode_reqs = decode_lens = None
         if d_rows:
-            decode_rows = torch.tensor(d_rows, device=dev)
-            decode_reqs = torch.tensor(d_reqs, device=dev)
-            decode_lens = seq_lens_cpu[d_reqs].to(dev)
+            packed = to_device(torch.stack([torch.tensor(d_rows), torch.tensor(d_reqs), seq_lens_cpu[d_reqs].long()]), dev)
+            decode_rows, decode_reqs, decode_lens = packed[0], packed[1], packed[2]
         prefill_reqs = [r for r, _ in gathers]
         prefill_tiles = prefill_dense = prefill_blk = prefill_off = None
         if gathers and self.use_triton:
@@ -199,9 +199,9 @@ class EchoKVMetadataBuilder(AttentionMetadataBuilder[EchoKVMetadata]):
                 prefill_dense = (
                     build_dequant_work(prefill, prefill_reqs, bs, dev),
                     g_start,
-                    q_rows.to(dev),
-                    cu_q.to(dev),
-                    cu_k.to(dev),
+                    to_device(q_rows, dev),
+                    to_device(cu_q, dev),
+                    to_device(cu_k, dev),
                     max(nqs),
                     max(ctxs),
                 )
@@ -281,6 +281,7 @@ class EchoKVAttentionImpl(AttentionImpl[EchoKVMetadata]):
         self._store_key: tuple | None = None
         self._step = 0
         self._fire_pending = False
+        self._pending: tuple[torch.Tensor, float] | None = None  # last canary δ̂, not yet consumed
 
     # -- cache binding ----------------------------------------------------
 
@@ -388,19 +389,21 @@ class EchoKVAttentionImpl(AttentionImpl[EchoKVMetadata]):
     # -- canary + controller ----------------------------------------------
 
     def _fire(self, query: torch.Tensor, rows: list[int], ctx: list[int]) -> None:
+        # The controller consumes the previous fire's δ̂ (computed `canary_interval`
+        # steps ago, long finished on the GPU), so reading it does not stall the
+        # stream the way reading this fire's result immediately would.
+        if self._pending is not None:
+            deltas, ctx_mean = self._pending
+            self._pending = None
+            self.controller.observe(dict(zip(SUPPORTED_BITS, deltas.tolist())), ctx_mean)
         kref = self.kref.view()
-        if kref is None:
+        if kref is None or kref.shape[0] < self.cfg.k_group:
             return
         rows = rows[: self.cfg.canary_max_q]
         ctx = ctx[: self.cfg.canary_max_q]
-        q = query[torch.tensor(rows, device=query.device)]
-        if kref.shape[0] < self.cfg.k_group:
-            return
-        deltas = canary_kl(q, kref, SUPPORTED_BITS, self.cfg.k_group, self.scale)
-        deltas = _tp_mean(deltas)
-        values = deltas.tolist()
-        self.controller.observe(dict(zip(SUPPORTED_BITS, values)), sum(ctx) / len(ctx))
-
+        q = query[to_device(torch.tensor(rows), query.device)]
+        deltas = _tp_mean(canary_kl(q, kref, SUPPORTED_BITS, self.cfg.k_group, self.scale))
+        self._pending = (deltas, sum(ctx) / len(ctx))
 
 def _block_multiple() -> int:
     return max(16, load_config().k_group)

@@ -65,6 +65,7 @@ from echokv_vllm.quant import (
     stats_along,
     unpack,
 )
+from echokv_vllm._util import to_device
 from echokv_vllm.write_plan import Eviction, WritePlan, WritePlanner
 
 # Extra pool chunks a block of each tier needs beyond its in-page chunk 0.
@@ -277,7 +278,7 @@ class TieredKVCache:
         self._tag_h[blocks] = tiers
         # One host-to-device copy: [block, tier, chunk ids x3] per opened block.
         packed = torch.from_numpy(np.concatenate([blocks[:, None], tiers[:, None], self._table_h[blocks]], 1))
-        dev = packed.to(self.device, non_blocking=False)
+        dev = to_device(packed, self.device)
         self.tag[dev[:, 0]] = dev[:, 1].to(torch.uint8)
         self.table[dev[:, 0]] = dev[:, 2:].to(torch.int32)
         self.sealed[dev[:, 0]] = 0

@@ -29,6 +29,7 @@ import torch
 import torch.nn.functional as F
 from torch.nn.attention.bias import causal_lower_right
 
+from echokv_vllm._util import to_device
 from echokv_vllm.kernels.decode import HAS_TRITON, _use_triton
 from echokv_vllm.tiered_cache import TieredKVCache
 
@@ -63,7 +64,7 @@ def build_tiles(prefill: list[tuple[int, int, int, int]], req_of: list[int], gqa
         pos0 = ctx - nq
         for t0 in range(0, nq, bm):
             rows.append((qs + t0, min(bm, nq - t0), pos0 + t0, ctx, r))
-    tiles = torch.tensor(rows, dtype=torch.int32).reshape(-1, 5).to(device)
+    tiles = to_device(torch.tensor(rows, dtype=torch.int32).reshape(-1, 5), device)
     tiles.block_m = bm  # host-side record of the tile size (checked without a sync)
     return tiles
 
@@ -81,7 +82,7 @@ def build_dequant_work(prefill, req_of, block_size: int, device) -> torch.Tensor
     for (_, _, ctx, g0), r in zip(prefill, req_of):
         for bi in range(-(-ctx // block_size)):
             rows.append((r, bi, g0 + bi * block_size, ctx))
-    return torch.tensor(rows, dtype=torch.int32).reshape(-1, 4).to(device)
+    return to_device(torch.tensor(rows, dtype=torch.int32).reshape(-1, 4), device)
 
 
 def dequant_dense(store, work, total_ctx: int, block_table, dtype) -> tuple[torch.Tensor, torch.Tensor]:

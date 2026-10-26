@@ -15,8 +15,9 @@ On a real GPU (NVIDIA DGX Spark, Llama-3.1-8B-Instruct):
 - **INT4 is nearly lossless: +0.7% perplexity for 3.19× KV capacity** in the
   same memory.
 - **INT8 is lossless: 1.77× capacity.**
-- **Throughput is the open problem.** It was 0.46–0.49× stock before the
-  speed fixes; those fixes are pushed, and the re-measurement is pending.
+- **EchoKV INT4 is 1.35× faster than stock vLLM** in the same memory
+  (462.5 vs 342.5 output tok/s). The extra KV capacity lets vLLM run about
+  3× more requests at once. Before the speed fixes it was 0.49× stock.
 
 ## GPU: DGX Spark (GB10), Llama-3.1-8B-Instruct, bf16
 
@@ -45,20 +46,31 @@ INT4 differences below ~0.003 nats are noise: they come from rounding flips
 8 GiB KV-cache budget for every config. 256 requests × (1,024 tokens in,
 256 out). CUDA graphs on (piecewise).
 
+**Current code** (commit `c6b4743`), from `throughput_v2.json`:
+
 | config | KV tokens | capacity | output tok/s | speed |
 |---|---:|---:|---:|---:|
-| stock vLLM (bf16) | 65,536 | 1.00× | 347.0 | 1.00× |
-| EchoKV INT8 | 116,288 | **1.77×** | 158.4 | 0.46× |
-| EchoKV INT4 | 209,024 | **3.19×** | 170.6 | 0.49× |
-| live, 6-bit budget | 149,440 | 2.28× | 156.3 | 0.45× |
-| live, 4-bit budget | 209,024 | 3.19× | 168.9 | 0.49× |
+| stock vLLM (bf16) | 65,536 | 1.00× | 342.5 | 1.00× |
+| **EchoKV INT4** | 209,024 | **3.19×** | **462.5** | **1.35×** |
 
-These were measured before the speed fixes in commit `7372522`:
-- per-step batch layout
+Wall time for the 256 requests: 142 s for EchoKV vs 191 s for stock.
+
+**Before the speed fixes** (from `throughput.json`). The fixes in commit
+`7372522` were:
+- a per-step batch layout built once instead of per layer
 - fused bf16 prefill attention
 - fp16 tensor-core decode dots
 
-A re-run is in progress.
+| config | KV tokens | capacity | output tok/s | speed |
+|---|---:|---:|---:|---:|
+| stock vLLM (bf16) | 65,536 | 1.00× | 347.0 | 1.00× |
+| EchoKV INT8 | 116,288 | 1.77× | 158.4 | 0.46× |
+| EchoKV INT4 | 209,024 | 3.19× | 170.6 | 0.49× |
+| live, 6-bit budget | 149,440 | 2.28× | 156.3 | 0.45× |
+| live, 4-bit budget | 209,024 | 3.19× | 168.9 | 0.49× |
+
+The quality table above was measured before the speed fixes. A
+re-check of INT4 on the current code is pending.
 
 The DGX Spark has ~273 GB/s memory bandwidth (an H100 has ~3.3 TB/s), so
 treat absolute tok/s as Spark-specific. The ratios against stock are the
@@ -128,8 +140,12 @@ MODEL=unsloth/Llama-3.1-8B-Instruct bash scripts/echokv_gpu_validate.sh  # ungat
 
 ## Next
 
-1. Re-measure throughput with the speed fixes.
-2. Profile on GPU to find where the remaining time goes.
-3. Run 70B on 4× H100 (TP=4).
-4. Try long-context workloads (e.g. RULER), where per-layer adaptation has
+1. Re-check INT4 quality on the current code, then re-run the other
+   configs (INT8, live) for throughput.
+2. Profile on GPU, then work on a fused prefill kernel, a fused write
+   kernel and CUDA graphs for decode.
+3. Run memory-bound benchmarks (long contexts, many users), where the
+   capacity gain should matter most.
+4. Run 70B on 4× H100 (TP=4).
+5. Try long-context workloads (e.g. RULER), where per-layer adaptation has
    more room to help.

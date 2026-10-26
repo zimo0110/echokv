@@ -2,7 +2,7 @@
 
 Closed-loop, per-layer mixed-precision KV cache (INT8 / INT4 / INT2) for
 vLLM, shipped as a vLLM plugin (`echokv_vllm/`, vLLM 0.32.0, no fork).
-Design, measurements and limitations: [docs/ECHOKV_VLLM_PLUGIN.md](docs/ECHOKV_VLLM_PLUGIN.md).
+Results: [RESULTS.md](RESULTS.md). Design and limitations: [docs/ECHOKV_VLLM_PLUGIN.md](docs/ECHOKV_VLLM_PLUGIN.md).
 
 ## Run the GPU validation
 

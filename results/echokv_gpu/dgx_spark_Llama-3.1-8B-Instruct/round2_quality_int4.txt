@@ -1,0 +1,4 @@
+
+unsloth/Llama-3.1-8B-Instruct   stock NLL 1.8860
+config           ΔNLL   bits  tiers
+int4          +0.0055    4.0  4:32

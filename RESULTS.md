@@ -15,9 +15,13 @@ On a real GPU (NVIDIA DGX Spark, Llama-3.1-8B-Instruct):
 - **INT4 is nearly lossless: +0.7% perplexity for 3.19× KV capacity** in the
   same memory.
 - **INT8 is lossless: 1.77× capacity.**
-- **EchoKV INT4 is 1.35× faster than stock vLLM** in the same memory
-  (462.5 vs 342.5 output tok/s). The extra KV capacity lets vLLM run about
-  3× more requests at once. Before the speed fixes it was 0.49× stock.
+- **EchoKV beats stock vLLM on throughput in the same memory**, by
+  freeing KV space so vLLM can run more requests at once:
+  - INT4: 1.35× on short prompts and 1.40× on 8K-token prompts
+  - INT8: 1.15×
+  - Before the speed fixes it was 0.49×.
+- **The speed-up costs no quality.** INT4 measured +0.0055 ΔNLL after the
+  fixes vs +0.0066 before, which is within noise.
 
 ## GPU: DGX Spark (GB10), Llama-3.1-8B-Instruct, bf16
 
@@ -46,14 +50,28 @@ INT4 differences below ~0.003 nats are noise: they come from rounding flips
 8 GiB KV-cache budget for every config. 256 requests × (1,024 tokens in,
 256 out). CUDA graphs on (piecewise).
 
-**Current code** (commit `c6b4743`), from `throughput_v2.json`:
+**Current code**, short prompts: 256 × (1,024 in, 256 out). From
+`round2_throughput_short.json`.
 
 | config | KV tokens | capacity | output tok/s | speed |
 |---|---:|---:|---:|---:|
-| stock vLLM (bf16) | 65,536 | 1.00× | 342.5 | 1.00× |
-| **EchoKV INT4** | 209,024 | **3.19×** | **462.5** | **1.35×** |
+| stock vLLM (bf16) | 65,536 | 1.00× | 341.4 | 1.00× |
+| EchoKV INT8 | 116,288 | 1.77× | 394.1 | **1.15×** |
+| EchoKV INT4 | 209,024 | 3.19× | 461.0 | **1.35×** |
+| live, 6-bit budget | 149,440 | 2.28× | 404.5 | **1.18×** |
+| live, 4-bit budget | 209,024 | 3.19× | 456.9 | **1.34×** |
 
-Wall time for the 256 requests: 142 s for EchoKV vs 191 s for stock.
+**Current code**, long prompts (memory-bound): 64 × (8,192 in, 256 out).
+At this length 8 GiB holds about 7 requests in bf16 and about 23 in INT4.
+From `round2_throughput_long.json`.
+
+| config | KV tokens | output tok/s | total tok/s | wall time | speed |
+|---|---:|---:|---:|---:|---:|
+| stock vLLM (bf16) | 65,536 | 46.5 | 1,534 | 352 s | 1.00× |
+| **EchoKV INT4** | 209,024 | **65.1** | **2,149** | **252 s** | **1.40×** |
+
+Speed tracks capacity: the more KV tokens fit, the bigger the batches vLLM
+can run.
 
 **Before the speed fixes** (from `throughput.json`). The fixes in commit
 `7372522` were:
@@ -69,8 +87,8 @@ Wall time for the 256 requests: 142 s for EchoKV vs 191 s for stock.
 | live, 6-bit budget | 149,440 | 2.28× | 156.3 | 0.45× |
 | live, 4-bit budget | 209,024 | 3.19× | 168.9 | 0.49× |
 
-The quality table above was measured before the speed fixes. A
-re-check of INT4 on the current code is pending.
+The quality table above was measured before the speed fixes. INT4
+re-checked on the current code: ΔNLL +0.0055 (`round2_quality_int4.txt`).
 
 The DGX Spark has ~273 GB/s memory bandwidth (an H100 has ~3.3 TB/s), so
 treat absolute tok/s as Spark-specific. The ratios against stock are the
@@ -140,12 +158,13 @@ MODEL=unsloth/Llama-3.1-8B-Instruct bash scripts/echokv_gpu_validate.sh  # ungat
 
 ## Next
 
-1. Re-check INT4 quality on the current code, then re-run the other
-   configs (INT8, live) for throughput.
-2. Profile on GPU, then work on a fused prefill kernel, a fused write
-   kernel and CUDA graphs for decode.
-3. Run memory-bound benchmarks (long contexts, many users), where the
-   capacity gain should matter most.
+1. Profile on GPU, then work on a fused prefill kernel, a fused write
+   kernel and CUDA graphs for decode. The goal is to beat stock even when
+   memory isn't the bottleneck.
+2. Run longer contexts (32K+) and more users, where the capacity gain
+   should grow.
+3. Measure latency (time to first token, inter-token latency), not just
+   throughput.
 4. Run 70B on 4× H100 (TP=4).
 5. Try long-context workloads (e.g. RULER), where per-layer adaptation has
    more room to help.

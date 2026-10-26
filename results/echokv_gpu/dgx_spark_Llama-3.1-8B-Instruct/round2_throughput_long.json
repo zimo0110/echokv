@@ -1,0 +1,68 @@
+{
+ "args": {
+  "model": "unsloth/Llama-3.1-8B-Instruct",
+  "dtype": "auto",
+  "tp": 1,
+  "block_size": 64,
+  "kv_cache_gib": 8.0,
+  "num_prompts": 64,
+  "input_len": 8192,
+  "output_len": 256,
+  "enforce_eager": false,
+  "configs": [
+   "stock",
+   "echokv-int4"
+  ],
+  "out": "results/echokv_gpu/Llama-3.1-8B-Instruct/round2_throughput_long.json",
+  "child_out": null
+ },
+ "results": {
+  "stock": {
+   "kv_capacity_tokens": 65536,
+   "wall_s": 352.4778927860316,
+   "output_tok_s": 46.48234778782496,
+   "total_tok_s": 1533.9174769982237
+  },
+  "echokv-int4": {
+   "kv_capacity_tokens": 209024,
+   "wall_s": 251.61515579000115,
+   "output_tok_s": 65.11531449112763,
+   "total_tok_s": 2148.805378207212,
+   "avg_stored_bits": 4.0,
+   "tier_vector": [
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4
+   ]
+  }
+ }
+}

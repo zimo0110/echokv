@@ -111,7 +111,9 @@ def run(args, name: str, env_extra: dict) -> dict:
     with open(log_path, "w") if args.quiet else open(os.devnull, "w") as log:
         stream = log if args.quiet else None
         proc = subprocess.run(cmd, env=env, stdout=stream, stderr=subprocess.STDOUT if args.quiet else None)
-    if proc.returncode != 0:
+    # vLLM can abort while tearing down after the work is done ("terminate
+    # called without an active exception"): the result file is the success signal.
+    if not os.path.exists(out):
         print(f"[{name}] FAILED (exit {proc.returncode})" + (f", log: {log_path}" if args.quiet else ""))
         if args.quiet:
             with open(log_path) as f:

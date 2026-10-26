@@ -94,7 +94,10 @@ def spawn(args, mode: str, out: str) -> dict:
     else:
         env["ECHOKV_ENABLE"] = "0"
     cmd = [sys.executable, __file__, "--child", mode, "--child-out", out] + args.passthrough
-    subprocess.run(cmd, env=env, check=True)
+    proc = subprocess.run(cmd, env=env)
+    # vLLM can abort during teardown after finishing: the result file is the success signal.
+    if not os.path.exists(out):
+        raise RuntimeError(f"{mode} run failed (exit {proc.returncode})")
     with open(out) as f:
         return json.load(f)
 

@@ -100,14 +100,24 @@ def main() -> None:
     for name in args.configs:
         tmp = f"{args.out}.{name}.tmp"
         env = dict(os.environ, VLLM_ALLOW_INSECURE_SERIALIZATION="1", **CONFIGS[name])
-        subprocess.run([sys.executable, __file__, "--child-out", tmp] + sys.argv[1:], env=env, check=True)
+        proc = subprocess.run([sys.executable, __file__, "--child-out", tmp] + sys.argv[1:], env=env)
+        # vLLM can abort during teardown after finishing: the result file is the success signal.
+        if not os.path.exists(tmp):
+            print(f"[{name}] FAILED (exit {proc.returncode})")
+            results[name] = {"error": f"exit {proc.returncode}"}
+            continue
         with open(tmp) as f:
             results[name] = json.load(f)
         os.remove(tmp)
     base = results.get("stock")
+    if base is not None and "error" in base:
+        base = None
     print(f"\n{args.model}  KV budget {args.kv_cache_gib} GiB, {args.num_prompts} x ({args.input_len} in, {args.output_len} out)")
     print(f"{'config':<18} {'KV tokens':>10} {'capacity':>9} {'out tok/s':>10} {'speed':>7} {'bits':>5}")
     for name, r in results.items():
+        if "error" in r:
+            print(f"{name:<18} FAILED ({r['error']})")
+            continue
         cap = r["kv_capacity_tokens"] / base["kv_capacity_tokens"] if base else float("nan")
         spd = r["output_tok_s"] / base["output_tok_s"] if base else float("nan")
         bits = r.get("avg_stored_bits")
@@ -115,6 +125,8 @@ def main() -> None:
               f"{'' if bits is None else f'{bits:.2f}':>5}")
     with open(args.out, "w") as f:
         json.dump({"args": vars(args), "results": results}, f, indent=1)
+    if any("error" in r for r in results.values()):
+        sys.exit(1)
 
 
 if __name__ == "__main__":

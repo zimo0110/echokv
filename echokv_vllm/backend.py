@@ -27,6 +27,7 @@ from typing import ClassVar
 import torch
 import torch.nn.functional as F
 from torch.nn.attention.bias import causal_lower_right
+from torch.profiler import record_function
 
 from vllm.v1.attention.backend import (
     AttentionBackend,
@@ -135,6 +136,10 @@ class EchoKVMetadataBuilder(AttentionMetadataBuilder[EchoKVMetadata]):
         common_attn_metadata: CommonAttentionMetadata,
         fast_build: bool = False,
     ) -> EchoKVMetadata:
+        with record_function("echokv.build"):
+            return self._build(common_attn_metadata)
+
+    def _build(self, common_attn_metadata: CommonAttentionMetadata) -> EchoKVMetadata:
         cm = common_attn_metadata
         if cm.causal is not True:
             raise NotImplementedError("EchoKV supports causal decoder attention only")
@@ -290,9 +295,10 @@ class EchoKVAttentionImpl(AttentionImpl[EchoKVMetadata]):
                 f"EchoKV write plan ({plan.block_size}, {plan.k_group}) does not match the cache "
                 f"({store.layout.block_size}, {store.layout.k_group})"
             )
-        store.apply_plan(plan, key, value, self.controller.bits)
-        if plan.rows.numel():
-            self.kref.push(key[plan.rows[-self.cfg.kref_window :]])
+        with record_function("echokv.write"):
+            store.apply_plan(plan, key, value, self.controller.bits)
+            if plan.rows.numel():
+                self.kref.push(key[plan.rows[-self.cfg.kref_window :]])
 
     # -- read path --------------------------------------------------------
 
@@ -318,28 +324,31 @@ class EchoKVAttentionImpl(AttentionImpl[EchoKVMetadata]):
             # One gather for every prefill request's context, then per-request
             # attention in the model dtype with a bottom-right causal mask
             # (lets PyTorch pick its fused SDPA kernels).
-            k_all, v_all = store.gather(md.prefill_blk, md.prefill_off)
-            k_all, v_all = k_all.to(query.dtype), v_all.to(query.dtype)
-            for qs, qe, ctx, g in md.prefill:
-                output[qs:qe] = self._attend(query[qs:qe], k_all[g : g + ctx], v_all[g : g + ctx]).to(
-                    output.dtype
-                )
+            with record_function("echokv.prefill_attn"):
+                k_all, v_all = store.gather(md.prefill_blk, md.prefill_off)
+                k_all, v_all = k_all.to(query.dtype), v_all.to(query.dtype)
+                for qs, qe, ctx, g in md.prefill:
+                    output[qs:qe] = self._attend(
+                        query[qs:qe], k_all[g : g + ctx], v_all[g : g + ctx]
+                    ).to(output.dtype)
         if md.decode_rows is not None:
-            out = decode_attention(
-                store,
-                query[md.decode_rows],
-                md.block_table[md.decode_reqs],
-                md.decode_lens,
-                self.scale,
-            )
-            output[md.decode_rows] = out.to(output.dtype)
+            with record_function("echokv.decode_attn"):
+                out = decode_attention(
+                    store,
+                    query[md.decode_rows],
+                    md.block_table[md.decode_reqs],
+                    md.decode_lens,
+                    self.scale,
+                )
+                output[md.decode_rows] = out.to(output.dtype)
 
         self._step += 1
         if self._step % self.cfg.canary_interval == 0:
             self._fire_pending = True
         if self._fire_pending and md.last_rows:
             self._fire_pending = False
-            self._fire(query, md.last_rows, md.last_ctx)
+            with record_function("echokv.canary"):
+                self._fire(query, md.last_rows, md.last_ctx)
         return output
 
     def _attend(self, q: torch.Tensor, k: torch.Tensor, v: torch.Tensor) -> torch.Tensor:

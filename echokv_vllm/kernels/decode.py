@@ -130,6 +130,7 @@ if HAS_TRITON:
         KG: tl.constexpr,
         VG: tl.constexpr,
         KC: tl.constexpr,
+        TILE: tl.constexpr,
     ):
         seq = tl.program_id(0)
         h = tl.program_id(1)
@@ -142,7 +143,6 @@ if HAS_TRITON:
 
         offs_q = tl.arange(0, QBLOCK)
         offs_d = tl.arange(0, D)
-        offs_t = tl.arange(0, BS)
         q_mask = offs_q < GQA
         q = tl.load(
             q_ptr + seq * q_s0 + (h * GQA + offs_q)[:, None] * q_s1 + offs_d[None, :],
@@ -160,64 +160,71 @@ if HAS_TRITON:
             # Never-written block (tag 0; vLLM's warmup/profiling batches read
             # these): address it as INT2 so every access stays inside its page.
             bits = tl.where(bits == 0, 2, bits)
-            tok = bi * BS + offs_t
-            valid = tok < seq_len
-
-            # Where each token's row lives: chunk j of the block.
             tpc = (2 * BS) // bits
-            j = offs_t // tpc
-            ext = (j > 0) & valid
-            ids = tl.load(table_ptr + blk * table_s0 + (j - 1), mask=ext, other=0).to(tl.int64)
-            page = tl.where(ext, ids // KC, blk)
-            slot = tl.where(ext, ids % KC, 0)
             side_bytes = (H * D * bits) // 8
-            row = page * data_s0 + slot * data_s1 + ((offs_t % tpc) * (2 * side_bytes)).to(tl.int64)
             head_off = h * ((D * bits) // 8)
             byte_d = (offs_d * bits) // 8
             shift_d = (offs_d * bits) % 8
             mask_val = (1 << bits) - 1
-
-            # K: per-channel stats of the token's group; open group from the residual.
-            k_raw = tl.load(
-                data_ptr + row[:, None] + head_off + byte_d[None, :], mask=valid[:, None], other=0
-            ).to(tl.int32)
-            k_code = (k_raw >> shift_d[None, :]) & mask_val
-            grp = offs_t // KG
-            ks_off = blk * ks_s0 + grp[:, None] * ks_s1 + h * ks_s2 + offs_d[None, :]
-            k_scale = tl.load(ks_ptr + ks_off, mask=valid[:, None], other=0.0).to(tl.float32)
-            k_min = tl.load(km_ptr + ks_off, mask=valid[:, None], other=0.0).to(tl.float32)
-            k = k_code.to(tl.float32) * k_scale + k_min
             rslot = tl.load(block_res_ptr + blk)
             rgrp = tl.load(res_group_ptr + tl.maximum(rslot, 0))
-            in_res = valid & (rslot >= 0) & (grp == rgrp)
-            k_res = tl.load(
-                res_ptr + tl.maximum(rslot, 0) * res_s0 + (offs_t % KG)[:, None] * res_s1
-                + h * res_s2 + offs_d[None, :],
-                mask=in_res[:, None],
-                other=0.0,
-            ).to(tl.float32)
-            k = tl.where(in_res[:, None], k_res, k)
 
-            # V: per-token stats along head_dim groups.
-            v_raw = tl.load(
-                data_ptr + row[:, None] + side_bytes + head_off + byte_d[None, :],
-                mask=valid[:, None],
-                other=0,
-            ).to(tl.int32)
-            v_code = (v_raw >> shift_d[None, :]) & mask_val
-            vs_off = blk * vs_s0 + offs_t[:, None] * vs_s1 + h * vs_s2 + (offs_d // VG)[None, :]
-            v_scale = tl.load(vs_ptr + vs_off, mask=valid[:, None], other=0.0).to(tl.float32)
-            v_min = tl.load(vm_ptr + vs_off, mask=valid[:, None], other=0.0).to(tl.float32)
-            v = v_code.to(tl.float32) * v_scale + v_min
+            # TILE tokens at a time keeps the fp32 K/V tiles within the shared
+            # memory of smaller GPUs (~100 KB on GB10/sm_12x vs 228 KB on H100).
+            for t0 in tl.static_range(0, BS, TILE):
+                offs_t = t0 + tl.arange(0, TILE)
+                tok = bi * BS + offs_t
+                valid = tok < seq_len
 
-            s = tl.dot(q, tl.trans(k), input_precision="ieee") * softmax_scale
-            s = tl.where(valid[None, :], s, float("-inf"))
-            m_new = tl.maximum(m_i, tl.max(s, axis=1))
-            alpha = tl.exp(m_i - m_new)
-            p = tl.exp(s - m_new[:, None])
-            l_i = l_i * alpha + tl.sum(p, axis=1)
-            acc = acc * alpha[:, None] + tl.dot(p, v, input_precision="ieee")
-            m_i = m_new
+                # Where each token's row lives: chunk j of the block.
+                j = offs_t // tpc
+                ext = (j > 0) & valid
+                ids = tl.load(table_ptr + blk * table_s0 + (j - 1), mask=ext, other=0).to(tl.int64)
+                page = tl.where(ext, ids // KC, blk)
+                slot = tl.where(ext, ids % KC, 0)
+                row = page * data_s0 + slot * data_s1 + ((offs_t % tpc) * (2 * side_bytes)).to(tl.int64)
+
+                # K: per-channel stats of the token's group; open group from the residual.
+                k_raw = tl.load(
+                    data_ptr + row[:, None] + head_off + byte_d[None, :], mask=valid[:, None], other=0
+                ).to(tl.int32)
+                k_code = (k_raw >> shift_d[None, :]) & mask_val
+                grp = offs_t // KG
+                ks_off = blk * ks_s0 + grp[:, None] * ks_s1 + h * ks_s2 + offs_d[None, :]
+                k_scale = tl.load(ks_ptr + ks_off, mask=valid[:, None], other=0.0).to(tl.float32)
+                k_min = tl.load(km_ptr + ks_off, mask=valid[:, None], other=0.0).to(tl.float32)
+                k = k_code.to(tl.float32) * k_scale + k_min
+                in_res = valid & (rslot >= 0) & (grp == rgrp)
+                k_res = tl.load(
+                    res_ptr + tl.maximum(rslot, 0) * res_s0 + (offs_t % KG)[:, None] * res_s1
+                    + h * res_s2 + offs_d[None, :],
+                    mask=in_res[:, None],
+                    other=0.0,
+                ).to(tl.float32)
+                k = tl.where(in_res[:, None], k_res, k)
+
+                # V: per-token stats along head_dim groups.
+                v_raw = tl.load(
+                    data_ptr + row[:, None] + side_bytes + head_off + byte_d[None, :],
+                    mask=valid[:, None],
+                    other=0,
+                ).to(tl.int32)
+                v_code = (v_raw >> shift_d[None, :]) & mask_val
+                vs_off = blk * vs_s0 + offs_t[:, None] * vs_s1 + h * vs_s2 + (offs_d // VG)[None, :]
+                v_scale = tl.load(vs_ptr + vs_off, mask=valid[:, None], other=0.0).to(tl.float32)
+                v_min = tl.load(vm_ptr + vs_off, mask=valid[:, None], other=0.0).to(tl.float32)
+                v = v_code.to(tl.float32) * v_scale + v_min
+
+                s = tl.dot(q, tl.trans(k), input_precision="ieee") * softmax_scale
+                s = tl.where(valid[None, :], s, float("-inf"))
+                m_new = tl.maximum(m_i, tl.max(s, axis=1))
+                # A tile can be fully masked while m_i is still -inf: keep exp() finite.
+                m_safe = tl.where(m_new == float("-inf"), 0.0, m_new)
+                alpha = tl.exp(m_i - m_safe)
+                p = tl.exp(s - m_safe[:, None])
+                l_i = l_i * alpha + tl.sum(p, axis=1)
+                acc = acc * alpha[:, None] + tl.dot(p, v, input_precision="ieee")
+                m_i = m_new
 
         out_row = (seq * (H * GQA) + h * GQA + offs_q) * num_splits + split
         tl.store(acc_ptr + out_row[:, None] * D + offs_d[None, :], acc, mask=q_mask[:, None])
@@ -265,6 +272,8 @@ def _decode_triton(store, query, block_table, seq_lens, softmax_scale, blocks_pe
         KG=L.k_group,
         VG=L.v_group,
         KC=L.chunks_per_page,
+        TILE=min(32, L.block_size),
+        num_stages=1,
     )
     m, l = ml[..., 0], ml[..., 1]
     m_max = m.max(dim=2, keepdim=True).values

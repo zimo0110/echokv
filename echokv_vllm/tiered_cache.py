@@ -275,10 +275,12 @@ class TieredKVCache:
             self.blocks_opened[bits] += int((tiers == bits).sum())
         self.downgraded_blocks += int((tiers < target_bits).sum())
         self._tag_h[blocks] = tiers
-        dev_blocks = torch.from_numpy(blocks).to(self.device)
-        self.tag[dev_blocks] = torch.from_numpy(tiers).to(self.device, torch.uint8)
-        self.table[dev_blocks] = torch.from_numpy(self._table_h[blocks]).to(self.device, torch.int32)
-        self.sealed[dev_blocks] = 0
+        # One host-to-device copy: [block, tier, chunk ids x3] per opened block.
+        packed = torch.from_numpy(np.concatenate([blocks[:, None], tiers[:, None], self._table_h[blocks]], 1))
+        dev = packed.to(self.device, non_blocking=False)
+        self.tag[dev[:, 0]] = dev[:, 1].to(torch.uint8)
+        self.table[dev[:, 0]] = dev[:, 2:].to(torch.int32)
+        self.sealed[dev[:, 0]] = 0
 
     def _demote_lru(self, chunks_needed: int, keep: set) -> None:
         """Requantize least recently written full INT4/INT8 blocks to INT2, freeing chunks."""
@@ -380,9 +382,10 @@ class TieredKVCache:
                 opens = np.union1d(opens, fresh)
         if opens.size:
             self.open_blocks(opens, target_bits, protect=plan.touched_np)
-        if plan.slots_np.size:
-            np.maximum.at(self._fill_h, plan.slots_np // L.block_size, plan.slots_np % L.block_size + 1)
-            self._last_h[plan.touched_np] = plan.step
+        if plan.touched_np.size:
+            t = plan.touched_np
+            self._fill_h[t] = np.maximum(self._fill_h[t], plan.touched_fill)
+            self._last_h[t] = plan.step
         if plan.res_clear_block.numel():
             self.block_res[plan.res_clear_block] = -1
         if plan.res_set_block.numel():

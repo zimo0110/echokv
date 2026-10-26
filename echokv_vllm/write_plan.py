@@ -53,6 +53,8 @@ class WritePlan:
     slots_np: np.ndarray = field(default_factory=lambda: np.zeros(0, dtype=np.int64))
     open_np: np.ndarray = field(default_factory=lambda: np.zeros(0, dtype=np.int64))
     touched_np: np.ndarray = field(default_factory=lambda: np.zeros(0, dtype=np.int64))
+    touched_fill: np.ndarray = field(default_factory=lambda: np.zeros(0, dtype=np.int64))
+    host_buffer: torch.Tensor | None = None  # keeps the pinned source of the async copy alive
     n_open: int = 0
     n_fin: int = 0
     n_sealed: int = 0
@@ -104,15 +106,36 @@ class WritePlanner:
         set_b, set_s, set_g = [], [], []
         evictions: list[Eviction] = []
 
-        # Group tokens by (block, group); vLLM lays a request's tokens out contiguously.
+        # Group tokens by (block, group), each group's tokens in position order.
         key = blk * (bs // g) + grp
-        order = np.argsort(key, kind="stable")
-        bounds = np.nonzero(np.diff(key[order]))[0] + 1
+        order = np.lexsort((pos, key))
+        ks = key[order]
+        starts = np.flatnonzero(np.r_[True, ks[1:] != ks[:-1]]) if n else np.zeros(0, np.int64)
+        counts = np.diff(np.r_[starts, n])
+        ublk = blk[order[starts]]
+        ugrp = grp[order[starts]]
+
+        # Fast path, vectorized: groups whose g tokens are all in this batch (the
+        # common prefill case). No residual is involved: earlier tokens would
+        # make the count < g.
+        fast = counts == g
+        if self.sealed:
+            fast &= np.array(
+                [not (self.sealed.get(int(b), 0) >> int(gr)) & 1 for b, gr in zip(ublk, ugrp)], dtype=bool
+            )
+        fi = np.flatnonzero(fast)
+        fin_fast_rows = rows[order[starts[fi][:, None] + np.arange(g)]] if fi.size else np.zeros((0, g), np.int64)
+        for b in ublk[fi].tolist():  # a rewrite of a group that had a residual slot (rare)
+            s_ = self.block_slot.get(b)
+            if s_ is not None and self.slot_info[s_][1] in set(ugrp[fi][ublk[fi] == b].tolist()):
+                self._release(s_, clear_b, clear_s)
+
+        # Slow path, per group: partial groups, groups completing from the residual,
+        # groups sealed by an eviction.
         protected = {self.block_slot[b] for b in np.unique(blk).tolist() if b in self.block_slot}
-        for idx in np.split(order, bounds):
-            if idx.size == 0:
-                continue
-            b, gr = int(blk[idx[0]]), int(grp[idx[0]])
+        for u in np.flatnonzero(~fast).tolist():
+            idx = order[starts[u] : starts[u] + counts[u]]
+            b, gr = int(ublk[u]), int(ugrp[u])
             p = pos[idx]
             if (self.sealed.get(b, 0) >> gr) & 1:
                 tok_sealed[idx] = True
@@ -150,36 +173,63 @@ class WritePlanner:
             info[2] = max(info[2], int(p.max()) + 1)
             info[3] = self.step
 
-        def t(x, dtype=torch.long):
-            # Contiguous: kernels index these with unit stride (column slices of
-            # fin_arr would otherwise keep a stride of 3 through .to(device)).
-            arr = np.ascontiguousarray(x, dtype=np.int64 if dtype == torch.long else bool)
-            return torch.from_numpy(arr).to(device=device, dtype=dtype).contiguous()
+        fin_arr = np.concatenate(
+            [np.stack([ublk[fi], ugrp[fi], np.full(fi.size, -1)], 1).reshape(-1, 3),
+             np.asarray(fin, dtype=np.int64).reshape(-1, 3)]
+        )
+        fin_rows_arr = np.concatenate([fin_fast_rows, np.asarray(fin_rows, dtype=np.int64).reshape(-1, g)])
 
-        fin_arr = np.asarray(fin, dtype=np.int64).reshape(-1, 3)
+        # Per-block fill (highest offset written + 1), once per step for all layers.
+        bsorted = blk[order]
+        bstarts = np.flatnonzero(np.r_[True, bsorted[1:] != bsorted[:-1]]) if n else np.zeros(0, np.int64)
+        touched = bsorted[bstarts]
+        touched_fill = np.maximum.reduceat(off[order] + 1, bstarts) if n else np.zeros(0, np.int64)
+
+        # One host-to-device copy for every index array of the plan.
+        parts = {
+            "slots": slots, "rows": rows, "open_blocks": open_blocks, "tok_res_slot": tok_res,
+            "tok_sealed": tok_sealed.astype(np.int64), "fin_block": fin_arr[:, 0], "fin_group": fin_arr[:, 1],
+            "fin_res_slot": fin_arr[:, 2], "fin_rows": fin_rows_arr.reshape(-1),
+            "res_set_block": set_b, "res_set_slot": set_s, "res_set_group": set_g,
+            "res_clear_block": clear_b, "res_clear_slot": clear_s,
+        }
+        flat = [np.asarray(v, dtype=np.int64).reshape(-1) for v in parts.values()]
+        host = torch.from_numpy(np.concatenate(flat)) if flat else torch.zeros(0, dtype=torch.long)
+        if torch.device(device).type == "cuda":
+            host = host.pin_memory()
+        dev = host.to(device, non_blocking=True)
+        views, o = {}, 0
+        for k, a in zip(parts, flat):
+            views[k] = dev[o : o + a.size]
+            o += a.size
+        views["tok_sealed"] = views["tok_sealed"].bool()
+        views["fin_rows"] = views["fin_rows"].view(-1, g)
+
         return WritePlan(
-            slots=t(slots),
-            rows=t(rows),
-            open_blocks=t(open_blocks),
-            tok_res_slot=t(tok_res),
-            tok_sealed=t(tok_sealed, torch.bool),
-            fin_block=t(fin_arr[:, 0]),
-            fin_group=t(fin_arr[:, 1]),
-            fin_res_slot=t(fin_arr[:, 2]),
-            fin_rows=t(np.asarray(fin_rows, dtype=np.int64).reshape(-1, g)),
-            res_set_block=t(set_b),
-            res_set_slot=t(set_s),
-            res_set_group=t(set_g),
-            res_clear_block=t(clear_b),
-            res_clear_slot=t(clear_s),
+            slots=views["slots"],
+            rows=views["rows"],
+            open_blocks=views["open_blocks"],
+            tok_res_slot=views["tok_res_slot"],
+            tok_sealed=views["tok_sealed"],
+            fin_block=views["fin_block"],
+            fin_group=views["fin_group"],
+            fin_res_slot=views["fin_res_slot"],
+            fin_rows=views["fin_rows"],
+            res_set_block=views["res_set_block"],
+            res_set_slot=views["res_set_slot"],
+            res_set_group=views["res_set_group"],
+            res_clear_block=views["res_clear_block"],
+            res_clear_slot=views["res_clear_slot"],
             evictions=evictions,
             n_open=int(open_blocks.size),
-            n_fin=len(fin),
+            n_fin=int(fin_arr.shape[0]),
             n_sealed=int(tok_sealed.sum()),
             block_size=bs,
             k_group=g,
             step=self.step,
             slots_np=slots,
             open_np=open_blocks,
-            touched_np=np.unique(blk),
+            touched_np=touched,
+            touched_fill=touched_fill,
+            host_buffer=host,
         )

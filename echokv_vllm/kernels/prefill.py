@@ -16,6 +16,8 @@ into the tile table, once per step.
 
 from __future__ import annotations
 
+import os
+
 import torch
 import torch.nn.functional as F
 from torch.nn.attention.bias import causal_lower_right
@@ -27,7 +29,10 @@ if HAS_TRITON:
     import triton
     import triton.language as tl
 
-ROWS = 64  # query rows per program (tokens x padded GQA group)
+# Query rows per program (tokens x padded GQA group). More rows reuse each
+# dequantized K/V tile for more queries; 128 fits ~100 KB of shared memory
+# (GB10). If a GPU rejects it, the launcher falls back to 64 once.
+ROWS = int(os.environ.get("ECHOKV_PREFILL_ROWS", "128"))
 
 
 def gqa_pad(gqa: int) -> int:
@@ -51,7 +56,9 @@ def build_tiles(prefill: list[tuple[int, int, int, int]], req_of: list[int], gqa
         pos0 = ctx - nq
         for t0 in range(0, nq, bm):
             rows.append((qs + t0, min(bm, nq - t0), pos0 + t0, ctx, r))
-    return torch.tensor(rows, dtype=torch.int32).reshape(-1, 5).to(device)
+    tiles = torch.tensor(rows, dtype=torch.int32).reshape(-1, 5).to(device)
+    tiles.block_m = bm  # host-side record of the tile size (checked without a sync)
+    return tiles
 
 
 def prefill_attention(
@@ -77,7 +84,15 @@ def prefill_attention(
         gqa = query.shape[1] // store.layout.num_kv_heads
         if tiles is None:
             tiles = build_tiles(prefill, req_of, gqa, query.device)
-        _prefill_triton(store, query, output, tiles, block_table, softmax_scale)
+        try:
+            _prefill_triton(store, query, output, tiles, block_table, softmax_scale)
+        except triton.runtime.errors.OutOfResources:
+            global ROWS
+            if ROWS <= 64:
+                raise
+            ROWS = 64  # also used by build_tiles from now on
+            tiles = build_tiles(prefill, req_of, gqa, query.device)
+            _prefill_triton(store, query, output, tiles, block_table, softmax_scale)
         return
     prefill_attention_torch(store, query, output, prefill, block_table, softmax_scale, gather, req_of)
 
@@ -247,6 +262,9 @@ def _prefill_triton(store, query, output, tiles, block_table, softmax_scale):
     res = store.res_k
     if tiles.numel() == 0:
         return
+    bm = block_m(gqa)
+    if getattr(tiles, "block_m", bm) > bm:  # tiles built for a larger ROWS (fallback in progress)
+        raise triton.runtime.errors.OutOfResources(0, 0, "stale prefill tiles")
     _prefill_kernel[(tiles.shape[0], h)](
         query, query.stride(0), query.stride(1),
         output, output.stride(0), output.stride(1),
@@ -265,7 +283,7 @@ def _prefill_triton(store, query, output, tiles, block_table, softmax_scale):
         H=h,
         GQA=gqa,
         GQA_PAD=gqa_pad(gqa),
-        BLOCK_M=block_m(gqa),
+        BLOCK_M=bm,
         D=L.head_size,
         BS=L.block_size,
         KG=L.k_group,
@@ -273,4 +291,5 @@ def _prefill_triton(store, query, output, tiles, block_table, softmax_scale):
         KC=L.chunks_per_page,
         TILE=min(32, L.block_size),
         num_stages=1,
+        num_warps=8 if ROWS >= 128 else 4,
     )

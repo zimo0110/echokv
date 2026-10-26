@@ -25,8 +25,6 @@ from dataclasses import dataclass, replace
 from typing import ClassVar
 
 import torch
-import torch.nn.functional as F
-from torch.nn.attention.bias import causal_lower_right
 from torch.profiler import record_function
 
 from vllm.v1.attention.backend import (
@@ -40,12 +38,14 @@ from vllm.v1.attention.backend import (
     MultipleOf,
 )
 from vllm.forward_context import get_forward_context
+from vllm.v1.attention.backends.utils import get_num_attention_heads_from_layers
 from vllm.v1.kv_cache_interface import AttentionSpec
 
 from echokv_vllm.canary import KRefRing, canary_kl
 from echokv_vllm.config import load_config
 from echokv_vllm.controller import LayerController
-from echokv_vllm.kernels.decode import decode_attention
+from echokv_vllm.kernels.decode import _use_triton, decode_attention
+from echokv_vllm.kernels.prefill import build_tiles, prefill_attention
 from echokv_vllm.quant import SUPPORTED_BITS
 from echokv_vllm.tiered_cache import TieredKVCache, TieredLayout
 from echokv_vllm.write_plan import WritePlan, WritePlanner
@@ -116,7 +116,9 @@ class EchoKVMetadata:
     decode_reqs: torch.Tensor | None  # [nd] their request indices
     decode_lens: torch.Tensor | None  # [nd] their cache lengths
     prefill: list[tuple[int, int, int, int]]  # (q_start, q_end, ctx, gather_start)
-    prefill_blk: torch.Tensor | None  # gather index over every prefill request's context
+    prefill_reqs: list[int]  # request index (block-table row) of each prefill entry
+    prefill_tiles: torch.Tensor | None  # Triton prefill work list (see kernels/prefill.py)
+    prefill_blk: torch.Tensor | None  # PyTorch path: gather index over all prefill contexts
     prefill_off: torch.Tensor | None
 
 
@@ -129,6 +131,11 @@ class EchoKVMetadataBuilder(AttentionMetadataBuilder[EchoKVMetadata]):
         # One planner per KV cache group: every layer applies the same plan, so
         # host-side planning (and its one device-to-host copy) happens once per step.
         self.planner = WritePlanner(kv_cache_spec.block_size, cfg.k_group, _residual_slots(cfg))
+        num_heads = get_num_attention_heads_from_layers(vllm_config, layer_names) or (
+            vllm_config.model_config.get_num_attention_heads(vllm_config.parallel_config)
+        )
+        self.gqa = num_heads // kv_cache_spec.num_kv_heads
+        self.use_triton = _use_triton(torch.device(device))
 
     def build(
         self,
@@ -171,8 +178,11 @@ class EchoKVMetadataBuilder(AttentionMetadataBuilder[EchoKVMetadata]):
             decode_rows = torch.tensor(d_rows, device=dev)
             decode_reqs = torch.tensor(d_reqs, device=dev)
             decode_lens = seq_lens_cpu[d_reqs].to(dev)
-        prefill_blk = prefill_off = None
-        if gathers:
+        prefill_reqs = [r for r, _ in gathers]
+        prefill_tiles = prefill_blk = prefill_off = None
+        if gathers and self.use_triton:
+            prefill_tiles = build_tiles(prefill, prefill_reqs, self.gqa, dev)
+        elif gathers:
             blks, offs = [], []
             for r, ctx in gathers:
                 pos = torch.arange(ctx, device=dev)
@@ -193,6 +203,8 @@ class EchoKVMetadataBuilder(AttentionMetadataBuilder[EchoKVMetadata]):
             decode_reqs=decode_reqs,
             decode_lens=decode_lens,
             prefill=prefill,
+            prefill_reqs=prefill_reqs,
+            prefill_tiles=prefill_tiles,
             prefill_blk=prefill_blk,
             prefill_off=prefill_off,
         )
@@ -321,16 +333,14 @@ class EchoKVAttentionImpl(AttentionImpl[EchoKVMetadata]):
         store = self._get_store(kv_cache)
         md = attn_metadata
         if md.prefill:
-            # One gather for every prefill request's context, then per-request
-            # attention in the model dtype with a bottom-right causal mask
-            # (lets PyTorch pick its fused SDPA kernels).
+            # Triton: one fused kernel reading the tiered pages directly.
+            # PyTorch: one gather for all contexts, then SDPA per request.
             with record_function("echokv.prefill_attn"):
-                k_all, v_all = store.gather(md.prefill_blk, md.prefill_off)
-                k_all, v_all = k_all.to(query.dtype), v_all.to(query.dtype)
-                for qs, qe, ctx, g in md.prefill:
-                    output[qs:qe] = self._attend(
-                        query[qs:qe], k_all[g : g + ctx], v_all[g : g + ctx]
-                    ).to(output.dtype)
+                gather = None if md.prefill_blk is None else (md.prefill_blk, md.prefill_off)
+                prefill_attention(
+                    store, query, output, md.prefill, md.prefill_reqs, md.block_table,
+                    self.scale, tiles=md.prefill_tiles, gather=gather,
+                )
         if md.decode_rows is not None:
             with record_function("echokv.decode_attn"):
                 out = decode_attention(
@@ -350,19 +360,6 @@ class EchoKVAttentionImpl(AttentionImpl[EchoKVMetadata]):
             with record_function("echokv.canary"):
                 self._fire(query, md.last_rows, md.last_ctx)
         return output
-
-    def _attend(self, q: torch.Tensor, k: torch.Tensor, v: torch.Tensor) -> torch.Tensor:
-        """Causal attention of ``q [nq, Hq, D]`` over a request's whole context ``k, v [ctx, H, D]``."""
-        nq, ctx = q.shape[0], k.shape[0]
-        out = F.scaled_dot_product_attention(
-            q.transpose(0, 1).unsqueeze(0),
-            k.transpose(0, 1).unsqueeze(0),
-            v.transpose(0, 1).unsqueeze(0),
-            attn_mask=causal_lower_right(nq, ctx),
-            scale=self.scale,
-            enable_gqa=True,
-        )
-        return out.squeeze(0).transpose(0, 1)
 
     # -- canary + controller ----------------------------------------------
 

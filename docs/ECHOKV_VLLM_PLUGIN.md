@@ -132,6 +132,53 @@ Each vLLM page (one block of `bs` tokens, one layer) is laid out as:
   eagerly and everything between them is graphed, so serving works with
   CUDA graphs on.
 
+## Results on GPU (DGX Spark, GB10, Llama-3.1-8B-Instruct, bf16)
+
+Raw files: `results/echokv_gpu/dgx_spark_Llama-3.1-8B-Instruct/`. All 52
+unit tests (Triton kernels compiled on sm_121) and the end-to-end vLLM
+test pass.
+
+**Quality.** WikiText-103, 32 passages × 2,048 tokens; prompt NLL vs stock
+vLLM (1.886). INT4 differences under ~0.003 are noise: they come from
+rounding flips.
+
+| config | ΔNLL | perplexity | stored bits | tiers |
+|---|---|---|---|---|
+| INT8 | −0.0006 | ≈0% | 8.0 | all INT8 |
+| INT4 | +0.0066 | +0.7% | 4.0 | all INT4 |
+| INT2 | +0.196 | +22% | 2.0 | all INT2 |
+| live τ=0.005 | +0.0065 | +0.7% | 4.25 | INT4, layers 13–14 INT8 |
+| live τ=0.01 (default) | +0.0066 | +0.7% | 4.0 | all INT4 |
+| live τ=0.05 | +0.0152 | +1.5% | 3.94 | layer 0 INT2 |
+
+**Capacity and speed.** 8 GiB KV budget, 256 × (1024 in, 256 out),
+CUDA graphs on (piecewise). Measured before the speed fixes in 7372522.
+
+| config | KV tokens | capacity | out tok/s | speed |
+|---|---|---|---|---|
+| stock (bf16) | 65,536 | 1.00× | 347 | 1.00× |
+| INT8 | 116,288 | 1.77× | 158 | 0.46× |
+| INT4 | 209,024 | 3.19× | 171 | 0.49× |
+| live, 6-bit budget | 149,440 | 2.28× | 156 | 0.45× |
+| live, 4-bit budget | 209,024 | 3.19× | 169 | 0.49× |
+
+Takeaways:
+* INT4 with per-channel K is nearly lossless at 8B, giving 3.2× KV
+  capacity for +0.7% perplexity.
+* The controller correctly finds INT4 safe everywhere. INT2 costs more
+  than it saves, so it should stay a last resort.
+* Throughput is the open problem. Targeted so far:
+  * PyTorch prefill
+  * fp32 decode dots
+  * per-layer host work
+
+GPU porting issues found on this machine, all fixed:
+* Triton's branch-typing rule
+* the ~100 KB shared-memory limit
+* never-written blocks read during warmup
+* vLLM's 0.92 memory-utilization default on unified memory
+* a teardown abort
+
 ## Results (macOS CPU, fp32, vLLM 0.32.0)
 
 **Quality vs memory.** Prompt NLL on WikiText-103 against stock vLLM. Live

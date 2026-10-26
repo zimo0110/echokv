@@ -2,7 +2,7 @@
 
 Current results for the EchoKV vLLM plugin (`echokv_vllm/`, vLLM 0.32.0, no fork).
 Design and methodology: [docs/ECHOKV_VLLM_PLUGIN.md](docs/ECHOKV_VLLM_PLUGIN.md).
-Last updated: 2026-10-25.
+Last updated: 2026-10-26.
 
 ## TL;DR
 
@@ -133,7 +133,23 @@ meaningful.
   now dequantizes once, then runs flash-attention.
 - **Decode kernel:** 6.6 s.
 - **Remaining cost:** ~10 s of GPU idle time, caused by a blocking
-  host-to-device copy in the write path. A fix is in progress.
+  host-to-device copy in the write path. This is fixed in round 4 below.
+
+**Round 4 profile** (current code, commit `1546036`): pinned non-blocking
+host-to-device copies, and the canary no longer waits on the GPU. Same
+workload; from `round4_profile.json`. GEMM times match the first round-3
+session to within 1%, so the machine ran at full speed.
+
+| | fused prefill (round 3, first session) | **current** | stock (same-speed session) |
+|---|---:|---:|---:|
+| wall time | 31.5 s | **26.8 s** | 35.8 s |
+| GPU idle | 1.0 s | **0.9 s** | 0.1 s |
+| prefill attention (GPU) | 5.3 s | **0.73 s** | — |
+
+EchoKV now finishes this short-prompt workload **1.34× faster than stock**.
+At 16 users with 8K prompts, round-4 latency matches round 3 (68 tok/s,
+TTFT p50 3.7 s, TPOT 208 ms; `round4_latency_c16.json`). That load is
+decode-bound on the GPU, so removing CPU stalls doesn't change it.
 
 ### What this means
 
@@ -199,10 +215,10 @@ MODEL=unsloth/Llama-3.1-8B-Instruct bash scripts/echokv_gpu_validate.sh  # ungat
 
 ## Next
 
-1. Remove the blocking host-to-device copy in the write path (~10 s of
-   idle GPU in the profile), then reprofile.
-2. Lower time per output token under load: decode-kernel tuning, CUDA
+1. Lower time per output token under load: decode-kernel tuning, CUDA
    graphs for decode.
+2. Cut host CPU per write call (~3.7 ms). It overlaps with the GPU today
+   but will matter on faster GPUs.
 3. Measure at 64K–128K tokens, and at lower memory budgets (e.g.
    `ECHOKV_MEM_BITS=6` with the live controller).
 4. Run 70B on 4× H100 (TP=4).

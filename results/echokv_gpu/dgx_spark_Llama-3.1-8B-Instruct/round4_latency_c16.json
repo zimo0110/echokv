@@ -1,0 +1,37 @@
+{
+ "args": {
+  "model": "unsloth/Llama-3.1-8B-Instruct",
+  "tp": 1,
+  "kv_cache_gib": 8.0,
+  "input_len": 8192,
+  "output_len": 256,
+  "concurrency": [
+   16
+  ],
+  "prompts_per_level": 2,
+  "configs": [
+   "echokv-int4"
+  ],
+  "port": 8321,
+  "out": "results/echokv_gpu/Llama-3.1-8B-Instruct/round4_latency_c16.json"
+ },
+ "results": {
+  "echokv-int4": {
+   "16": {
+    "request_throughput": 0.2668131788528356,
+    "output_throughput": 68.30417378632592,
+    "total_token_throughput": 2254.0377349487553,
+    "median_ttft_ms": 3705.1257068524137,
+    "p90_ttft_ms": 27004.04873620719,
+    "p99_ttft_ms": 32365.84843242541,
+    "median_tpot_ms": 208.13036703312878,
+    "p90_tpot_ms": 211.72020849041348,
+    "p99_tpot_ms": 215.1374633322543,
+    "median_itl_ms": 122.37770995125175,
+    "p99_itl_ms": 556.1390247591771,
+    "median_e2el_ms": 57076.61614450626,
+    "p99_e2el_ms": 86855.00373143237
+   }
+  }
+ }
+}

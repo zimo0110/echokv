@@ -9,19 +9,24 @@ Last updated: 2026-10-25.
 On a real GPU (NVIDIA DGX Spark, Llama-3.1-8B-Instruct):
 
 - **It works end to end in stock vLLM.**
-  - All 52 unit tests pass, including the Triton kernels compiled for the GPU.
+  - All 77 unit tests pass, including the Triton kernels and flash-attention
+    compiled for the GPU.
   - The live controller changes tiers mid-request, and blocks at different
     precisions coexist.
-- **INT4 is nearly lossless: +0.7% perplexity for 3.19× KV capacity** in the
-  same memory.
-- **INT8 is lossless: 1.77× capacity.**
-- **EchoKV beats stock vLLM on throughput in the same memory**, by
-  freeing KV space so vLLM can run more requests at once:
-  - INT4: 1.35× on short prompts and 1.40× on 8K-token prompts
-  - INT8: 1.15×
-  - Before the speed fixes it was 0.49×.
-- **The speed-up costs no quality.** INT4 measured +0.0055 ΔNLL after the
-  fixes vs +0.0066 before, which is within noise.
+- **INT4 is nearly lossless: +0.6–0.7% perplexity for 3.19× KV capacity**
+  in the same memory. INT8 is lossless at 1.77×.
+- **Faster than stock vLLM wherever memory is the limit**, all in the same
+  8 GiB KV budget:
+  - **32K-token contexts: 3.86× throughput (INT4), 3.05× (INT8).**
+  - Serving with 8K prompts at 16 concurrent users: **12× lower median
+    time-to-first-token** (3.7 s vs 44.8 s) and 1.5× throughput.
+  - At 32 users: 6× lower TTFT and 1.64× throughput.
+  - Short prompts (1K): INT4 1.35×, INT8 1.15×.
+- **No penalty when memory isn't the limit.** At 4 concurrent users,
+  throughput, TTFT and time-per-token are identical to stock.
+- **The trade-off:** under load, each request decodes alongside more others,
+  so time per output token is higher (209 vs 136 ms at 16 users). Total
+  waiting is much lower: median end-to-end 57 s vs 80 s.
 
 ## GPU: DGX Spark (GB10), Llama-3.1-8B-Instruct, bf16
 
@@ -94,6 +99,42 @@ The DGX Spark has ~273 GB/s memory bandwidth (an H100 has ~3.3 TB/s), so
 treat absolute tok/s as Spark-specific. The ratios against stock are the
 meaningful numbers.
 
+### Long contexts and serving latency (current code, commit `416aa80`)
+
+**32K-token contexts:** 16 × (32,768 in, 256 out), 8 GiB KV. At this
+length, stock fits 2 requests in memory, INT8 about 3.5 and INT4 about 6.
+From `round3_throughput_32k.json`.
+
+| config | KV tokens | output tok/s | total tok/s | wall time | speed |
+|---|---:|---:|---:|---:|---:|
+| stock vLLM (bf16) | 65,536 | 4.2 | 543 | 974 s | 1.00× |
+| EchoKV INT8 | 116,288 | 12.8 | 1,655 | 319 s | **3.05×** |
+| EchoKV INT4 | 209,024 | 16.2 | 2,094 | 252 s | **3.86×** |
+
+**Serving latency:** `vllm serve` driven by `vllm bench serve`. 8,192-token
+prompts, 256 out, closed loop at fixed concurrency, 8 GiB KV. Times in ms.
+From `round3_latency_8k.json`.
+
+| config | users | out tok/s | TTFT p50 | TTFT p99 | TPOT p50 | E2E p50 |
+|---|---:|---:|---:|---:|---:|---:|
+| stock | 4 | 35 | 3,040 | 7,483 | 101 | 28,759 |
+| EchoKV INT4 | 4 | 35 | 3,010 | 7,776 | 101 | 28,817 |
+| stock | 16 | 45 | 44,847 | 78,728 | 136 | 79,569 |
+| EchoKV INT4 | 16 | **68** | **3,734** | 32,333 | 209 | **57,168** |
+| stock | 32 | 45 | 124,797 | 158,269 | 136 | 159,507 |
+| EchoKV INT4 | 32 | **74** | **21,162** | 93,518 | 294 | **97,297** |
+
+**Profile:** 64 × (1,024 in, 128 out). From
+`round3_profile_summary.txt`. The Spark ran ~2× slower overall in this
+session for both configs, so only the comparison between them is
+meaningful.
+- **Wall time:** EchoKV 66.7 s vs stock 80.5 s.
+- **Prefill attention:** 1.3 s GPU (was 5.3 s with the fused kernel). It
+  now dequantizes once, then runs flash-attention.
+- **Decode kernel:** 6.6 s.
+- **Remaining cost:** ~10 s of GPU idle time, caused by a blocking
+  host-to-device copy in the write path. A fix is in progress.
+
 ### What this means
 
 - **The quantizer is the big win.** Per-channel K quantization with fp16
@@ -158,13 +199,12 @@ MODEL=unsloth/Llama-3.1-8B-Instruct bash scripts/echokv_gpu_validate.sh  # ungat
 
 ## Next
 
-1. Profile on GPU, then work on a fused prefill kernel, a fused write
-   kernel and CUDA graphs for decode. The goal is to beat stock even when
-   memory isn't the bottleneck.
-2. Run longer contexts (32K+) and more users, where the capacity gain
-   should grow.
-3. Measure latency (time to first token, inter-token latency), not just
-   throughput.
+1. Remove the blocking host-to-device copy in the write path (~10 s of
+   idle GPU in the profile), then reprofile.
+2. Lower time per output token under load: decode-kernel tuning, CUDA
+   graphs for decode.
+3. Measure at 64K–128K tokens, and at lower memory budgets (e.g.
+   `ECHOKV_MEM_BITS=6` with the live controller).
 4. Run 70B on 4× H100 (TP=4).
 5. Try long-context workloads (e.g. RULER), where per-layer adaptation has
    more room to help.

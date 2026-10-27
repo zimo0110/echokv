@@ -6,7 +6,7 @@ import numpy as np
 import torch
 
 from echokv_vllm import host_slots
-from echokv_vllm.host_slots import host_lens_and_slots, install_v2
+from echokv_vllm.host_slots import host_lens_and_slots, install_v1_dummy, install_v2, is_dummy_step
 
 BS = 16
 
@@ -50,6 +50,12 @@ class FakeBlockTables:
         ids = new_block_ids[0]
         self.block_tables[0].gpu[req_index, start : start + len(ids)] = torch.tensor(ids, dtype=torch.int32)
         self.num_blocks.np[0, req_index] = start + len(ids)
+
+    def compute_slot_mappings(self, *args):
+        pass
+
+    def get_dummy_slot_mappings(self, num_tokens):
+        pass
 
     def gather(self, idx_mapping):
         self.input_block_tables[0][: len(idx_mapping)] = self.block_tables[0].gpu[idx_mapping]
@@ -101,3 +107,29 @@ def test_v1_table_indexed_by_batch_row():
         assert torch.equal(slots, reference_slots(t.block_table.np, qsl, seq, 4))
     finally:
         host_slots._find_rows = orig
+
+
+def test_v2_dummy_steps_use_the_device_copy():
+    """Dummy steps write nothing (all-PAD slots), whatever the block-table rows hold."""
+    install_v2(FakeBlockTables)
+    bt = FakeBlockTables(max_reqs=2, max_blocks=4)
+    bt.append_block_ids(0, ([3],), overwrite=True)  # a live request in slot 0
+    table = bt.gather(torch.tensor([0]))
+    cm = make_cm(table, [0, 1], [5], 1, np.array([0]))
+    bt.compute_slot_mappings()
+    assert host_lens_and_slots(cm, BS) is not None and not is_dummy_step(cm)
+    bt.get_dummy_slot_mappings(1)  # e.g. warmup, or an idle data-parallel rank
+    assert host_lens_and_slots(cm, BS) is None and is_dummy_step(cm)
+    bt.compute_slot_mappings()  # the next real step
+    assert host_lens_and_slots(cm, BS) is not None
+
+
+def test_v1_dummy_run_is_tracked():
+    class Runner:
+        def _dummy_run(self, probe):
+            return probe()
+
+    install_v1_dummy(Runner)
+    assert host_slots._v1_dummy_depth == 0
+    assert Runner()._dummy_run(lambda: host_slots._v1_dummy_depth) == 1
+    assert host_slots._v1_dummy_depth == 0

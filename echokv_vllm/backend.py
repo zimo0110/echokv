@@ -47,7 +47,7 @@ from echokv_vllm._util import to_device
 from echokv_vllm.canary import KRefRing, canary_kl
 from echokv_vllm.config import load_config
 from echokv_vllm.controller import LayerController
-from echokv_vllm.host_slots import host_lens_and_slots
+from echokv_vllm.host_slots import host_lens_and_slots, is_dummy_step
 from echokv_vllm.kernels.decode import _use_triton, decode_attention
 from echokv_vllm.kernels.prefill import (
     FUSED_MAX_CHUNK,
@@ -172,10 +172,11 @@ class EchoKVMetadataBuilder(AttentionMetadataBuilder[EchoKVMetadata]):
         if host is not None:
             seq_lens_cpu, slots_cpu = host
             self.host_slot_steps += 1
-        if host is None and self.check_host_slots:
+        if host is None and self.check_host_slots and self.host_slots and not is_dummy_step(cm):
             raise AssertionError("ECHOKV_CHECK_HOST_SLOTS=1 but the host slot mapping is unavailable")
         if host is None or self.check_host_slots:
-            # Device-to-host copies: each waits for the GPU to drain.
+            # Device-to-host copies: each waits for the GPU to drain. Normal
+            # steps avoid them; dummy steps (all-PAD slots) always take them.
             dev_lens, dev_slots = cm.seq_lens[:n].cpu(), cm.slot_mapping[: cm.num_actual_tokens].cpu()
             if host is not None and not (torch.equal(seq_lens_cpu, dev_lens.long()) and torch.equal(slots_cpu, dev_slots.long())):
                 raise AssertionError("EchoKV host slot mapping differs from vLLM's")

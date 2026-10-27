@@ -197,8 +197,9 @@ sit in these waits instead of preparing the next step.
 
 The fix, after `e389602`:
 - `index_fill_` replaces the scalar assignments.
-- The builder computes the slot mapping on the host, from vLLM's CPU block
-  table, instead of copying it back. It falls back to the copy under
+- The builder computes the slot mapping on the host instead of copying it
+  back. It reads vLLM's CPU block table (V1 model runner) or a host mirror
+  of the block-table writes (V2 runner, the default on CUDA). It falls back to the copy under
   speculative decoding or context parallelism.
 - `ECHOKV_CHECK_HOST_SLOTS=1` checks every step against vLLM's own
   mapping. The end-to-end test runs with it on.

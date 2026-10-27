@@ -26,10 +26,10 @@ All settings are `ECHOKV_*` environment variables (`echokv_vllm/config.py`):
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `ECHOKV_MEM_BITS` | 8 | Memory budget in bits/element (2, 4, 6, 8). vLLM sizes the cache for it. |
+| `ECHOKV_MEM_BITS` | 4 | Memory budget in bits/element (2, 4, 6, 8). vLLM sizes the cache for it. |
 | `ECHOKV_TAU0` | 0.01 | Per-layer canary KL budget: the quality/memory knob. |
 | `ECHOKV_FIXED_BITS` | unset | Pin every layer to one tier, with the controller off (static baselines). |
-| `ECHOKV_INIT_BITS` | 8 | Starting tier. |
+| `ECHOKV_INIT_BITS` | highest tier the budget fits (8, 4, 4, 2 for budgets 8, 6, 4, 2) | Starting tier. |
 | `ECHOKV_CANARY_INTERVAL` | 64 | Canary fires every N forward steps per layer. |
 | `ECHOKV_TAU_SCALING` | none | `sqrt`: τ0·√(max(L, L0)/L0), loosening only above L0. |
 

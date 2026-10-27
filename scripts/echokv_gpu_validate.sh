@@ -5,6 +5,7 @@
 #   bash scripts/echokv_gpu_validate.sh                # Llama-3.1-8B, 1 GPU
 #   MODEL=meta-llama/Llama-3.1-70B-Instruct TP=4 bash scripts/echokv_gpu_validate.sh
 #   ECHOKV_GPU_UTIL=0.5 bash scripts/echokv_gpu_validate.sh   # if vLLM says free memory is too low
+#   SETUP_ONLY=1 bash scripts/echokv_gpu_validate.sh       # install + GPU checks only
 #
 # Steps: install vLLM 0.32.0 + this plugin into ./.venv-gpu (Python 3.12 via
 # uv; vLLM 0.32 needs >= 3.11), run the unit tests (the Triton kernels
@@ -52,6 +53,16 @@ if ! command -v ninja >/dev/null; then  # venvs created before ninja was added
   uv pip install --python "$PY" -q ninja || die "installing ninja failed"
 fi
 export VLLM_ALLOW_INSECURE_SERIALIZATION=1
+
+# The vLLM wheel pins a CUDA build of PyTorch; an older NVIDIA driver cannot
+# run it (common on rented machines). Fail here with the versions involved.
+$PY - <<'EOF' || die "PyTorch cannot use the GPU (see above): update the NVIDIA driver to one that supports this CUDA version"
+import torch
+print(f"torch {torch.__version__}, CUDA {torch.version.cuda}, devices {torch.cuda.device_count()}")
+assert torch.cuda.is_available()
+print("GPU 0:", torch.cuda.get_device_name(0), "sm_%d%d" % torch.cuda.get_device_capability(0))
+EOF
+[ "${SETUP_ONLY:-0}" = 1 ] && { echo "Setup done (.venv-gpu)."; exit 0; }
 
 $PY - "$MODEL" <<'EOF' || die "cannot read $MODEL from Hugging Face: set HF_TOKEN (or run 'huggingface-cli login') with access to that repo"
 import sys

@@ -76,3 +76,19 @@ def test_frozen_and_fixed_hold_tier_but_track_ema():
     c = make(fixed_bits=2)
     c.observe({2: 9.0, 4: 9.0, 8: 9.0}, ctx_len=100)
     assert c.bits == 2
+
+
+def test_config_defaults_int4_and_pinned_tier_gets_its_budget(monkeypatch):
+    from echokv_vllm.config import load_config
+
+    for var in ("ECHOKV_MEM_BITS", "ECHOKV_INIT_BITS", "ECHOKV_FIXED_BITS"):
+        monkeypatch.delenv(var, raising=False)
+    cfg = load_config()
+    assert (cfg.mem_bits, cfg.controller.init_bits) == (4, 4)
+    monkeypatch.setenv("ECHOKV_FIXED_BITS", "8")
+    assert load_config().mem_bits == 8
+    monkeypatch.setenv("ECHOKV_MEM_BITS", "6")
+    monkeypatch.delenv("ECHOKV_FIXED_BITS")
+    assert load_config().controller.init_bits == 4
+    monkeypatch.setenv("ECHOKV_MEM_BITS", "8")
+    assert load_config().controller.init_bits == 8

@@ -124,6 +124,7 @@ class EchoKVMetadata:
     decode_rows: torch.Tensor | None  # [nd] query rows of single-token requests
     decode_reqs: torch.Tensor | None  # [nd] their request indices
     decode_lens: torch.Tensor | None  # [nd] their cache lengths
+    decode_max_len: int  # longest of them (host-side; sizes the decode split grid)
     prefill: list[tuple[int, int, int, int]]  # (q_start, q_end, ctx, gather_start)
     prefill_reqs: list[int]  # request index (block-table row) of each prefill entry
     prefill_tiles: torch.Tensor | None  # fused Triton prefill work list (tiny chunks)
@@ -200,6 +201,7 @@ class EchoKVMetadataBuilder(AttentionMetadataBuilder[EchoKVMetadata]):
                 g_start += ctx
         dev = self.device
         decode_rows = decode_reqs = decode_lens = None
+        decode_max_len = max((lens[r] for r in d_reqs), default=0)
         if d_rows:
             packed = to_device(torch.stack([torch.tensor(d_rows), torch.tensor(d_reqs), seq_lens_cpu[d_reqs].long()]), dev)
             decode_rows, decode_reqs, decode_lens = packed[0], packed[1], packed[2]
@@ -243,6 +245,7 @@ class EchoKVMetadataBuilder(AttentionMetadataBuilder[EchoKVMetadata]):
             decode_rows=decode_rows,
             decode_reqs=decode_reqs,
             decode_lens=decode_lens,
+            decode_max_len=decode_max_len,
             prefill=prefill,
             prefill_reqs=prefill_reqs,
             prefill_tiles=prefill_tiles,
@@ -386,14 +389,19 @@ class EchoKVAttentionImpl(AttentionImpl[EchoKVMetadata]):
                 )
         if md.decode_rows is not None:
             with record_function("echokv.decode_attn"):
-                out = decode_attention(
+                # Reads its query / block-table rows by index and writes its
+                # output rows directly: no gathers, casts or scatters around it.
+                decode_attention(
                     store,
-                    query[md.decode_rows],
-                    md.block_table[md.decode_reqs],
+                    query,
+                    md.block_table,
                     md.decode_lens,
                     self.scale,
+                    q_rows=md.decode_rows,
+                    bt_rows=md.decode_reqs,
+                    out=output.view(output.shape[0], -1, query.shape[-1]),
+                    max_len=md.decode_max_len,
                 )
-                output[md.decode_rows] = out.to(output.dtype)
 
         self._step += 1
         if self._step % self.cfg.canary_interval == 0:

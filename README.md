@@ -36,7 +36,8 @@ print(llm.generate("The capital of Japan is")[0].outputs[0].text)'
 ```
 
 Settings are `ECHOKV_*` environment variables (see `echokv_vllm/config.py`),
-e.g. `ECHOKV_MEM_BITS=4` for a 4-bit memory budget, `ECHOKV_TAU0` for the
+e.g. `ECHOKV_MEM_BITS` for the memory budget (default 4 bits: INT4, 3.2× the
+KV capacity for +0.7% perplexity at 8B; 8 for INT8), `ECHOKV_TAU0` for the
 quality/memory trade-off.
 
 ## Repo layout

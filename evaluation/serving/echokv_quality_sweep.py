@@ -151,7 +151,7 @@ def main() -> None:
     on = {"ECHOKV_ENABLE": "1", "ECHOKV_CANARY_INTERVAL": str(args.canary_interval)}
     results = {"stock": run(args, "stock", {"ECHOKV_ENABLE": "0"})}
     for b in args.static:
-        results[f"int{b}"] = run(args, f"int{b}", {**on, "ECHOKV_FIXED_BITS": str(b)})
+        results[f"int{b}"] = run(args, f"int{b}", {**on, "ECHOKV_FIXED_BITS": str(b), "ECHOKV_MEM_BITS": str(b)})
     for mb in args.mem_bits:
         for t in args.taus:
             name = f"tau={t}" if args.mem_bits == [8] else f"tau={t},mem={mb}"

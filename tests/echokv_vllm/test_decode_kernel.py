@@ -5,6 +5,7 @@ docker/triton-interp). Elsewhere only the reference checks run.
 """
 
 import os
+from unittest import mock
 
 import pytest
 import torch
@@ -111,6 +112,34 @@ def test_triton_kernel_is_batch_invariant():
         nb = -(-lens[i] // bs)
         alone = dec._decode_triton(store, q[i : i + 1], table[i : i + 1, :nb], lens_t[i : i + 1], d**-0.5, 2)
         assert torch.equal(alone[0], full[i])
+
+
+@pytest.mark.parametrize("use_triton", [False, True])
+def test_indexed_rows_write_into_output(use_triton):
+    """The backend's call: query / block-table rows by index, results written into
+    a bf16 output at the query rows, split grid sized by the host's max length."""
+    if use_triton and not TRITON_OK:
+        pytest.skip("needs CUDA or TRITON_INTERPRET=1")
+    h, d, bs, mem, lens, plan = CASES[0]
+    store, table, lens_t = build(h, d, bs, mem, lens, plan, seed=3)
+    hq = 2 * h
+    # 7 token rows; decode rows 6, 1, 3 belong to block-table rows 4, 0, 2.
+    q_all = torch.randn(7, hq, d, device=DEVICE)
+    q_rows = torch.tensor([6, 1, 3], device=DEVICE)
+    bt_rows = torch.tensor([4, 0, 2], device=DEVICE)
+    sel_lens = lens_t[bt_rows]
+    out = torch.full((7, hq, d), 7.0, device=DEVICE, dtype=torch.bfloat16)
+    with mock.patch.object(dec, "_use_triton", lambda dev: use_triton):
+        dec.decode_attention(store, q_all, table, sel_lens, d**-0.5, 2, q_rows=q_rows, bt_rows=bt_rows,
+                             out=out, max_len=int(sel_lens.max()))
+    ref = dec.decode_attention_torch(store, q_all[q_rows], table[bt_rows], sel_lens, d**-0.5)
+    torch.testing.assert_close(out[q_rows].float(), ref, rtol=2e-2, atol=2e-2)
+    untouched = [r for r in range(7) if r not in q_rows.tolist()]
+    assert (out[untouched] == 7.0).all()
+    if use_triton:  # a tighter grid (max_len) must not change any bit
+        wide = torch.zeros_like(out)
+        dec._decode_triton(store, q_all, table, sel_lens, d**-0.5, 2, q_rows, bt_rows, wide)
+        assert torch.equal(wide[q_rows], out[q_rows])
 
 
 @pytest.mark.parametrize("use_triton", [False, True])

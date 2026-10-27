@@ -340,16 +340,24 @@ Correctness checks:
 ```bash
 bash scripts/echokv_gpu_validate.sh                                   # tests + quality + throughput
 MODEL=unsloth/Llama-3.1-8B-Instruct bash scripts/echokv_gpu_validate.sh  # ungated Llama mirror
+bash scripts/echokv_bench_h100.sh                                      # 4x H100: 8B, then 70B TP=4
 ```
 
 ## Next
 
-1. Fold the decode split-merge into the Triton kernel (~13 fewer launches
-   per layer per step).
-2. Run on a fast GPU (H100). Per-layer Python cost is ~1 ms per layer per
-   step, so a fast GPU may become CPU-bound. If it does, the next step is
-   a device-side write path that CUDA graphs can capture.
-3. Make INT4 the default `ECHOKV_MEM_BITS`.
-4. Run 70B on 4× H100 (TP=4).
-5. Try long-context workloads (e.g. RULER), where per-layer adaptation has
+Done after round 5, on branch `round6`; passes the CPU and Triton
+interpreter suites, not yet run on a GPU:
+- **Decode split-merge in Triton.** A merge kernel replaces ~13 small
+  PyTorch kernels per layer per step. Decode reads its query and
+  block-table rows by index and writes vLLM's output rows directly.
+- **Smaller split grid.** It's sized from the batch's longest decode
+  length (known on the host) instead of `max_model_len`. At 128K context
+  that avoids up to ~0.5 GB of per-layer scratch.
+- **INT4 is the default** (`ECHOKV_MEM_BITS=4`, starting tier INT4).
+  `ECHOKV_FIXED_BITS` alone now implies a budget that holds that tier.
+
+1. Run `scripts/echokv_bench_h100.sh` on 4× H100: 8B on one GPU (is a fast
+   GPU CPU-bound?), then 70B with TP=4. If 8B is CPU-bound, the next step
+   is a device-side write path that CUDA graphs can capture.
+2. Try long-context workloads (e.g. RULER), where per-layer adaptation has
    more room to help.

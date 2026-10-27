@@ -17,6 +17,7 @@ def test_live_mixed_tiers_in_vllm(tmp_path):
     out = tmp_path / "smoke.json"
     subprocess.run(
         [sys.executable, str(DRIVER), "--tau0", "0.6", "--interval", "8", "--max-tokens", "120",
+         "--mem-bits", "8", "--init-bits", "8",
          "--out", str(out)],
         check=True,
         cwd=tmp_path,

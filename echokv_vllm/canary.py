@@ -34,8 +34,11 @@ class KRefRing:
             return
         if self.buf is None:
             self.buf = torch.zeros(self.window, *keys.shape[1:], device=keys.device)
-        idx = (self.pos + torch.arange(t, device=keys.device)) % self.window
-        self.buf[idx] = keys
+        # At most two slice copies (wrap-around), no index kernel.
+        first = min(t, self.window - self.pos)
+        self.buf[self.pos : self.pos + first] = keys[:first]
+        if first < t:
+            self.buf[: t - first] = keys[first:]
         self.pos = (self.pos + t) % self.window
         self.fill = min(self.window, self.fill + t)
 

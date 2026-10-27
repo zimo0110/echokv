@@ -54,6 +54,9 @@ class WritePlan:
     open_np: np.ndarray = field(default_factory=lambda: np.zeros(0, dtype=np.int64))
     touched_np: np.ndarray = field(default_factory=lambda: np.zeros(0, dtype=np.int64))
     touched_fill: np.ndarray = field(default_factory=lambda: np.zeros(0, dtype=np.int64))
+    touched_count: np.ndarray = field(default_factory=lambda: np.zeros(0, dtype=np.int64))
+    res_index: torch.Tensor | None = None  # [n] residual row of each token's K (trash row if none)
+    res_pos: torch.Tensor | None = None  # [n] position of each token within its K group
     host_buffer: torch.Tensor | None = None  # keeps the pinned source of the async copy alive
     n_open: int = 0
     n_fin: int = 0
@@ -184,6 +187,11 @@ class WritePlanner:
         bstarts = np.flatnonzero(np.r_[True, bsorted[1:] != bsorted[:-1]]) if n else np.zeros(0, np.int64)
         touched = bsorted[bstarts]
         touched_fill = np.maximum.reduceat(off[order] + 1, bstarts) if n else np.zeros(0, np.int64)
+        touched_count = np.diff(np.r_[bstarts, n]) if n else np.zeros(0, np.int64)
+        # Residual destination of every token: its slot, or the trash row
+        # (index num_slots) for tokens whose K goes straight to codes.
+        res_index = np.where(tok_res >= 0, tok_res, self.num_slots)
+        res_pos = pos
 
         # One host-to-device copy for every index array of the plan.
         parts = {
@@ -192,6 +200,7 @@ class WritePlanner:
             "fin_res_slot": fin_arr[:, 2], "fin_rows": fin_rows_arr.reshape(-1),
             "res_set_block": set_b, "res_set_slot": set_s, "res_set_group": set_g,
             "res_clear_block": clear_b, "res_clear_slot": clear_s,
+            "res_index": res_index, "res_pos": res_pos,
         }
         flat = [np.asarray(v, dtype=np.int64).reshape(-1) for v in parts.values()]
         host = torch.from_numpy(np.concatenate(flat)) if flat else torch.zeros(0, dtype=torch.long)
@@ -231,5 +240,8 @@ class WritePlanner:
             open_np=open_blocks,
             touched_np=touched,
             touched_fill=touched_fill,
+            touched_count=touched_count,
+            res_index=views["res_index"],
+            res_pos=views["res_pos"],
             host_buffer=host,
         )

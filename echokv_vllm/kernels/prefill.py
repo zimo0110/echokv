@@ -37,6 +37,8 @@ if HAS_TRITON:
     import triton
     import triton.language as tl
 
+    from echokv_vllm.kernels.common import block_info, load_kv_tile
+
 # Query rows per program (tokens x padded GQA group). More rows reuse each
 # dequantized K/V tile for more queries; 128 fits ~100 KB of shared memory
 # (GB10). If a GPU rejects it, the launcher falls back to 64 once.
@@ -108,7 +110,7 @@ def dequant_dense(store, work, total_ctx: int, block_table, dtype) -> tuple[torc
         res, res.stride(0), res.stride(1), res.stride(2),
         store.block_res, store.res_group,
         H=h, D=d, BS=L.block_size, KG=L.k_group, VG=L.v_group, KC=L.chunks_per_page,
-        TILE=min(32, L.block_size),
+        TILE=min(32, L.block_size, L.k_group),
     )
     return k, v
 
@@ -292,58 +294,20 @@ if HAS_TRITON:
         kv_end = tl.minimum(ctx, q_pos0 + n_tok)  # keys beyond the last query are masked anyway
         for bi in range(0, tl.cdiv(kv_end, BS)):
             blk = tl.load(bt_ptr + req.to(tl.int64) * bt_s0 + bi).to(tl.int64)
-            bits = tl.load(tag_ptr + blk * tag_s0).to(tl.int32)
-            bits = tl.where(bits == 0, 2, bits)  # never-written block: stay in bounds
-            tpc = (2 * BS) // bits
-            side_bytes = (H * D * bits) // 8
-            head_off = h * ((D * bits) // 8)
-            byte_d = (offs_d * bits) // 8
-            shift_d = (offs_d * bits) % 8
-            mask_val = (1 << bits) - 1
-            rslot = tl.load(block_res_ptr + blk)
-            rgrp = tl.load(res_group_ptr + tl.maximum(rslot, 0))
-
+            bits, tpc, side_bytes, head_off, byte_d, shift_d, mask_val, rslot, rgrp = block_info(
+                blk, h, tag_ptr, tag_s0, block_res_ptr, res_group_ptr, H, D, BS
+            )
             for t0 in tl.static_range(0, BS, TILE):
-                offs_t = t0 + tl.arange(0, TILE)
+                k, v, offs_t, valid = load_kv_tile(
+                    blk, t0, kv_end - bi * BS, h,
+                    tpc, side_bytes, head_off, byte_d, shift_d, mask_val, rslot, rgrp,
+                    table_ptr, table_s0, data_ptr, data_s0, data_s1,
+                    ks_ptr, ks_s0, ks_s1, ks_s2, km_ptr,
+                    vs_ptr, vs_s0, vs_s1, vs_s2, vm_ptr,
+                    res_ptr, res_s0, res_s1, res_s2,
+                    D, KG, VG, KC, TILE,
+                )
                 kpos = bi * BS + offs_t
-                valid = kpos < kv_end
-
-                j = offs_t // tpc
-                ext = (j > 0) & valid
-                ids = tl.load(table_ptr + blk * table_s0 + (j - 1), mask=ext, other=0).to(tl.int64)
-                page = tl.where(ext, ids // KC, blk)
-                slot = tl.where(ext, ids % KC, 0)
-                row = page * data_s0 + slot * data_s1 + ((offs_t % tpc) * (2 * side_bytes)).to(tl.int64)
-
-                k_raw = tl.load(
-                    data_ptr + row[:, None] + head_off + byte_d[None, :], mask=valid[:, None], other=0
-                ).to(tl.int32)
-                k_code = (k_raw >> shift_d[None, :]) & mask_val
-                grp = offs_t // KG
-                ks_off = blk * ks_s0 + grp[:, None] * ks_s1 + h * ks_s2 + offs_d[None, :]
-                k_scale = tl.load(ks_ptr + ks_off, mask=valid[:, None], other=0.0).to(tl.float32)
-                k_min = tl.load(km_ptr + ks_off, mask=valid[:, None], other=0.0).to(tl.float32)
-                k = k_code.to(tl.float32) * k_scale + k_min
-                in_res = valid & (rslot >= 0) & (grp == rgrp)
-                k_res = tl.load(
-                    res_ptr + tl.maximum(rslot, 0) * res_s0 + (offs_t % KG)[:, None] * res_s1
-                    + h * res_s2 + offs_d[None, :],
-                    mask=in_res[:, None],
-                    other=0.0,
-                ).to(tl.float32)
-                k = tl.where(in_res[:, None], k_res, k)
-
-                v_raw = tl.load(
-                    data_ptr + row[:, None] + side_bytes + head_off + byte_d[None, :],
-                    mask=valid[:, None],
-                    other=0,
-                ).to(tl.int32)
-                v_code = (v_raw >> shift_d[None, :]) & mask_val
-                vs_off = blk * vs_s0 + offs_t[:, None] * vs_s1 + h * vs_s2 + (offs_d // VG)[None, :]
-                v_scale = tl.load(vs_ptr + vs_off, mask=valid[:, None], other=0.0).to(tl.float32)
-                v_min = tl.load(vm_ptr + vs_off, mask=valid[:, None], other=0.0).to(tl.float32)
-                v = v_code.to(tl.float32) * v_scale + v_min
-
                 s = tl.dot(q, tl.trans(k.to(tl.float16))) * softmax_scale
                 causal = valid[None, :] & (kpos[None, :] <= qpos[:, None])
                 s = tl.where(causal, s, float("-inf"))
@@ -386,45 +350,20 @@ if HAS_TRITON:
         out_row0 = tl.load(work_ptr + w * 4 + 2).to(tl.int64)
         ctx = tl.load(work_ptr + w * 4 + 3)
         blk = tl.load(bt_ptr + req.to(tl.int64) * bt_s0 + bi).to(tl.int64)
-        bits = tl.load(tag_ptr + blk * tag_s0).to(tl.int32)
-        bits = tl.where(bits == 0, 2, bits)  # never-written block: stay in bounds
-        tpc = (2 * BS) // bits
-        side_bytes = (H * D * bits) // 8
-        head_off = h * ((D * bits) // 8)
+        bits, tpc, side_bytes, head_off, byte_d, shift_d, mask_val, rslot, rgrp = block_info(
+            blk, h, tag_ptr, tag_s0, block_res_ptr, res_group_ptr, H, D, BS
+        )
         offs_d = tl.arange(0, D)
-        byte_d = (offs_d * bits) // 8
-        shift_d = (offs_d * bits) % 8
-        mask_val = (1 << bits) - 1
-        rslot = tl.load(block_res_ptr + blk)
-        rgrp = tl.load(res_group_ptr + tl.maximum(rslot, 0))
         for t0 in tl.static_range(0, BS, TILE):
-            offs_t = t0 + tl.arange(0, TILE)
-            valid = bi * BS + offs_t < ctx
-            j = offs_t // tpc
-            ext = (j > 0) & valid
-            ids = tl.load(table_ptr + blk * table_s0 + (j - 1), mask=ext, other=0).to(tl.int64)
-            page = tl.where(ext, ids // KC, blk)
-            slot = tl.where(ext, ids % KC, 0)
-            row = page * data_s0 + slot * data_s1 + ((offs_t % tpc) * (2 * side_bytes)).to(tl.int64)
-            k_raw = tl.load(data_ptr + row[:, None] + head_off + byte_d[None, :], mask=valid[:, None], other=0).to(tl.int32)
-            k_code = (k_raw >> shift_d[None, :]) & mask_val
-            grp = offs_t // KG
-            ks_off = blk * ks_s0 + grp[:, None] * ks_s1 + h * ks_s2 + offs_d[None, :]
-            k = k_code.to(tl.float32) * tl.load(ks_ptr + ks_off, mask=valid[:, None], other=0.0).to(tl.float32) \
-                + tl.load(km_ptr + ks_off, mask=valid[:, None], other=0.0).to(tl.float32)
-            in_res = valid & (rslot >= 0) & (grp == rgrp)
-            k_res = tl.load(
-                res_ptr + tl.maximum(rslot, 0) * res_s0 + (offs_t % KG)[:, None] * res_s1 + h * res_s2 + offs_d[None, :],
-                mask=in_res[:, None], other=0.0,
-            ).to(tl.float32)
-            k = tl.where(in_res[:, None], k_res, k)
-            v_raw = tl.load(
-                data_ptr + row[:, None] + side_bytes + head_off + byte_d[None, :], mask=valid[:, None], other=0
-            ).to(tl.int32)
-            v_code = (v_raw >> shift_d[None, :]) & mask_val
-            vs_off = blk * vs_s0 + offs_t[:, None] * vs_s1 + h * vs_s2 + (offs_d // VG)[None, :]
-            v = v_code.to(tl.float32) * tl.load(vs_ptr + vs_off, mask=valid[:, None], other=0.0).to(tl.float32) \
-                + tl.load(vm_ptr + vs_off, mask=valid[:, None], other=0.0).to(tl.float32)
+            k, v, offs_t, valid = load_kv_tile(
+                blk, t0, ctx - bi * BS, h,
+                tpc, side_bytes, head_off, byte_d, shift_d, mask_val, rslot, rgrp,
+                table_ptr, table_s0, data_ptr, data_s0, data_s1,
+                ks_ptr, ks_s0, ks_s1, ks_s2, km_ptr,
+                vs_ptr, vs_s0, vs_s1, vs_s2, vm_ptr,
+                res_ptr, res_s0, res_s1, res_s2,
+                D, KG, VG, KC, TILE,
+            )
             dst = (out_row0 + offs_t)[:, None] * out_s0 + h * out_s1 + offs_d[None, :]
             tl.store(k_out_ptr + dst, k.to(k_out_ptr.dtype.element_ty), mask=valid[:, None])
             tl.store(v_out_ptr + dst, v.to(v_out_ptr.dtype.element_ty), mask=valid[:, None])
@@ -464,7 +403,7 @@ def _prefill_triton(store, query, output, tiles, block_table, softmax_scale):
         KG=L.k_group,
         VG=L.v_group,
         KC=L.chunks_per_page,
-        TILE=min(32, L.block_size),
+        TILE=min(32, L.block_size, L.k_group),
         num_stages=1,
         num_warps=8 if ROWS >= 128 else 4,
     )

@@ -138,6 +138,8 @@ def main() -> None:
     p.add_argument("--static", type=int, nargs="*", default=[8, 4, 2])
     p.add_argument("--taus", type=float, nargs="*", default=[0.005, 0.01, 0.02, 0.05])
     p.add_argument("--canary-interval", type=int, default=8)
+    p.add_argument("--mem-bits", type=int, nargs="*", default=[8],
+                   help="memory budgets (ECHOKV_MEM_BITS) to run each live tau under")
     p.add_argument("--out", default="echokv_quality_sweep.json")
     p.add_argument("--quiet", action="store_true")
     p.add_argument("--child-out")
@@ -150,13 +152,16 @@ def main() -> None:
     results = {"stock": run(args, "stock", {"ECHOKV_ENABLE": "0"})}
     for b in args.static:
         results[f"int{b}"] = run(args, f"int{b}", {**on, "ECHOKV_FIXED_BITS": str(b)})
-    for t in args.taus:
-        results[f"tau={t}"] = run(args, f"tau{t}", {**on, "ECHOKV_TAU0": str(t)})
+    for mb in args.mem_bits:
+        for t in args.taus:
+            name = f"tau={t}" if args.mem_bits == [8] else f"tau={t},mem={mb}"
+            results[name] = run(args, name.replace("=", "").replace(",", "_"),
+                                {**on, "ECHOKV_TAU0": str(t), "ECHOKV_MEM_BITS": str(mb)})
     if "error" in results["stock"]:
         sys.exit("stock vLLM failed to run, so nothing can be compared; see its log above")
     base = results["stock"]["nll"]
     print(f"\n{args.model}   stock NLL {base:.4f}")
-    print(f"{'config':<12} {'ΔNLL':>8} {'bits':>6}  tiers")
+    print(f"{'config':<18} {'ΔNLL':>8} {'bits':>6}  tiers")
     for name, r in results.items():
         if name == "stock":
             continue
@@ -167,7 +172,7 @@ def main() -> None:
         tiers = r.get("tier_vector") or []
         mix = " ".join(f"{b}:{tiers.count(b)}" for b in (2, 4, 8) if tiers.count(b))
         bits = r.get("avg_stored_bits")
-        print(f"{name:<12} {r['delta_nll']:>+8.4f} {bits if bits is None else round(bits, 2):>6}  {mix}")
+        print(f"{name:<18} {r['delta_nll']:>+8.4f} {bits if bits is None else round(bits, 2):>6}  {mix}")
     with open(args.out, "w") as f:
         json.dump({"model": args.model, "results": results}, f, indent=1)
     if any("error" in r for r in results.values()):

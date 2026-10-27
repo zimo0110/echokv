@@ -55,6 +55,7 @@ from dataclasses import dataclass
 
 import numpy as np
 import torch
+from torch.profiler import record_function
 
 from echokv_vllm.quant import (
     SUPPORTED_BITS,
@@ -209,20 +210,17 @@ class TieredKVCache:
         self.block_res = torch.full((n,), -1, dtype=torch.long, device=dev)
         self.planner = WritePlanner(bs, L.k_group, r)
 
-        self._tokens = torch.zeros(9, dtype=torch.long, device=dev)
+        self._tokens_h = np.zeros(9, dtype=np.int64)
         self.reset_counters()
 
     # -- counters (read lazily; each read syncs) ---------------------------
 
     @property
     def tokens_written(self) -> dict[int, int]:
-        return {b: int(self._tokens[b]) for b in SUPPORTED_BITS}
+        return {b: int(self._tokens_h[b]) for b in SUPPORTED_BITS}
 
     def reset_counters(self) -> None:
-        # Callable from outside vLLM's forward (llm.apply_model), where the
-        # counter, created under inference mode, may only be updated inside it.
-        with torch.inference_mode():
-            self._tokens.zero_()
+        self._tokens_h[:] = 0
         self.blocks_opened = {b: 0 for b in SUPPORTED_BITS}
         self.downgraded_blocks = 0
         self.demoted_blocks = 0
@@ -382,11 +380,13 @@ class TieredKVCache:
             if fresh.size:
                 opens = np.union1d(opens, fresh)
         if opens.size:
-            self.open_blocks(opens, target_bits, protect=plan.touched_np)
+            with record_function("echokv.write.open"):
+                self.open_blocks(opens, target_bits, protect=plan.touched_np)
         if plan.touched_np.size:
             t = plan.touched_np
             self._fill_h[t] = np.maximum(self._fill_h[t], plan.touched_fill)
             self._last_h[t] = plan.step
+            self._tokens_h += np.bincount(self._tag_h[t], weights=plan.touched_count, minlength=9)[:9].astype(np.int64)
         if plan.res_clear_block.numel():
             self.block_res[plan.res_clear_block] = -1
         if plan.res_set_block.numel():
@@ -395,23 +395,19 @@ class TieredKVCache:
         if plan.slots.numel() == 0:
             return
 
-        blk = plan.slots // L.block_size
-        off = plan.slots % L.block_size
-        self._tokens.index_add_(0, self.tag[blk].long(), torch.ones_like(blk))
-        write_v(self, value, plan.rows, plan.slots)
-
+        with record_function("echokv.write.v"):
+            write_v(self, value, plan.rows, plan.slots)
         # Finalize before the residual scatter: the planner may hand a slot freed
         # by a completing group to a new group in the same step.
         if plan.n_fin:
-            finalize_k(self, key, plan.fin_block, plan.fin_group, plan.fin_res_slot, plan.fin_rows)
-
-        # K tokens of still-open groups go to the residual (masked rows hit the trash row).
-        trash = self.res_k.shape[0] - 1
-        to_res = plan.tok_res_slot >= 0
-        self.res_k[torch.where(to_res, plan.tok_res_slot, trash), off % L.k_group] = key[plan.rows].to(
-            self.res_k.dtype
-        )
+            with record_function("echokv.write.k_finalize"):
+                finalize_k(self, key, plan.fin_block, plan.fin_group, plan.fin_res_slot, plan.fin_rows)
+        # K of still-open groups to the residual (other tokens hit the trash row).
+        with record_function("echokv.write.residual"):
+            self.res_k[plan.res_index, plan.res_pos] = key[plan.rows].to(self.res_k.dtype)
         if plan.n_sealed:
+            blk = plan.slots // L.block_size
+            off = plan.slots % L.block_size
             m = plan.tok_sealed
             b_, o_, r_ = blk[m], off[m], plan.rows[m]
             for bits in SUPPORTED_BITS:

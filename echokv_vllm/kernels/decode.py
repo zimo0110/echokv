@@ -23,13 +23,13 @@ import torch.nn.functional as F
 
 from echokv_vllm.tiered_cache import TieredKVCache
 
-try:
+from echokv_vllm.kernels.common import HAS_TRITON
+
+if HAS_TRITON:
     import triton
     import triton.language as tl
 
-    HAS_TRITON = True
-except ImportError:  # macOS, CPU-only installs
-    HAS_TRITON = False
+    from echokv_vllm.kernels.common import block_info, load_kv_tile
 
 
 def _use_triton(device: torch.device) -> bool:
@@ -157,65 +157,22 @@ if HAS_TRITON:
 
         for bi in range(b_start, b_end):
             blk = tl.load(bt_ptr + seq * bt_s0 + bi).to(tl.int64)
-            bits = tl.load(tag_ptr + blk * tag_s0).to(tl.int32)
-            # Never-written block (tag 0; vLLM's warmup/profiling batches read
-            # these): address it as INT2 so every access stays inside its page.
-            bits = tl.where(bits == 0, 2, bits)
-            tpc = (2 * BS) // bits
-            side_bytes = (H * D * bits) // 8
-            head_off = h * ((D * bits) // 8)
-            byte_d = (offs_d * bits) // 8
-            shift_d = (offs_d * bits) % 8
-            mask_val = (1 << bits) - 1
-            rslot = tl.load(block_res_ptr + blk)
-            rgrp = tl.load(res_group_ptr + tl.maximum(rslot, 0))
-
-            # TILE tokens at a time keeps the fp32 K/V tiles within the shared
+            bits, tpc, side_bytes, head_off, byte_d, shift_d, mask_val, rslot, rgrp = block_info(
+                blk, h, tag_ptr, tag_s0, block_res_ptr, res_group_ptr, H, D, BS
+            )
+            n_valid = seq_len - bi * BS
+            # TILE tokens at a time keeps the K/V tiles within the shared
             # memory of smaller GPUs (~100 KB on GB10/sm_12x vs 228 KB on H100).
             for t0 in tl.static_range(0, BS, TILE):
-                offs_t = t0 + tl.arange(0, TILE)
-                tok = bi * BS + offs_t
-                valid = tok < seq_len
-
-                # Where each token's row lives: chunk j of the block.
-                j = offs_t // tpc
-                ext = (j > 0) & valid
-                ids = tl.load(table_ptr + blk * table_s0 + (j - 1), mask=ext, other=0).to(tl.int64)
-                page = tl.where(ext, ids // KC, blk)
-                slot = tl.where(ext, ids % KC, 0)
-                row = page * data_s0 + slot * data_s1 + ((offs_t % tpc) * (2 * side_bytes)).to(tl.int64)
-
-                # K: per-channel stats of the token's group; open group from the residual.
-                k_raw = tl.load(
-                    data_ptr + row[:, None] + head_off + byte_d[None, :], mask=valid[:, None], other=0
-                ).to(tl.int32)
-                k_code = (k_raw >> shift_d[None, :]) & mask_val
-                grp = offs_t // KG
-                ks_off = blk * ks_s0 + grp[:, None] * ks_s1 + h * ks_s2 + offs_d[None, :]
-                k_scale = tl.load(ks_ptr + ks_off, mask=valid[:, None], other=0.0).to(tl.float32)
-                k_min = tl.load(km_ptr + ks_off, mask=valid[:, None], other=0.0).to(tl.float32)
-                k = k_code.to(tl.float32) * k_scale + k_min
-                in_res = valid & (rslot >= 0) & (grp == rgrp)
-                k_res = tl.load(
-                    res_ptr + tl.maximum(rslot, 0) * res_s0 + (offs_t % KG)[:, None] * res_s1
-                    + h * res_s2 + offs_d[None, :],
-                    mask=in_res[:, None],
-                    other=0.0,
-                ).to(tl.float32)
-                k = tl.where(in_res[:, None], k_res, k)
-
-                # V: per-token stats along head_dim groups.
-                v_raw = tl.load(
-                    data_ptr + row[:, None] + side_bytes + head_off + byte_d[None, :],
-                    mask=valid[:, None],
-                    other=0,
-                ).to(tl.int32)
-                v_code = (v_raw >> shift_d[None, :]) & mask_val
-                vs_off = blk * vs_s0 + offs_t[:, None] * vs_s1 + h * vs_s2 + (offs_d // VG)[None, :]
-                v_scale = tl.load(vs_ptr + vs_off, mask=valid[:, None], other=0.0).to(tl.float32)
-                v_min = tl.load(vm_ptr + vs_off, mask=valid[:, None], other=0.0).to(tl.float32)
-                v = v_code.to(tl.float32) * v_scale + v_min
-
+                k, v, offs_t, valid = load_kv_tile(
+                    blk, t0, n_valid, h,
+                    tpc, side_bytes, head_off, byte_d, shift_d, mask_val, rslot, rgrp,
+                    table_ptr, table_s0, data_ptr, data_s0, data_s1,
+                    ks_ptr, ks_s0, ks_s1, ks_s2, km_ptr,
+                    vs_ptr, vs_s0, vs_s1, vs_s2, vm_ptr,
+                    res_ptr, res_s0, res_s1, res_s2,
+                    D, KG, VG, KC, TILE,
+                )
                 # fp16 operands, fp32 accumulation: tensor cores, as in stock
                 # attention kernels (|q|, |k|, |v| are far inside fp16 range, p <= 1).
                 s = tl.dot(q16, tl.trans(k.to(tl.float16))) * softmax_scale
@@ -235,6 +192,24 @@ if HAS_TRITON:
         tl.store(ml_ptr + out_row * 2 + 1, l_i, mask=q_mask)
 
 
+if HAS_TRITON:
+    # Autotuned per GPU and shape on first use (CUDA only; the interpreter
+    # runs the plain kernel). Configs that exceed a GPU's shared memory are
+    # discarded by the autotuner. ECHOKV_AUTOTUNE=0 pins one config.
+    _decode_kernel_tuned = triton.autotune(
+        configs=[triton.Config({}, num_warps=w, num_stages=st) for w in (2, 4, 8) for st in (1, 2)],
+        key=["H", "GQA", "D", "BS", "TILE"],
+    )(_decode_kernel)
+
+
+def _autotune_enabled(device: torch.device) -> bool:
+    return (
+        device.type == "cuda"
+        and os.environ.get("TRITON_INTERPRET") != "1"
+        and os.environ.get("ECHOKV_AUTOTUNE", "1") == "1"
+    )
+
+
 def _decode_triton(store, query, block_table, seq_lens, softmax_scale, blocks_per_split):
     L = store.layout
     s, hq, d = query.shape
@@ -250,7 +225,10 @@ def _decode_triton(store, query, block_table, seq_lens, softmax_scale, blocks_pe
     acc = torch.empty(s, hq, num_splits, d, device=query.device, dtype=torch.float32)
     ml = torch.empty(s, hq, num_splits, 2, device=query.device, dtype=torch.float32)
     res = store.res_k
-    _decode_kernel[(s, h, num_splits)](
+    tuned = _autotune_enabled(query.device)
+    kernel = _decode_kernel_tuned if tuned else _decode_kernel
+    launch = {} if tuned else {"num_stages": 1}
+    kernel[(s, h, num_splits)](
         query, query.stride(0), query.stride(1),
         block_table, block_table.stride(0),
         lens,
@@ -275,8 +253,8 @@ def _decode_triton(store, query, block_table, seq_lens, softmax_scale, blocks_pe
         KG=L.k_group,
         VG=L.v_group,
         KC=L.chunks_per_page,
-        TILE=min(32, L.block_size),
-        num_stages=1,
+        TILE=min(32, L.block_size, L.k_group),
+        **launch,
     )
     m, l = ml[..., 0], ml[..., 1]
     m_max = m.max(dim=2, keepdim=True).values

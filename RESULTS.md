@@ -22,11 +22,15 @@ On a real GPU (NVIDIA DGX Spark, Llama-3.1-8B-Instruct):
     time-to-first-token** (3.7 s vs 44.8 s) and 1.5× throughput.
   - At 32 users: 6× lower TTFT and 1.64× throughput.
   - Short prompts (1K): INT4 1.35×, INT8 1.15×.
+- **Very long contexts:** 64K-token prompts 1.51× and 128K-token prompts
+  1.28× (16 and 24 GiB KV). Stock fits one such request at a time,
+  INT4 fits 4–6.
 - **No penalty when memory isn't the limit.** At 4 concurrent users,
   throughput, TTFT and time-per-token are identical to stock.
 - **The trade-off:** under load, each request decodes alongside more others,
-  so time per output token is higher (209 vs 136 ms at 16 users). Total
-  waiting is much lower: median end-to-end 57 s vs 80 s.
+  so time per output token is higher (209 vs 136 ms at 16 users). That's
+  set by how many requests run at once, not by kernel speed (see round 5).
+  Total waiting is much lower: median end-to-end 57 s vs 80 s.
 
 ## GPU: DGX Spark (GB10), Llama-3.1-8B-Instruct, bf16
 
@@ -151,6 +155,131 @@ At 16 users with 8K prompts, round-4 latency matches round 3 (68 tok/s,
 TTFT p50 3.7 s, TPOT 208 ms; `round4_latency_c16.json`). That load is
 decode-bound on the GPU, so removing CPU stalls doesn't change it.
 
+### Round 5 (commit `e389602`)
+
+Changes:
+- A shared tile loader for the decode, fused-prefill and dequantize
+  kernels. It reads K's scale/min once per tile instead of once per token.
+- Decode-kernel autotuning per GPU.
+- Per-step write bookkeeping done once per step on the host.
+
+All unit tests pass on the GPU (`round5_unit.txt`, `round5b_unit.txt`).
+
+**Profile:** same workload as round 4, 64 × (1,024 in, 128 out).
+From `round5_profile.json`.
+
+| | round 4 | round 5 | stock |
+|---|---:|---:|---:|
+| wall time | 26.8 s | **26.5 s** | 35.6 s |
+| GPU idle | 0.9 s | 0.8 s | 0.1 s |
+| decode kernel (GPU) | 3.43 s | 3.37 s | — |
+| KV writes (GPU) | 0.86 s | **0.56 s** | — |
+| prefill attention (GPU) | 0.73 s | 0.73 s | — |
+
+- **Writes are 35% cheaper on the GPU.**
+- **Decode barely moved (−2%).** The per-token stats loads weren't what
+  limited it.
+- **Decode is 13% of GPU time.** Most of the rest is the model's matrix
+  multiplies, the same work stock does.
+
+**CPU waiting on the GPU.** The trace shows the host blocked on the GPU
+for ~23 s of the 26.5 s wall time:
+
+| where | cause | calls | CPU blocked |
+|---|---|---:|---:|
+| block open | `sealed[idx] = 0`: the scalar becomes a CPU tensor, and copying it blocks | 608 | 12.7 s |
+| metadata build | copying `slot_mapping` and `seq_lens` back from the GPU | 715 | 8.5 s |
+| write | `block_res[idx] = -1` (same scalar issue) | 1,120 | 1.6 s |
+
+On the Spark this barely costs anything: the GPU is the bottleneck, so
+the CPU would be waiting somewhere anyway. On a faster GPU, the CPU would
+sit in these waits instead of preparing the next step.
+
+The fix, after `e389602`:
+- `index_fill_` replaces the scalar assignments.
+- The builder computes the slot mapping on the host instead of copying it
+  back. It reads vLLM's CPU block table (V1 model runner) or a host mirror
+  of the block-table writes (V2 runner, the default on CUDA). It falls back to the copy under
+  speculative decoding or context parallelism.
+- `ECHOKV_CHECK_HOST_SLOTS=1` checks every step against vLLM's own
+  mapping. The end-to-end test runs with it on.
+
+**Confirmed on the GPU** (commit `7957e9d`, `round5b_profile.json`):
+- The end-to-end test passes with `ECHOKV_CHECK_HOST_SLOTS=1`, so the
+  host mapping matched vLLM's on every step.
+- CPU time in `echokv.build` fell from 8.5 s to 0.14 s.
+- CPU time in `write.open` fell from 12.8 s to 0.3 s.
+- Wall time is 26.3 s (vs 26.5 s); the Spark was GPU-bound either way.
+
+Where the CPU waits now:
+- **Kernel launches (10.8 s):** the CPU runs far enough ahead to fill the
+  GPU's launch queue.
+- **vLLM's own once-per-step sync:** stock vLLM has it too.
+
+The remaining per-layer cost on a faster GPU is launches. Each decode call
+merges its split results with ~13 small PyTorch kernels, which could be
+folded into the Triton kernel.
+
+**Serving latency:** 8,192-token prompts, 256 out, 8 GiB KV. Matches
+rounds 3 and 4 to within ~1%. From `round5_latency.json`.
+
+| config | users | out tok/s | TTFT p50 | TTFT p99 | TPOT p50 | E2E p50 |
+|---|---:|---:|---:|---:|---:|---:|
+| stock | 16 | 46 | 44,257 | 77,586 | 135 | 78,583 |
+| EchoKV INT4 | 16 | **68** | **3,766** | 32,595 | 210 | **57,416** |
+| stock | 32 | 46 | 123,440 | 156,508 | 135 | 157,880 |
+| EchoKV INT4 | 32 | **74** | **21,423** | 93,916 | 295 | **97,777** |
+
+**Why time per token is higher.** TPOT ≈ (requests decoding at once) ÷
+(output throughput):
+
+| | requests in memory | ÷ out tok/s | predicted TPOT | measured TPOT |
+|---|---:|---:|---:|---:|
+| stock | 7 | 46 | 152 ms | 135 ms |
+| EchoKV, 16 users | 16 | 68 | 235 ms | 210 ms |
+| EchoKV, 32 users | 24 | 74 | 324 ms | 295 ms |
+
+Stock holds 7 of these requests in 8 GiB; INT4 holds 24.
+- **Throughput is mostly prefill.** Each request prefills 8,192 tokens
+  for 256 output tokens, and prefill is the same work in both configs.
+- **More requests share each step.** Running more requests at once raises
+  each one's TPOT, while the queueing wait (TTFT) falls.
+- **A faster decode kernel can't change this much.** A deployment that
+  needs stock-level TPOT can cap concurrency with `--max-num-seqs`, at the
+  cost of TTFT.
+
+**Very long contexts:** stock vs INT4. From `round5_ctx64k.json` and
+`round5_ctx128k.json`.
+
+| workload | KV | stock fits | INT4 fits | stock wall | INT4 wall | speed |
+|---|---:|---:|---:|---:|---:|---:|
+| 8 × (65,536 in, 256 out) | 16 GiB | 1 | 6 | 429 s | 284 s | **1.51×** |
+| 4 × (130,048 in, 256 out) | 24 GiB | 1 | 4 | 471 s | 367 s | **1.28×** |
+
+- **Both configs are prefill-bound** at these lengths (~1,400–1,850
+  prompt tok/s).
+- **The gain is decoding together.** Stock decodes its requests one at a
+  time; INT4 decodes them together.
+- **Longer outputs would widen the gap.**
+- **128K needs EchoKV in a smaller budget.** Stock can't hold one 128K
+  request in 8 GiB; INT4 holds 1.6.
+
+**Quality under a memory budget:** live controller at τ=0.005 with
+`ECHOKV_MEM_BITS` 4, 6 and 8. Same quality setup as above. From
+`round5_budget.json`.
+
+| config | ΔNLL | stored bits | tiers chosen |
+|---|---:|---:|---|
+| static INT4 | +0.0065 | 4.0 | all INT4 |
+| live, 4-bit budget | +0.0065 | 4.0 | all INT4 (forced) |
+| live, 6-bit budget | +0.0053 | 4.12 | INT4, layer 14 INT8 |
+| live, 8-bit budget | +0.0061 | 4.25 | INT4, layers 13–14 INT8 |
+
+- **The budget caps correctly.** The controller wants INT8 for layers
+  13–14 at τ=0.005. An 8-bit budget lets both have it, a 6-bit budget
+  one, and a 4-bit budget none.
+- **Quality stays within INT4's noise (±0.003) in all three.**
+
 ### What this means
 
 - **The quantizer is the big win.** Per-channel K quantization with fp16
@@ -215,12 +344,12 @@ MODEL=unsloth/Llama-3.1-8B-Instruct bash scripts/echokv_gpu_validate.sh  # ungat
 
 ## Next
 
-1. Lower time per output token under load: decode-kernel tuning, CUDA
-   graphs for decode.
-2. Cut host CPU per write call (~3.7 ms). It overlaps with the GPU today
-   but will matter on faster GPUs.
-3. Measure at 64K–128K tokens, and at lower memory budgets (e.g.
-   `ECHOKV_MEM_BITS=6` with the live controller).
+1. Fold the decode split-merge into the Triton kernel (~13 fewer launches
+   per layer per step).
+2. Run on a fast GPU (H100). Per-layer Python cost is ~1 ms per layer per
+   step, so a fast GPU may become CPU-bound. If it does, the next step is
+   a device-side write path that CUDA graphs can capture.
+3. Make INT4 the default `ECHOKV_MEM_BITS`.
 4. Run 70B on 4× H100 (TP=4).
 5. Try long-context workloads (e.g. RULER), where per-layer adaptation has
    more room to help.

@@ -1,6 +1,7 @@
 """Boots real vLLM with the EchoKV backend. Slow (~1 min on CPU); run with ``pytest -m slow``."""
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -19,6 +20,8 @@ def test_live_mixed_tiers_in_vllm(tmp_path):
          "--out", str(out)],
         check=True,
         cwd=tmp_path,
+        # Every step: plan from the host slot mapping and check it against vLLM's.
+        env=dict(os.environ, ECHOKV_CHECK_HOST_SLOTS="1"),
     )
     e = json.loads(out.read_text())["echokv"]
     st = e["state"]

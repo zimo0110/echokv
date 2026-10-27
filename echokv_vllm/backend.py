@@ -22,6 +22,7 @@ kernels.
 from __future__ import annotations
 
 import itertools
+import os
 from dataclasses import dataclass, replace
 from typing import ClassVar
 
@@ -46,6 +47,7 @@ from echokv_vllm._util import to_device
 from echokv_vllm.canary import KRefRing, canary_kl
 from echokv_vllm.config import load_config
 from echokv_vllm.controller import LayerController
+from echokv_vllm.host_slots import host_lens_and_slots
 from echokv_vllm.kernels.decode import _use_triton, decode_attention
 from echokv_vllm.kernels.prefill import (
     FUSED_MAX_CHUNK,
@@ -137,13 +139,18 @@ class EchoKVMetadataBuilder(AttentionMetadataBuilder[EchoKVMetadata]):
         super().__init__(kv_cache_spec, layer_names, vllm_config, device)
         cfg = load_config()
         # One planner per KV cache group: every layer applies the same plan, so
-        # host-side planning (and its one device-to-host copy) happens once per step.
+        # host-side planning happens once per step.
         self.planner = WritePlanner(kv_cache_spec.block_size, cfg.k_group, _residual_slots(cfg))
         num_heads = get_num_attention_heads_from_layers(vllm_config, layer_names) or (
             vllm_config.model_config.get_num_attention_heads(vllm_config.parallel_config)
         )
         self.gqa = num_heads // kv_cache_spec.num_kv_heads
         self.use_triton = _use_triton(torch.device(device))
+        # Host slot mapping needs exact CPU sequence lengths, which async
+        # speculative decoding does not provide (see host_slots.py).
+        self.host_slots = vllm_config.speculative_config is None
+        self.check_host_slots = os.environ.get("ECHOKV_CHECK_HOST_SLOTS", "0") == "1"
+        self.host_slot_steps = 0  # steps planned from the host mapping (tests read this)
 
     def build(
         self,
@@ -159,11 +166,22 @@ class EchoKVMetadataBuilder(AttentionMetadataBuilder[EchoKVMetadata]):
         if cm.causal is not True:
             raise NotImplementedError("EchoKV supports causal decoder attention only")
         n = cm.num_reqs
-        plan = self.planner.plan(cm.slot_mapping[: cm.num_actual_tokens].cpu(), self.device)
-        qsl = cm.query_start_loc_cpu[: n + 1].tolist()
-        seq_lens_cpu = cm.seq_lens[:n].cpu()
-        lens = seq_lens_cpu.tolist()
         bs = self.kv_cache_spec.block_size
+        host = host_lens_and_slots(cm, bs) if self.host_slots else None
+        if host is not None:
+            seq_lens_cpu, slots_cpu = host
+            self.host_slot_steps += 1
+        if host is None and self.check_host_slots:
+            raise AssertionError("ECHOKV_CHECK_HOST_SLOTS=1 but the host slot mapping is unavailable")
+        if host is None or self.check_host_slots:
+            # Device-to-host copies: each waits for the GPU to drain.
+            dev_lens, dev_slots = cm.seq_lens[:n].cpu(), cm.slot_mapping[: cm.num_actual_tokens].cpu()
+            if host is not None and not (torch.equal(seq_lens_cpu, dev_lens.long()) and torch.equal(slots_cpu, dev_slots.long())):
+                raise AssertionError("EchoKV host slot mapping differs from vLLM's")
+            seq_lens_cpu, slots_cpu = dev_lens, dev_slots
+        plan = self.planner.plan(slots_cpu, self.device)
+        qsl = cm.query_start_loc_cpu[: n + 1].tolist()
+        lens = seq_lens_cpu.tolist()
         last_rows, last_ctx, d_rows, d_reqs, prefill = [], [], [], [], []
         gathers = []
         g_start = 0
@@ -216,7 +234,7 @@ class EchoKVMetadataBuilder(AttentionMetadataBuilder[EchoKVMetadata]):
             num_actual_tokens=cm.num_actual_tokens,
             num_reqs=n,
             query_start_loc_cpu=cm.query_start_loc_cpu[: n + 1].cpu(),
-            seq_lens_cpu=cm.seq_lens[:n].cpu(),
+            seq_lens_cpu=seq_lens_cpu,
             block_table=cm.block_table_tensor,
             slot_mapping=cm.slot_mapping,
             write_plan=plan,

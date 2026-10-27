@@ -20,6 +20,9 @@ def register() -> None:
     from vllm.platforms import current_platform
     from vllm.v1.attention.backends.registry import AttentionBackendEnum, register_backend
 
+    from echokv_vllm.host_slots import install
+
+    install()
     register_backend(AttentionBackendEnum.CUSTOM, BACKEND_PATH)
     if current_platform.is_cpu():
         register_backend(AttentionBackendEnum.CPU_ATTN, BACKEND_PATH)

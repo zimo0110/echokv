@@ -1,0 +1,4 @@
+unsloth/Llama-3.1-8B-Instruct  KV budget 16.0 GiB, 8 x (65536 in, 256 out)
+config              KV tokens  capacity  out tok/s   speed  bits
+stock                 131,072     1.00x        4.8   1.00x      
+echokv-int4           418,112     3.19x        7.2   1.51x  4.00

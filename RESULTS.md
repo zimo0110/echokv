@@ -163,7 +163,7 @@ Changes:
 - Decode-kernel autotuning per GPU.
 - Per-step write bookkeeping done once per step on the host.
 
-All 77 unit tests pass on the GPU (`round5_unit.txt`).
+All unit tests pass on the GPU (`round5_unit.txt`, `round5b_unit.txt`).
 
 **Profile:** same workload as round 4, 64 × (1,024 in, 128 out).
 From `round5_profile.json`.
@@ -204,7 +204,21 @@ The fix, after `e389602`:
 - `ECHOKV_CHECK_HOST_SLOTS=1` checks every step against vLLM's own
   mapping. The end-to-end test runs with it on.
 
-This fix still needs a GPU run.
+**Confirmed on the GPU** (commit `7957e9d`, `round5b_profile.json`):
+- The end-to-end test passes with `ECHOKV_CHECK_HOST_SLOTS=1`, so the
+  host mapping matched vLLM's on every step.
+- CPU time in `echokv.build` fell from 8.5 s to 0.14 s.
+- CPU time in `write.open` fell from 12.8 s to 0.3 s.
+- Wall time is 26.3 s (vs 26.5 s); the Spark was GPU-bound either way.
+
+Where the CPU waits now:
+- **Kernel launches (10.8 s):** the CPU runs far enough ahead to fill the
+  GPU's launch queue.
+- **vLLM's own once-per-step sync:** stock vLLM has it too.
+
+The remaining per-layer cost on a faster GPU is launches. Each decode call
+merges its split results with ~13 small PyTorch kernels, which could be
+folded into the Triton kernel.
 
 **Serving latency:** 8,192-token prompts, 256 out, 8 GiB KV. Matches
 rounds 3 and 4 to within ~1%. From `round5_latency.json`.
@@ -330,8 +344,8 @@ MODEL=unsloth/Llama-3.1-8B-Instruct bash scripts/echokv_gpu_validate.sh  # ungat
 
 ## Next
 
-1. Confirm the GPU-sync fix on the GPU. On the Spark, expect the CPU
-   wait to drop and wall time to barely change.
+1. Fold the decode split-merge into the Triton kernel (~13 fewer launches
+   per layer per step).
 2. Run on a fast GPU (H100). Per-layer Python cost is ~1 ms per layer per
    step, so a fast GPU may become CPU-bound. If it does, the next step is
    a device-side write path that CUDA graphs can capture.

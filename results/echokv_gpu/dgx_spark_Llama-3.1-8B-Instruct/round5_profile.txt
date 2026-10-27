@@ -1,0 +1,36 @@
+=== stock: wall 35.6s, GPU busy 35.5s
+    10100.0 ms  x1056   nvjet_sm121_tst_mma_128x208x64_2_32x104x64_tmaAB_bz_TNNN
+     5706.8 ms  x13888  void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_128x1_tn_align8
+     5208.1 ms  x8004   void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x1_tn_align8
+     4374.2 ms  x4000   void flash::flash_fwd_splitkv_kernel<Flash_fwd_kernel_traits<128, 64, 64, 4, false, false,
+     2467.2 ms  x1981   void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_128x2_tn_align8
+     2203.6 ms  x3904   void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_128x64_64x3_tn_align8>
+     1543.8 ms  x4256   void flash::flash_fwd_splitkv_kernel<Flash_fwd_kernel_traits<128, 64, 128, 4, false, false
+     1243.6 ms  x256    void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_128x256_32x3_tn_align8
+      834.4 ms  x8256   triton_poi_fused_mul_silu_slice_1
+      636.2 ms  x3904   nvjet_sm121_tst_mma_128x64x64_4_32x64x64_tmaAB_bz_TNNN
+      401.4 ms  x8256   triton_red_fused_fused_add_rms_norm_2
+      245.1 ms  x8256   triton_red_fused_fused_add_rms_norm_0
+
+=== echokv-int4: wall 26.5s, GPU busy 25.7s
+  echokv.build           cpu    8520.0 ms  gpu      64.0 ms  calls 136
+  echokv.canary          cpu     210.8 ms  gpu      61.5 ms  calls 64
+  echokv.decode_attn     cpu    1131.0 ms  gpu    3776.1 ms  calls 4320
+  echokv.prefill_attn    cpu      46.9 ms  gpu     728.9 ms  calls 288
+  echokv.write           cpu   15811.1 ms  gpu     558.4 ms  calls 4352
+  echokv.write.k_finalize cpu      63.4 ms  gpu      48.1 ms  calls 1152
+  echokv.write.open      cpu   12840.1 ms  gpu      30.7 ms  calls 608
+  echokv.write.residual  cpu     191.8 ms  gpu     128.6 ms  calls 4352
+  echokv.write.v         cpu     242.8 ms  gpu     196.6 ms  calls 4352
+     9592.7 ms  x1056   nvjet_sm121_tst_mma_128x208x64_2_32x104x64_tmaAB_bz_TNNN
+     5383.0 ms  x8068   void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x1_tn_align8
+     3370.3 ms  x4320   _decode_kernel
+     2366.2 ms  x3936   void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_128x64_64x3_tn_align8>
+     1070.9 ms  x224    void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_128x256_32x3_tn_align8
+      792.2 ms  x4352   triton_poi_fused_mul_silu_slice_1
+      785.9 ms  x3936   nvjet_sm121_tst_mma_128x64x64_4_32x64x64_tmaAB_bz_TNNN
+      376.6 ms  x4352   triton_red_fused_fused_add_rms_norm_2
+      336.8 ms  x288    void flash::flash_fwd_kernel<Flash_fwd_kernel_traits<128, 128, 64, 4, false, false, cutlas
+      290.5 ms  x14480  void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native:
+      238.1 ms  x17832  void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, 
+      234.9 ms  x4352   triton_red_fused_fused_add_rms_norm_0

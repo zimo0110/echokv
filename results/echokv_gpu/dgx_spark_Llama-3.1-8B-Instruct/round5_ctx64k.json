@@ -1,0 +1,68 @@
+{
+ "args": {
+  "model": "unsloth/Llama-3.1-8B-Instruct",
+  "dtype": "auto",
+  "tp": 1,
+  "block_size": 64,
+  "kv_cache_gib": 16.0,
+  "num_prompts": 8,
+  "input_len": 65536,
+  "output_len": 256,
+  "enforce_eager": false,
+  "configs": [
+   "stock",
+   "echokv-int4"
+  ],
+  "out": "results/echokv_gpu/Llama-3.1-8B-Instruct/round5_ctx64k.json",
+  "child_out": null
+ },
+ "results": {
+  "stock": {
+   "kv_capacity_tokens": 131072,
+   "wall_s": 429.07877461914904,
+   "output_tok_s": 4.773016334396424,
+   "total_tok_s": 1226.665197939881
+  },
+  "echokv-int4": {
+   "kv_capacity_tokens": 418112,
+   "wall_s": 283.5255890360568,
+   "output_tok_s": 7.223333904226719,
+   "total_tok_s": 1856.3968133862666,
+   "avg_stored_bits": 4.0,
+   "tier_vector": [
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4
+   ]
+  }
+ }
+}

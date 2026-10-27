@@ -1,0 +1,6 @@
+unsloth/Llama-3.1-8B-Instruct: 8192 in / 256 out, KV 8.0 GiB
+config        conc out tok/s  TTFT p50  TTFT p99  TPOT p50  TPOT p99   E2E p50  (ms)
+stock           16        46     44257     77586       135       138     78583
+stock           32        46    123440    156508       135       138    157880
+echokv-int4     16        68      3766     32595       210       216     57416
+echokv-int4     32        74     21423     93916       295       319     97777

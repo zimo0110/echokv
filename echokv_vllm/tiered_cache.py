@@ -279,7 +279,9 @@ class TieredKVCache:
         dev = to_device(packed, self.device)
         self.tag[dev[:, 0]] = dev[:, 1].to(torch.uint8)
         self.table[dev[:, 0]] = dev[:, 2:].to(torch.int32)
-        self.sealed[dev[:, 0]] = 0
+        # index_fill_, not ``t[idx] = 0``: a Python scalar on the right is a CPU
+        # tensor, and copying it to the device blocks until the stream drains.
+        self.sealed.index_fill_(0, dev[:, 0], 0)
 
     def _demote_lru(self, chunks_needed: int, keep: set) -> None:
         """Requantize least recently written full INT4/INT8 blocks to INT2, freeing chunks."""
@@ -295,7 +297,7 @@ class TieredKVCache:
             return
         L = self.layout
         bs, g, h, d = L.block_size, L.k_group, L.num_kv_heads, L.head_size
-        vb = torch.tensor(victims, device=self.device)
+        vb = to_device(torch.tensor(victims), self.device)
         blk = vb.repeat_interleave(bs)
         off = torch.arange(bs, device=self.device).repeat(len(victims))
         k, v = self.gather(blk, off)  # dequantized at the current tiers
@@ -305,7 +307,7 @@ class TieredKVCache:
         from echokv_vllm.quant import quantize
 
         v_codes, v_scale, v_min = quantize(v, 2, L.v_group)
-        self.tag[vb] = 2  # INT2 rows live in chunk 0: addressing needs no table
+        self.tag.index_fill_(0, vb, 2)  # INT2 rows live in chunk 0: addressing needs no table
         self.k_scale[vb] = k_scale
         self.k_min[vb] = k_min
         self.v_scale[blk, off] = v_scale
@@ -388,7 +390,7 @@ class TieredKVCache:
             self._last_h[t] = plan.step
             self._tokens_h += np.bincount(self._tag_h[t], weights=plan.touched_count, minlength=9)[:9].astype(np.int64)
         if plan.res_clear_block.numel():
-            self.block_res[plan.res_clear_block] = -1
+            self.block_res.index_fill_(0, plan.res_clear_block, -1)
         if plan.res_set_block.numel():
             self.block_res[plan.res_set_block] = plan.res_set_slot
             self.res_group[plan.res_set_slot] = plan.res_set_group

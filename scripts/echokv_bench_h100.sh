@@ -2,7 +2,7 @@
 # EchoKV on a 4x H100 (80 GB) machine: Llama-3.1-8B on one GPU, then
 # Llama-3.3-70B with tensor parallelism 4. Ungated model mirrors, no HF token.
 #
-#   bash scripts/echokv_bench_h100.sh                    # everything, ~2 h
+#   bash scripts/echokv_bench_h100.sh                    # everything, ~2.5 h
 #   STEPS="setup unit e2e profile8b" bash scripts/echokv_bench_h100.sh   # ~15 min smoke
 #
 #   setup        install vLLM 0.32.0 + plugin into .venv-gpu; check driver/GPUs
@@ -11,12 +11,15 @@
 #   profile8b    8B, stock vs INT4, 64 x (1K in, 128 out): is a fast GPU CPU-bound?
 #   quality8b    8B WikiText ΔNLL: stock, INT8, INT4, live tau 0.005 / 0.01
 #   tput8b       8B throughput, 256 x (1K in, 256 out), 8 GiB KV: stock/INT8/INT4
-#   tput8b_32k   8B throughput, 16 x (32K in, 256 out), 8 GiB KV: stock/INT8/INT4
-#   latency8b    8B serving, 8K prompts, 16/32/64 users, 8 GiB KV: stock/INT4
+#   tput8b_32k   8B throughput, 16 x (32K in, 256 out), 8 GiB KV: stock/INT8/INT4/live
+#   latency8b    8B serving, 8K prompts, 16/32/64 users, 8 GiB KV: stock/INT4/live
 #   quality70b   70B TP=4 ΔNLL: stock, INT8, INT4, live tau 0.005 / 0.01
 #   tput70b_8k   70B TP=4 throughput, 64 x (8K in, 256 out), 8 GiB KV per GPU
-#   tput70b_32k  70B TP=4 throughput, 16 x (32K in, 256 out), 8 GiB KV per GPU
-#   latency70b   70B TP=4 serving, 8K prompts, 16/32 users, 8 GiB KV per GPU
+#   tput70b_32k  70B TP=4 throughput, 16 x (32K in, 256 out), 8 GiB KV per GPU, incl. live
+#   latency70b   70B TP=4 serving, 8K prompts, 16/32 users, 8 GiB KV per GPU, incl. live
+#
+# "live" = dynamic EchoKV: the controller picks each layer's tier under a
+# 4-bit budget (ECHOKV_MEM_BITS=4, default tau), nothing pinned.
 #
 # The 70B weights (~140 GB) download in the background from the start, so
 # the 8B steps overlap with it. Results: results/echokv_gpu/h100_<model>/.
@@ -84,11 +87,11 @@ want tput8b && run "$OUT8" tput8b $PY evaluation/serving/echokv_throughput.py --
 # 8 GiB holds 2 of these at bf16, ~3.5 at INT8, ~6 at INT4.
 want tput8b_32k && run "$OUT8" tput8b_32k $PY evaluation/serving/echokv_throughput.py --model "$MODEL8" \
   --kv-cache-gib 8 --num-prompts 16 --input-len 32768 --output-len 256 \
-  --configs stock echokv-int8 echokv-int4 --out "$OUT8/tput8b_32k.json"
+  --configs stock echokv-int8 echokv-int4 echokv-live-mem4 --out "$OUT8/tput8b_32k.json"
 
 want latency8b && run "$OUT8" latency8b $PY evaluation/serving/echokv_latency.py --model "$MODEL8" \
   --kv-cache-gib 8 --input-len 8192 --output-len 256 --concurrency 16 32 64 \
-  --configs stock echokv-int4 --out "$OUT8/latency8b.json"
+  --configs stock echokv-int4 echokv-live-mem4 --out "$OUT8/latency8b.json"
 
 # -- Llama-3.3-70B, TP=4 ----------------------------------------------------
 unset CUDA_VISIBLE_DEVICES
@@ -109,11 +112,11 @@ want tput70b_8k && run "$OUT70" tput70b_8k $PY evaluation/serving/echokv_through
 
 want tput70b_32k && run "$OUT70" tput70b_32k $PY evaluation/serving/echokv_throughput.py --model "$MODEL70" --tp 4 \
   --kv-cache-gib 8 --num-prompts 16 --input-len 32768 --output-len 256 \
-  --configs stock echokv-int8 echokv-int4 --out "$OUT70/tput70b_32k.json"
+  --configs stock echokv-int8 echokv-int4 echokv-live-mem4 --out "$OUT70/tput70b_32k.json"
 
 want latency70b && run "$OUT70" latency70b $PY evaluation/serving/echokv_latency.py --model "$MODEL70" --tp 4 \
   --kv-cache-gib 8 --input-len 8192 --output-len 256 --concurrency 16 32 \
-  --configs stock echokv-int4 --out "$OUT70/latency70b.json"
+  --configs stock echokv-int4 echokv-live-mem4 --out "$OUT70/latency70b.json"
 
 echo
 if [ ${#FAILED[@]} -eq 0 ]; then

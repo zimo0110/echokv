@@ -52,6 +52,7 @@ def decode_attention(
     bt_rows: torch.Tensor | None = None,
     out: torch.Tensor | None = None,
     max_len: int | None = None,
+    num_splits: int | None = None,
 ) -> torch.Tensor:
     """Attention of one query token per sequence over each sequence's cache.
 
@@ -60,23 +61,31 @@ def decode_attention(
     ``seq_lens[i]`` (including the query token's own K/V), as in vLLM.
     Without ``out`` returns float32 ``[S, Hq, D]``; with ``out`` writes
     sequence ``i`` to ``out[q_rows[i]]`` (in ``out``'s dtype) and returns
-    ``out``. ``max_len`` (an upper bound on ``seq_lens``, known on the host)
-    sizes the split grid; by default it covers the whole block table.
+    ``out``; sequences of length 0 (CUDA-graph padding) leave their row as is.
 
-    Batch-invariant: a sequence's result does not depend on which other
-    sequences share the batch. The kernel splits each sequence at fixed
-    ``blocks_per_split`` boundaries (empty trailing splits add exact zeros);
-    the PyTorch path reduces each sequence on its own.
+    The kernel cuts each sequence into at most ``num_splits`` splits of
+    ``max(blocks_per_split, ceil(blocks / num_splits))`` blocks, a function
+    of the sequence alone, so a sequence's result does not depend on which
+    other sequences share the batch (batch-invariant). ``num_splits`` fixes
+    the grid (as a CUDA graph needs); by default it is just enough for
+    ``max_len`` (an upper bound on ``seq_lens`` known on the host, else the
+    block table's width) at ``blocks_per_split``. The PyTorch path reduces
+    each sequence on its own.
     """
     L = store.layout
     pow2 = not (query.shape[-1] & (query.shape[-1] - 1) or L.block_size & (L.block_size - 1))
     if _use_triton(query.device) and pow2:
         return _decode_triton(
-            store, query, block_table, seq_lens, softmax_scale, blocks_per_split, q_rows, bt_rows, out, max_len
+            store, query, block_table, seq_lens, softmax_scale, blocks_per_split, q_rows, bt_rows, out, max_len,
+            num_splits,
         )
     q = query if q_rows is None else query[q_rows]
     bt = block_table if bt_rows is None else block_table[bt_rows]
-    res = decode_attention_torch(store, q, bt, seq_lens, softmax_scale)
+    live = seq_lens > 0
+    if not bool(live.all()):  # CUDA-graph padding rows
+        q, bt, seq_lens = q[live], bt[live], seq_lens[live]
+        q_rows = (torch.arange(live.numel(), device=live.device) if q_rows is None else q_rows)[live]
+    res = decode_attention_torch(store, q, bt, seq_lens, softmax_scale) if seq_lens.numel() else q.float()
     if out is None:
         return res
     out[torch.arange(res.shape[0], device=res.device) if q_rows is None else q_rows] = res.to(out.dtype)
@@ -156,8 +165,11 @@ if HAS_TRITON:
 
         seq_len = tl.load(lens_ptr + seq).to(tl.int32)
         n_blocks = tl.cdiv(seq_len, BS)
-        b_start = split * blocks_per_split
-        b_end = tl.minimum(b_start + blocks_per_split, n_blocks)
+        bps = tl.maximum(blocks_per_split, tl.cdiv(n_blocks, num_splits))
+        b_start = split * bps
+        if b_start >= n_blocks:  # no blocks here; the merge skips this split
+            return
+        b_end = tl.minimum(b_start + bps, n_blocks)
         q_row = tl.load(q_rows_ptr + seq).to(tl.int64)
         bt_row = tl.load(bt_rows_ptr + seq).to(tl.int64)
 
@@ -221,9 +233,12 @@ if HAS_TRITON:
         seq = tl.program_id(0)
         head = tl.program_id(1)
         seq_len = tl.load(lens_ptr + seq).to(tl.int32)
-        # Only splits that hold blocks; their count depends on this sequence
-        # alone, so the result is independent of the batch.
-        used = tl.cdiv(tl.cdiv(seq_len, BS), blocks_per_split)
+        if seq_len == 0:  # CUDA-graph padding: leave the row alone
+            return
+        # Only splits that hold blocks; their size and count depend on this
+        # sequence alone, so the result is independent of the batch.
+        n_blocks = tl.cdiv(seq_len, BS)
+        used = tl.cdiv(n_blocks, tl.maximum(blocks_per_split, tl.cdiv(n_blocks, num_splits)))
         offs_d = tl.arange(0, D)
         base = (seq * HQ + head) * num_splits
         m_run = tl.max(tl.full([SB], float("-inf"), tl.float32), axis=0)
@@ -266,7 +281,7 @@ def _autotune_enabled(device: torch.device) -> bool:
 
 
 def _decode_triton(store, query, block_table, seq_lens, softmax_scale, blocks_per_split,
-                   q_rows=None, bt_rows=None, out=None, max_len=None):
+                   q_rows=None, bt_rows=None, out=None, max_len=None, num_splits=None):
     L = store.layout
     hq, d = query.shape[1], query.shape[2]
     s = seq_lens.shape[0]
@@ -279,11 +294,12 @@ def _decode_triton(store, query, block_table, seq_lens, softmax_scale, blocks_pe
         bt_rows = torch.arange(s, device=dev)
     if out is None:
         out = torch.empty(query.shape[0], hq, d, device=dev, dtype=torch.float32)
-    # Split boundaries are fixed per sequence (every blocks_per_split blocks);
-    # the grid covers the longest sequence, and shorter sequences' extra
-    # splits stay empty and are skipped by the merge.
-    max_blocks = block_table.shape[1] if max_len is None else min(block_table.shape[1], -(-max_len // L.block_size))
-    num_splits = max(1, -(-max_blocks // blocks_per_split))
+    # Split sizes are a function of each sequence's own length (see
+    # decode_attention); shorter sequences' extra splits exit at once and
+    # are skipped by the merge.
+    if num_splits is None:
+        max_blocks = block_table.shape[1] if max_len is None else min(block_table.shape[1], -(-max_len // L.block_size))
+        num_splits = max(1, -(-max_blocks // blocks_per_split))
     if query.stride(2) != 1:
         query = query.contiguous()
     lens = seq_lens if seq_lens.is_contiguous() else seq_lens.contiguous()

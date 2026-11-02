@@ -15,12 +15,16 @@ spawned ones, so the backend can read them wherever vLLM constructs it.
     ECHOKV_L0               reference context length for τ scaling (default 4096)
     ECHOKV_TAU_SCALING      none (default) or sqrt: τ0·sqrt(max(L, L0)/L0)
     ECHOKV_ALPHA            EMA weight of the newest sample (default 0.1)
-    ECHOKV_CANARY_INTERVAL  fire every N forward steps per layer (default 64)
+    ECHOKV_CANARY_INTERVAL  fire every N model steps, all layers together (default 64)
     ECHOKV_KREF_WINDOW      K_ref ring size in tokens (default 64)
     ECHOKV_CANARY_MAX_Q     decode queries sampled per fire (default 8)
     ECHOKV_K_GROUP          tokens per per-channel K group (default 32; divides block size)
     ECHOKV_V_GROUP          head_dim elements per per-token V group (default 32)
     ECHOKV_RESIDUAL_SLOTS   open-K-group slots per layer (default max_num_seqs + 16)
+
+Read elsewhere: ECHOKV_CUDAGRAPH=0 keeps attention out of full CUDA graphs
+(backend.py), ECHOKV_CHECK_HOST_SLOTS=1 checks the host slot mapping every
+step (backend.py), ECHOKV_AUTOTUNE=0 pins the decode kernel's launch config.
 """
 
 from __future__ import annotations

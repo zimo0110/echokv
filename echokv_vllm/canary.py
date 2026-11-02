@@ -16,6 +16,13 @@ import torch
 from echokv_vllm.quant import fake_quant_channels
 
 
+def ring_view(buf: torch.Tensor, pos: int, fill: int, dim: int = 0) -> torch.Tensor:
+    """The ``fill`` keys of a ring buffer along ``dim``, oldest first (``pos`` = next write)."""
+    if fill < buf.shape[dim]:
+        return buf.narrow(dim, 0, fill)
+    return torch.roll(buf, -pos, dims=dim)
+
+
 class KRefRing:
     """Circular buffer of the last ``window`` keys, ``[window, H, D]`` float32."""
 
@@ -46,9 +53,7 @@ class KRefRing:
         """Filled keys, oldest first; None until at least 2 are present."""
         if self.buf is None or self.fill < 2:
             return None
-        if self.fill < self.window:
-            return self.buf[: self.fill]
-        return torch.roll(self.buf, -self.pos, dims=0)
+        return ring_view(self.buf, self.pos, self.fill)
 
 
 def canary_kl(
@@ -58,26 +63,27 @@ def canary_kl(
     k_group: int,
     softmax_scale: float,
 ) -> torch.Tensor:
-    """Mean per-head, per-query KL at each tier in ``bits``; float32 ``[len(bits)]``.
+    """Mean per-head, per-query KL at each tier in ``bits``; float32 ``[..., len(bits)]``.
 
-    query: ``[nq, Hq, D]``; kref: ``[W, H, D]`` oldest first, ``Hq % H == 0``.
+    query: ``[..., nq, Hq, D]``; kref: ``[..., W, H, D]`` oldest first,
+    ``Hq % H == 0``; leading dims (e.g. layers) are independent problems.
     Only whole ``k_group`` groups of K_ref are scored (a partial group would
     sit in the cache's full-precision residual and contribute no error).
     """
-    w = (kref.shape[0] // k_group) * k_group
+    w = (kref.shape[-3] // k_group) * k_group
     if w == 0:
-        raise ValueError(f"K_ref has {kref.shape[0]} keys, fewer than k_group={k_group}")
-    kref = kref[kref.shape[0] - w :]
-    q = query.float().transpose(0, 1)  # [Hq, nq, D]
-    rep = q.shape[0] // kref.shape[1]
+        raise ValueError(f"K_ref has {kref.shape[-3]} keys, fewer than k_group={k_group}")
+    kref = kref[..., kref.shape[-3] - w :, :, :]
+    q = query.float().transpose(-3, -2)  # [..., Hq, nq, D]
+    rep = q.shape[-3] // kref.shape[-2]
 
     def log_weights(k: torch.Tensor) -> torch.Tensor:
-        kh = k.transpose(0, 1).repeat_interleave(rep, dim=0)  # [Hq, W, D]
-        return torch.log_softmax(q @ kh.transpose(1, 2) * softmax_scale, dim=-1)
+        kh = k.transpose(-3, -2).repeat_interleave(rep, dim=-3)  # [..., Hq, W, D]
+        return torch.log_softmax(q @ kh.transpose(-1, -2) * softmax_scale, dim=-1)
 
     logp_ref = log_weights(kref)
     out = []
     for b in bits:
         logp_q = log_weights(fake_quant_channels(kref, b, k_group))
-        out.append((logp_q.exp() * (logp_q - logp_ref)).sum(-1).mean())
-    return torch.stack(out).clamp_min(0.0)
+        out.append((logp_q.exp() * (logp_q - logp_ref)).sum(-1).mean((-2, -1)))
+    return torch.stack(out, -1).clamp_min(0.0)

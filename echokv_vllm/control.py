@@ -48,6 +48,7 @@ def get_state(model: torch.nn.Module) -> dict:
             "ema": {str(b): v for b, v in c.ema.items()},
             "fires": c.fires,
             "transitions": c.transitions,
+            "forward_calls": impl.forward_calls,
         }
         s = impl.store
         if s is not None:
@@ -106,10 +107,11 @@ def set_tau0(model: torch.nn.Module, tau0: float) -> int:
 
 
 def reset_counters(model: torch.nn.Module) -> int:
-    """Zero storage counters (e.g. between warmup and measurement)."""
+    """Zero storage counters and forward-call counts (e.g. between warmup and measurement)."""
     n = 0
     for _, impl in iter_layers(model):
         if impl.store is not None:
             impl.store.reset_counters()
+        impl.forward_calls = 0
         n += 1
     return n

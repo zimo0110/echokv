@@ -161,3 +161,30 @@ def test_reads_and_writes_of_never_opened_blocks_are_safe(use_triton):
     k = torch.randn(3, h, d, device=DEVICE)
     store.write(k, k, b * bs + 5 + torch.arange(3, device=DEVICE), 4)
     assert int(store.tag[b]) == 4
+
+
+@pytest.mark.parametrize("use_triton", [False, True])
+def test_graph_padding_and_fixed_split_grid(use_triton):
+    """As a replayed CUDA graph calls it: a fixed split grid, and length-0 padding
+    entries whose output rows are left alone. Each sequence's split size follows
+    from its own length, so its result does not depend on the batch."""
+    if use_triton and not TRITON_OK:
+        pytest.skip("needs CUDA or TRITON_INTERPRET=1")
+    h, d, bs, mem, lens, plan = CASES[2]  # 500 tokens = 8 blocks, and 3 tokens
+    store, table, lens_t = build(h, d, bs, mem, lens, plan, seed=4)
+    hq = 2 * h
+    q_all = torch.randn(4, hq, d, device=DEVICE)
+    q_rows = torch.arange(4, device=DEVICE)
+    bt_rows = torch.tensor([0, 1, 0, 0], device=DEVICE)
+    sel_lens = torch.tensor([500, 3, 0, 0], device=DEVICE)
+    out = torch.full((4, hq, d), 7.0, device=DEVICE, dtype=torch.bfloat16)
+    with mock.patch.object(dec, "_use_triton", lambda dev: use_triton):
+        dec.decode_attention(store, q_all, table, sel_lens, d**-0.5, 2, q_rows=q_rows, bt_rows=bt_rows,
+                             out=out, num_splits=3)
+    ref = dec.decode_attention_torch(store, q_all[:2], table, lens_t, d**-0.5)
+    torch.testing.assert_close(out[:2].float(), ref, rtol=2e-2, atol=2e-2)
+    assert (out[2:] == 7.0).all()
+    if use_triton:
+        alone = torch.zeros_like(out[:1])  # cast by the kernel, like out
+        dec._decode_triton(store, q_all[:1], table[:1], lens_t[:1], d**-0.5, 2, out=alone, num_splits=3)
+        assert torch.equal(alone[0], out[0])

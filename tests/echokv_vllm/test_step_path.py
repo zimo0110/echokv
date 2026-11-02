@@ -92,6 +92,9 @@ def test_batched_canary_matches_per_layer():
     each = torch.stack([canary_kl(q[i], kref[i], (2, 4, 8), KG, 64**-0.5) for i in range(3)])
     assert batched.shape == (3, 3)
     torch.testing.assert_close(batched, each, rtol=1e-5, atol=1e-6)
+    # Model-dtype inputs (bf16 query rows, or a K_ref ring built in bf16) work too.
+    low = canary_kl(q.bfloat16(), kref.bfloat16(), (2, 4, 8), KG, 64**-0.5)
+    assert low.dtype == torch.float32 and low.shape == (3, 3)
 
 
 def test_ring_view_along_a_layer_dim():

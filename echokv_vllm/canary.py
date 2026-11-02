@@ -73,7 +73,7 @@ def canary_kl(
     w = (kref.shape[-3] // k_group) * k_group
     if w == 0:
         raise ValueError(f"K_ref has {kref.shape[-3]} keys, fewer than k_group={k_group}")
-    kref = kref[..., kref.shape[-3] - w :, :, :]
+    kref = kref[..., kref.shape[-3] - w :, :, :].float()
     q = query.float().transpose(-3, -2)  # [..., Hq, nq, D]
     rep = q.shape[-3] // kref.shape[-2]
 

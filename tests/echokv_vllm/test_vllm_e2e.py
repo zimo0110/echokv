@@ -48,5 +48,5 @@ def test_decode_steps_replay_cuda_graphs(tmp_path):
     torch = pytest.importorskip("torch")
     if not torch.cuda.is_available():
         pytest.skip("needs CUDA")
-    st = run_smoke(tmp_path, "--cudagraph")
+    st = run_smoke(tmp_path, "--cudagraph", "--dtype", "bfloat16")  # as real models run
     assert all(layer["forward_calls"] < MAX_TOKENS // 2 for layer in st["layers"])

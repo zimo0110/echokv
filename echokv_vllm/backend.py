@@ -529,7 +529,8 @@ class EchoKVAttentionImpl(AttentionImpl[EchoKVMetadata]):
         self.residual = torch.zeros(
             _residual_slots(cfg) + 1, cfg.k_group, self.num_kv_heads, head_size, dtype=_model_dtype()
         )
-        self.kref_buf = torch.zeros(cfg.kref_window, self.num_kv_heads, head_size)
+        # Explicit dtype: vLLM builds layers under the model's default dtype.
+        self.kref_buf = torch.zeros(cfg.kref_window, self.num_kv_heads, head_size, dtype=torch.float32)
         self.stash = torch.zeros(cfg.canary_max_q, num_heads, head_size, dtype=_model_dtype())
         self.store: TieredKVCache | None = None
         self.forward_calls = 0  # eager forwards; CUDA-graph replays do not enter Python

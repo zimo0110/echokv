@@ -2,7 +2,7 @@
 
 Current results for the EchoKV vLLM plugin (`echokv_vllm/`, vLLM 0.32.0, no fork).
 Design and methodology: [docs/ECHOKV_VLLM_PLUGIN.md](docs/ECHOKV_VLLM_PLUGIN.md).
-Last updated: 2026-10-26.
+Last updated: 2026-11-02.
 
 ## TL;DR
 
@@ -31,6 +31,16 @@ On a real GPU (NVIDIA DGX Spark, Llama-3.1-8B-Instruct):
   so time per output token is higher (209 vs 136 ms at 16 users). That's
   set by how many requests run at once, not by kernel speed (see round 5).
   Total waiting is much lower: median end-to-end 57 s vs 80 s.
+
+On 4× H100 (round 6, Llama-3.1-8B and Llama-3.3-70B with TP=4):
+
+- **Quality holds at 70B:** INT4 costs +0.006 NLL (+0.6% perplexity) for
+  3.16× KV capacity. INT8 is lossless.
+- **Speed doesn't yet:** 0.6× stock on 8B with short prompts, 0.93–0.98×
+  on 70B. The profile shows the cause: EchoKV is CPU-bound. The GPU does
+  the same work as stock but sits idle two thirds of the time while Python
+  launches per-layer work. A slow GPU (the Spark) hid this. Round 7
+  addresses it (see Next).
 
 ## GPU: DGX Spark (GB10), Llama-3.1-8B-Instruct, bf16
 
@@ -290,6 +300,76 @@ Stock holds 7 of these requests in 8 GiB; INT4 holds 24.
 - **INT2 costs more than it saves.** Moving one layer to INT2 at τ=0.05 cost
   +0.009 nats for 0.06 bits saved, so INT2 should be a last resort.
 
+## GPU: 4× H100 80GB (Modal), round 6 (commit `b95f4b8`)
+
+Run with `scripts/echokv_bench_h100.sh`. Raw files:
+- `results/echokv_gpu/20261101_183932/h100_Llama-3.1-8B-Instruct/` (8B, one GPU)
+- `results/echokv_gpu/20261101_213936/h100_Llama-3.3-70B-Instruct/` (70B, TP=4)
+
+All 85 unit tests and the end-to-end test pass on sm_90.
+
+### Quality
+
+WikiText-103, 32 passages × 2,048 tokens. ΔNLL is against stock vLLM.
+
+| config | 8B ΔNLL | 70B ΔNLL |
+|---|---:|---:|
+| stock NLL | 1.8860 | 1.2312 |
+| INT8 | −0.0006 | −0.0003 |
+| INT4 | +0.0050 | +0.0057 |
+| live τ=0.005 | +0.0051 (one layer INT8) | +0.0044 |
+| live τ=0.01 | +0.0050 | +0.0068 (one layer INT2) |
+
+### Throughput
+
+8 GiB of KV per GPU. EchoKV holds 3.19× the tokens (8B) or 3.16× (70B).
+Speed is relative to stock.
+
+| workload | stock tok/s | INT8 | INT4 | live (4-bit budget) |
+|---|---:|---:|---:|---:|
+| 8B, 256 × (1K in, 256 out) | 4,025 | 0.57× | 0.61× | — |
+| 8B, 16 × (32K in, 256 out) | 93.3 | 0.72× | 1.05× | 0.93× |
+| 70B, 64 × (8K in, 256 out) | 253.9 | — | 0.93× | — |
+| 70B, 16 × (32K in, 256 out) | 57.1 | 0.71× | 0.98× | 0.98× |
+
+### Serving latency
+
+8K-token prompts, 256 output tokens. TTFT is time to first token, TPOT is
+time per output token, E2E is end-to-end request time; all are medians.
+
+| model, config | users | out tok/s | TTFT | TPOT | E2E |
+|---|---:|---:|---:|---:|---:|
+| 8B stock | 16 / 32 / 64 | 522 / 522 / 532 | 4.2 / 11.2 / 27.2 s | 10 / 10 / 10 ms | 6.9 / 13.9 / 29.8 s |
+| 8B INT4 | 16 / 32 / 64 | 359 / 447 / 441 | 2.0 / 2.7 / 18.3 s | 32 / 51 / 51 ms | 11.3 / 15.6 / 31.3 s |
+| 8B live | 16 / 32 / 64 | 382 / 390 / 387 | 1.2 / 2.7 / 20.4 s | 37 / 58 / 59 ms | 10.6 / 17.6 / 35.3 s |
+| 70B stock | 16 / 32 | 252 / 252 | 4.1 / 18.1 s | 39 / 39 ms | 14.0 / 27.8 s |
+| 70B INT4 | 16 / 32 | 147 / 223 | 3.1 / 3.1 s | 86 / 129 ms | 27.3 / 35.9 s |
+| 70B live | 16 / 32 | 168 / 229 | 3.0 / 2.4 s | 82 / 128 ms | 23.9 / 35.0 s |
+
+### Why it's slower: the CPU, not the GPU
+
+The 8B profile (64 × (1K in, 128 out)) settles it:
+
+| config | wall time | GPU busy |
+|---|---:|---:|
+| stock | 3.3 s | 3.1 s |
+| EchoKV INT4 | 9.5 s | 3.3 s |
+
+- **EchoKV's GPU work is within 10% of stock, but its GPU idles about two
+  thirds of the time.**
+- **Where the CPU time goes:** in steady state, each layer spends about
+  0.52 ms of Python per step on writes and 0.26 ms on decode. Each Triton
+  launch alone costs about 0.1 ms of Python.
+- **Per step that adds up:** about 25 ms of Python against about 10 ms for
+  stock's whole step. Stock replays decode as one CUDA graph; EchoKV's
+  attention ran eagerly, layer by layer.
+- **70B looks better** because each step does 4–5× more GPU work, which
+  hides more of the Python.
+- **The Spark hid all of this:** its GPU is slow enough that the Python
+  overlapped.
+- **The next limit, once the CPU is fixed:** the decode kernel's GPU time
+  is 2.5× flash-attention's (1.06 s against 0.43 s in this profile).
+
 ## Choosing the K quantization scheme
 
 Simulated in HF transformers on post-RoPE K/V, WikiText-103. ΔNLL against
@@ -341,23 +421,45 @@ Correctness checks:
 bash scripts/echokv_gpu_validate.sh                                   # tests + quality + throughput
 MODEL=unsloth/Llama-3.1-8B-Instruct bash scripts/echokv_gpu_validate.sh  # ungated Llama mirror
 bash scripts/echokv_bench_h100.sh                                      # 4x H100: 8B, then 70B TP=4
+bash scripts/echokv_bench_graphs.sh                                    # round 7: CUDA graphs, ~35 min
 ```
 
 ## Next
 
-Done after round 5, on branch `round6`; passes the CPU and Triton
-interpreter suites, not yet run on a GPU:
-- **Decode split-merge in Triton.** A merge kernel replaces ~13 small
-  PyTorch kernels per layer per step. Decode reads its query and
-  block-table rows by index and writes vLLM's output rows directly.
-- **Smaller split grid.** It's sized from the batch's longest decode
-  length (known on the host) instead of `max_model_len`. At 128K context
-  that avoids up to ~0.5 GB of per-layer scratch.
-- **INT4 is the default** (`ECHOKV_MEM_BITS=4`, starting tier INT4).
-  `ECHOKV_FIXED_BITS` alone now implies a budget that holds that tier.
+**Round 6 (branch `round6`) has run on 4× H100; results are above.** Its
+changes:
+- **Decode split-merge in Triton:** a merge kernel replaces ~13 small
+  PyTorch kernels per layer per step.
+- **INT4 is the default:** `ECHOKV_MEM_BITS=4`, with INT4 as the starting
+  tier.
 
-1. Run `scripts/echokv_bench_h100.sh` on 4× H100: 8B on one GPU (is a fast
-   GPU CPU-bound?), then 70B with TP=4. If 8B is CPU-bound, the next step
-   is a device-side write path that CUDA graphs can capture.
-2. Try long-context workloads (e.g. RULER), where per-layer adaptation has
-   more room to help.
+**Round 7 (branch `round7`): decode steps run as full CUDA graphs.** It
+passes the CPU suite, the Triton interpreter suite and a real-vLLM CPU
+run, but hasn't run on a GPU yet. The canary's measurements and tier
+decisions are unchanged: the CPU run is identical to round 6.
+- **The builder does all host-side work, once per step, for all layers:**
+  - write planning
+  - block opens at each layer's tier, written as page headers
+  - evictions
+  - K_ref ring positions
+  - one host-to-device upload of the step's metadata
+  - the canary, batched over layers, with one all-reduce under TP
+- **Each layer only launches kernels:**
+  - KV update: K-finalize, plus one fused token kernel (V quantize,
+    residual K, sealed K and K_ref).
+  - Decode: split attention and merge.
+  - A query-row copy for the canary.
+- **The builder now reports `UNIFORM_SINGLE_TOKEN_DECODE`,** so vLLM
+  replays decode-only steps as one graph. The metadata lives at fixed
+  addresses, kernels mask padding with device-side counts, and decode uses
+  a fixed split grid, with each sequence's split size taken from its own
+  length (still batch-invariant).
+
+1. **Validate on the Spark:** `bash scripts/echokv_bench_graphs.sh`
+   (~35 min) runs the unit tests and e2e, eager and with graphs, then the
+   profile, throughput and latency. The target: wall time close to GPU
+   busy time.
+2. **Then rerun the H100 script.** If CPU time is gone, the decode kernel
+   (2.5× flash-attention's GPU time) is the next limit.
+3. **Try long-context workloads** (e.g. RULER), where per-layer adaptation
+   has more room to help.

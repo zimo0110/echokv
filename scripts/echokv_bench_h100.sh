@@ -46,11 +46,13 @@ run() {  # run <out dir> <name> <command...>
   if "$@" 2>&1 | tee "$out/$name.txt"; then :; else FAILED+=("$name"); fi
 }
 
-if want setup || [ ! -x .venv-gpu/bin/python ]; then
-  SETUP_ONLY=1 bash scripts/echokv_gpu_validate.sh || exit 1
+# PY=... skips the .venv-gpu install: the caller's Python already has vLLM
+# and this plugin (scripts/modal_bench_h100.py runs this on Modal that way).
+if want setup || [ ! -x "${PY:-.venv-gpu/bin/python}" ]; then
+  [ -n "${PY:-}" ] || SETUP_ONLY=1 bash scripts/echokv_gpu_validate.sh || exit 1
   nvidia-smi --query-gpu=index,name,memory.total,driver_version --format=csv | tee "$OUT8/gpus.txt" "$OUT70/gpus.txt"
 fi
-PY=.venv-gpu/bin/python
+PY=${PY:-.venv-gpu/bin/python}
 export PATH="$PWD/.venv-gpu/bin:$HOME/.local/bin:$PATH"
 NGPU=$(nvidia-smi --query-gpu=name --format=csv,noheader | wc -l)
 

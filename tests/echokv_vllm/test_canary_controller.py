@@ -92,3 +92,17 @@ def test_config_defaults_int4_and_pinned_tier_gets_its_budget(monkeypatch):
     assert load_config().controller.init_bits == 4
     monkeypatch.setenv("ECHOKV_MEM_BITS", "8")
     assert load_config().controller.init_bits == 8
+
+
+def test_config_rejects_k_groups_the_kernels_cannot_tile(monkeypatch):
+    import pytest
+
+    from echokv_vllm.config import load_config
+
+    monkeypatch.delenv("ECHOKV_KREF_WINDOW", raising=False)
+    for bad in ("8", "48"):
+        monkeypatch.setenv("ECHOKV_K_GROUP", bad)
+        with pytest.raises(ValueError, match="ECHOKV_K_GROUP"):
+            load_config()
+    monkeypatch.setenv("ECHOKV_K_GROUP", "16")
+    assert load_config().k_group == 16

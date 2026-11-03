@@ -107,21 +107,23 @@ def test_staging_layout():
     backend = pytest.importorskip("echokv_vllm.backend")
     st = backend._Staging(cap=8, nq=2, w=3, tail=16, device="cpu")
 
-    def stage(t, f):
+    def stage(t, f, big=0):
         decode = (np.array([5, 6]), np.array([0, 1]), np.array([10, 11]))
         tok = tuple(np.arange(t) * 10 + k for k in range(4))
         fin = np.arange(f * 3).reshape(f, 3) + 100
-        tail = [np.array([1, 2, 3]), np.zeros(0, np.int64), np.array([9])]
+        tail = [np.array([1, 2, 3]), np.zeros(0, np.int64), np.arange(big) + 9]
         return st.stage(f, np.array([3, 0]), decode, tok, fin, tail)
 
     first = stage(4, 2)
-    for t, f in ((4, 2), (6, 1), (20, 2)):  # the last does not fit: fresh buffer
-        cnt, can, dec, tok, fin, tail = stage(t, f)
+    # (20, 2) does not fit: fresh buffer. (4, 2, 30) fits but its tail does
+    # not: the tail is uploaded on its own and the rest stays put.
+    for t, f, big in ((4, 2, 1), (6, 1, 1), (20, 2, 1), (4, 2, 30)):
+        cnt, can, dec, tok, fin, tail = stage(t, f, big)
         assert cnt.tolist() == [f] and can.tolist() == [3, 0]
         assert [x.tolist() for x in dec] == [[5, 6], [0, 1], [10, 11]]
         assert tok.shape == (4, t) and tok[2].tolist() == (np.arange(t) * 10 + 2).tolist()
         assert fin[:f].reshape(-1).tolist() == list(range(100, 100 + 3 * f))
-        assert [x.tolist() for x in tail] == [[1, 2, 3], [], [9]]
+        assert [x.tolist() for x in tail] == [[1, 2, 3], [], list(range(9, 9 + big))]
         # Graph-visible views keep their addresses while steps fit.
         assert (tok.data_ptr() == first[3].data_ptr()) == (t <= 8)
         assert (fin.data_ptr() == first[4].data_ptr()) == (t <= 8)

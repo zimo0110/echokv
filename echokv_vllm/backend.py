@@ -151,7 +151,9 @@ class _Staging:
     tail) sit at fixed offsets, so a captured CUDA graph reads the current
     step's values; the tail (residual map, page headers) is consumed by
     the builder's own ops. Larger steps (big prefills, never graph-replayed)
-    use a fresh buffer of exactly their size.
+    use a fresh buffer of exactly their size. A tail larger than ``tail``
+    (many evictions or opened blocks in one step) gets its own upload, so a
+    graph-sized step never leaves the persistent buffer a graph reads.
     """
 
     RING = 4  # pinned host buffers in flight
@@ -173,7 +175,8 @@ class _Staging:
         nq, w = self.nq, self.w
         s, t = decode[0].size, tok[0].size
         sizes = [a.size for a in tail]
-        persistent = max(s, t, n_fin) <= self.cap and sum(sizes) <= self.tail
+        persistent = max(s, t, n_fin) <= self.cap
+        split_tail = persistent and sum(sizes) > self.tail
         cd = ct = self.cap if persistent else None
         if persistent:
             cf = self.cap
@@ -196,9 +199,12 @@ class _Staging:
             h[o_t + k * ct : o_t + k * ct + t] = a
         h[o_f:o_tail] = fin.reshape(-1)
         o = o_tail
-        for a in tail:
-            h[o : o + a.size] = a.reshape(-1)
-            o += a.size
+        if split_tail:
+            tail_dev = to_device(torch.from_numpy(np.concatenate([a.reshape(-1) for a in tail])), self.device)
+        else:
+            for a in tail:
+                h[o : o + a.size] = a.reshape(-1)
+                o += a.size
         if persistent:
             dev = self.dev
             dev[:o].copy_(buf[:o], non_blocking=True)
@@ -209,9 +215,9 @@ class _Staging:
             self.i = (self.i + 1) % len(self.host)
         else:
             dev = to_device(torch.from_numpy(h), self.device)
-        views, o = [], o_tail
+        views, src, o = [], (tail_dev if split_tail else dev), (0 if split_tail else o_tail)
         for n in sizes:
-            views.append(dev[o : o + n])
+            views.append(src[o : o + n])
             o += n
         return (
             dev[0:1],

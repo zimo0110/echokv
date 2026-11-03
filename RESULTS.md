@@ -32,17 +32,21 @@ On a real GPU (NVIDIA DGX Spark, Llama-3.1-8B-Instruct):
   set by how many requests run at once, not by kernel speed (see round 5).
   Total waiting is much lower: median end-to-end 57 s vs 80 s.
 
-On 4× H100 (round 6, Llama-3.1-8B and Llama-3.3-70B with TP=4):
+On Modal (round 6): Llama-3.3-70B with TP=4 on 4× H100, and Llama-3.1-8B
+on one H200 (Modal substituted H200s for that run; see
+[`MODAL_RUNS.md`](results/echokv_gpu/MODAL_RUNS.md)):
 
 - **Quality holds at 70B:** INT4 costs +0.006 NLL (+0.6% perplexity) for
   3.16× KV capacity. INT8 is lossless.
-- **Speed doesn't yet:** 0.6× stock on 8B with short prompts, 0.93–0.98×
-  on 70B. The profile shows the cause: EchoKV is CPU-bound. The GPU does
-  the same work as stock but sits idle two thirds of the time while Python
-  launches per-layer work. A slow GPU (the Spark) hid this.
-- **Round 7 removes it:** decode steps now replay as full CUDA graphs. On
-  the Spark, EchoKV's wall time equals its GPU busy time. The H100 rerun
-  is next.
+- **Speed doesn't yet:** 0.6× stock on 8B with short prompts (H200),
+  0.93–0.98× on 70B (H100). The profile shows the cause: EchoKV is
+  CPU-bound. The GPU does the same work as stock but sits idle about
+  two thirds of the time (8.1 s wall vs 3.5 s GPU busy on one H100) while
+  Python launches per-layer work. A slow GPU (the Spark) hid this.
+- **Round 7 targets it:** decode steps now replay as full CUDA graphs.
+  On the Spark, EchoKV's wall time equals its GPU busy time, but the Spark
+  was barely CPU-bound to begin with. Whether this closes the gap on an
+  H100 is untested; that rerun is next.
 
 ## GPU: DGX Spark (GB10), Llama-3.1-8B-Instruct, bf16
 
@@ -318,11 +322,14 @@ the e2e with graphs (`graphs_unit.txt`).
 | wall time | 26.5 s | **24.6 s** | 35.2 s |
 | GPU busy | 25.7 s | 24.5 s | 35.1 s |
 | decode kernel (GPU) | 3.37 s | 3.14 s | — |
-| KV writes (GPU) | 0.56 s | **0.12 s** | — |
+| KV writes (GPU) | 0.56 s | **0.16 s** | — |
 
 - **No GPU idle time left.** It was already small on the Spark, whose GPU
   is slow enough to hide Python. The H100 will show what this is worth.
-- **KV writes cost a fifth of what they did,** now two kernels per layer.
+- **KV writes cost about a third of what they did,** now two kernels per
+  layer: 0.56 s of GPU time in round 5, 0.16 s of write kernels in
+  round 7. (The round-7 `echokv.write` scope reads 0.12 s, but it only
+  sees the 288 eager calls: graph replays bypass the profiler scopes.)
 - **The decode kernel is the largest EchoKV cost:** 13% of GPU time.
 
 **Throughput,** 256 × (1,024 in, 256 out), 8 GiB KV. From
@@ -349,11 +356,15 @@ the e2e with graphs (`graphs_unit.txt`).
 These are 2–3% better than round 5. Prefill dominates this workload, and
 the TPOT gap is still set by concurrency, not kernel speed.
 
-## GPU: 4× H100 80GB (Modal), round 6 (commit `b95f4b8`)
+## GPU: Modal H100 / H200, round 6 (commit `b95f4b8`)
 
-Run with `scripts/echokv_bench_h100.sh`. Raw files:
-- `results/echokv_gpu/20261101_183932/h100_Llama-3.1-8B-Instruct/` (8B, one GPU)
-- `results/echokv_gpu/20261101_213936/h100_Llama-3.3-70B-Instruct/` (70B, TP=4)
+Run with `scripts/echokv_bench_h100.sh`. **The 8B numbers below are from
+an H200** (141 GB, ~1.4× an H100's memory bandwidth): the run asked for
+H100s and Modal filled it with H200s (`gpus.txt`). The 70B numbers and
+the 8B smoke-run profile are from H100 80GB. Raw files:
+- `results/echokv_gpu/20261101_183932/h100_Llama-3.1-8B-Instruct/` (8B, one H200, despite the folder name)
+- `results/echokv_gpu/20261101_213936/h100_Llama-3.3-70B-Instruct/` (70B, 4× H100, TP=4)
+- `results/echokv_gpu/20261101_180614/h100_Llama-3.1-8B-Instruct/` (8B smoke run, one H100)
 
 All 85 unit tests and the end-to-end test pass on sm_90.
 
@@ -399,21 +410,22 @@ time per output token, E2E is end-to-end request time; all are medians.
 
 The 8B profile (64 × (1K in, 128 out)) settles it:
 
-| config | wall time | GPU busy |
-|---|---:|---:|
-| stock | 3.3 s | 3.1 s |
-| EchoKV INT4 | 9.5 s | 3.3 s |
+| config | H200 wall | H200 GPU busy | H100 wall | H100 GPU busy |
+|---|---:|---:|---:|---:|
+| stock | 3.3 s | 3.1 s | 3.7 s | 3.6 s |
+| EchoKV INT4 | 9.5 s | 3.3 s | 8.1 s | 3.5 s |
 
 - **EchoKV's GPU work is within 10% of stock, but its GPU idles about two
   thirds of the time.**
-- **Where the CPU time goes:** in steady state, each layer spends about
-  0.52 ms of Python per step on writes and 0.26 ms on decode. Each Triton
+- **Where the CPU time goes:** each layer spends about 0.94 ms of Python
+  per step on writes and 0.62 ms on decode (H200 profile: 3,988 ms over
+  4,224 write calls, 2,589 ms over 4,192 decode calls). Each Triton
   launch alone costs about 0.1 ms of Python.
-- **Per step that adds up:** about 25 ms of Python against about 10 ms for
+- **Per step that adds up:** about 50 ms of Python against about 10 ms for
   stock's whole step. Stock replays decode as one CUDA graph; EchoKV's
   attention ran eagerly, layer by layer.
-- **70B looks better** because each step does 4–5× more GPU work, which
-  hides more of the Python.
+- **70B looks better,** probably because each step has more GPU work
+  per Python launch to hide behind (70B was not profiled).
 - **The Spark hid all of this:** its GPU is slow enough that the Python
   overlapped.
 - **The next limit, once the CPU is fixed:** the decode kernel's GPU time

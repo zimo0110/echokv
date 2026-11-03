@@ -21,8 +21,9 @@ MODEL=${MODEL:-unsloth/Llama-3.1-8B-Instruct}
 STEPS=${STEPS:-unit profile short latency}
 OUT=results/echokv_gpu/$(basename "$MODEL")
 mkdir -p "$OUT"
-[ -x .venv-gpu/bin/python ] || { echo "run scripts/echokv_gpu_validate.sh first (sets up .venv-gpu)"; exit 1; }
-PY=.venv-gpu/bin/python
+# PY=... uses a Python that already has vLLM + this plugin (e.g. on Modal).
+PY=${PY:-.venv-gpu/bin/python}
+[ -x "$PY" ] || { echo "run scripts/echokv_gpu_validate.sh first (sets up .venv-gpu)"; exit 1; }
 export PATH="$PWD/.venv-gpu/bin:$PATH" VLLM_ALLOW_INSECURE_SERIALIZATION=1
 FAILED=()
 

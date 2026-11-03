@@ -9,9 +9,11 @@ Run:
 
     modal run scripts/modal_bench_h100.py                         # smoke test, 1x H100, ~15 min
     modal run --detach scripts/modal_bench_h100.py --steps all    # full run, 4x H100, ~2.5 h
+    modal run --detach scripts/modal_bench_h100.py --script graphs   # echokv_bench_graphs.sh, 1x H100, ~35 min
 
 --steps takes the script's step names ("setup unit e2e profile8b" by
-default, "all" for every step). Any 70B step gets 4 GPUs, otherwise 1.
+default for the h100 script, "all" for every step; the graphs script runs
+all its steps by default). Any 70B step gets 4 GPUs, otherwise 1.
 --detach keeps the run going if this terminal closes. Results are written
 to the Modal volume "echokv-results" as they are produced and copied to
 results/echokv_gpu/ when the run ends; for a detached run, fetch them with
@@ -35,6 +37,7 @@ import modal
 LOCAL_REPO = Path(__file__).resolve().parents[1]
 REMOTE_REPO = "/root/echokv"
 SMOKE = "setup unit e2e profile8b"
+SCRIPTS = {"h100": "scripts/echokv_bench_h100.sh", "graphs": "scripts/echokv_bench_graphs.sh"}
 MODEL70 = "unsloth/Llama-3.3-70B-Instruct"  # MODEL70 default in echokv_bench_h100.sh
 
 # torch 2.13 (pinned by vLLM 0.32.0) is built for CUDA 13.0; FlashInfer
@@ -58,8 +61,8 @@ hf_cache = modal.Volume.from_name("echokv-hf-cache", create_if_missing=True)
 results = modal.Volume.from_name("echokv-results", create_if_missing=True)
 
 
-@app.function(gpu="H100", timeout=3600, volumes={"/cache": hf_cache, "/results": results})
-def bench(steps: str, run_name: str) -> int:
+@app.function(gpu="H100!", timeout=3600, volumes={"/cache": hf_cache, "/results": results})
+def bench(steps: str, run_name: str, script: str = SCRIPTS["h100"]) -> int:
     out = Path("/results") / run_name
     out.mkdir(parents=True, exist_ok=True)
     (Path(REMOTE_REPO) / "results").mkdir(exist_ok=True)
@@ -76,7 +79,7 @@ def bench(steps: str, run_name: str) -> int:
     env = {**os.environ, "PY": sys.executable, "HF_HOME": "/cache/hf"}
     if steps != "all":
         env["STEPS"] = steps
-    rc = subprocess.run(["bash", "scripts/echokv_bench_h100.sh"], cwd=REMOTE_REPO, env=env).returncode
+    rc = subprocess.run(["bash", script], cwd=REMOTE_REPO, env=env).returncode
     done.set()
     results.commit()
     hf_cache.commit()
@@ -94,16 +97,18 @@ def prefetch(model: str) -> None:
 
 
 @app.local_entrypoint()
-def main(steps: str = SMOKE, hours: float = 0):
-    ngpu = 4 if steps == "all" or "70b" in steps else 1
+def main(steps: str = "", hours: float = 0, script: str = "h100"):
+    steps = steps or (SMOKE if script == "h100" else "all")
+    ngpu = 4 if script == "h100" and (steps == "all" or "70b" in steps) else 1
     hours = hours or (5 if ngpu == 4 else 1.5)
     run_name = time.strftime("%Y%m%d_%H%M%S")
-    print(f"== {ngpu}x H100, steps: {steps}, timeout {hours} h, run {run_name}")
+    print(f"== {SCRIPTS[script]} on {ngpu}x H100, steps: {steps}, timeout {hours} h, run {run_name}")
     print(f"== if this terminal disconnects: modal volume get echokv-results /{run_name} results/echokv_gpu/")
     if ngpu == 4:
         print(f"== downloading {MODEL70} on CPU first")
         prefetch.remote(MODEL70)
-    rc = bench.with_options(gpu=f"H100:{ngpu}", timeout=int(hours * 3600)).remote(steps, run_name)
+    # "H100!": plain "H100" lets Modal substitute H200s (it did for 20261101_183932).
+    rc = bench.with_options(gpu=f"H100!:{ngpu}",timeout=int(hours * 3600)).remote(steps, run_name, SCRIPTS[script])
     dest = LOCAL_REPO / "results" / "echokv_gpu"
     dest.mkdir(parents=True, exist_ok=True)
     subprocess.run([sys.executable, "-m", "modal", "volume", "get", "echokv-results", f"/{run_name}", f"{dest}/"], check=True)

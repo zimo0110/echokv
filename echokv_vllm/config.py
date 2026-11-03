@@ -18,7 +18,8 @@ spawned ones, so the backend can read them wherever vLLM constructs it.
     ECHOKV_CANARY_INTERVAL  fire every N model steps, all layers together (default 64)
     ECHOKV_KREF_WINDOW      K_ref ring size in tokens (default 64)
     ECHOKV_CANARY_MAX_Q     decode queries sampled per fire (default 8)
-    ECHOKV_K_GROUP          tokens per per-channel K group (default 32; divides block size)
+    ECHOKV_K_GROUP          tokens per per-channel K group (default 32; a power of 2,
+                            >= 16, dividing the block size)
     ECHOKV_V_GROUP          head_dim elements per per-token V group (default 32)
     ECHOKV_RESIDUAL_SLOTS   open-K-group slots per layer (default max_num_seqs + 16)
 
@@ -90,6 +91,9 @@ def load_config() -> EchoKVConfig:
         raise ValueError(f"ECHOKV_MEM_BITS must be 2, 4, 6 or 8, got {cfg.mem_bits}")
     if cfg.canary_interval < 1:
         raise ValueError("ECHOKV_CANARY_INTERVAL must be >= 1")
+    if cfg.k_group < 16 or cfg.k_group & (cfg.k_group - 1):
+        # The kernels tile K groups for tl.dot (>= 16) with power-of-2 ranges.
+        raise ValueError(f"ECHOKV_K_GROUP must be a power of 2 and >= 16, got {cfg.k_group}")
     if cfg.kref_window < cfg.k_group:
         raise ValueError("ECHOKV_KREF_WINDOW must be >= ECHOKV_K_GROUP")
     return cfg

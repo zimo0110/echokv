@@ -13,6 +13,12 @@
 #   short     256 x (1K in, 256 out), 8 GiB KV: stock, INT4, live            ~8 min
 #   latency   serving, 8K prompts, 16 and 32 users, 8 GiB KV                 ~16 min
 #
+# Optional steps (add them to STEPS):
+#   decode    decode kernel alone vs flash-attention, CUDA-graph replay      ~3 min
+#   cap7      latency at 16 users with EchoKV capped to 7 running requests,
+#             stock's count at this KV budget: is EchoKV's higher time per
+#             output token its kernels, or just more requests per step?   ~6 min
+#
 # Results: results/echokv_gpu/<model>/graphs_*.
 set -uo pipefail
 cd "$(dirname "$0")/.."
@@ -49,6 +55,12 @@ want short && run short $PY evaluation/serving/echokv_throughput.py --model "$MO
 want latency && run latency $PY evaluation/serving/echokv_latency.py --model "$MODEL" \
   --kv-cache-gib 8 --input-len 8192 --output-len 256 --concurrency 16 32 \
   --configs stock echokv-int4 echokv-live-mem4 --out "$OUT/graphs_latency.json"
+
+want decode && run decode $PY evaluation/serving/echokv_decode_bench.py --out "$OUT/graphs_decode.json"
+
+want cap7 && run cap7 $PY evaluation/serving/echokv_latency.py --model "$MODEL" \
+  --kv-cache-gib 8 --input-len 8192 --output-len 256 --concurrency 16 --max-num-seqs 7 \
+  --configs echokv-int4 --out "$OUT/graphs_latency_cap7.json"
 
 echo
 if [ ${#FAILED[@]} -eq 0 ]; then

@@ -565,8 +565,23 @@ tier decisions are unchanged: a CPU run is identical to round 6.
   a fixed split grid, with each sequence's split size taken from its own
   length (still batch-invariant).
 
-1. **The decode kernel is the next limit:** about 2× flash-attention's
-   GPU time on the H100 now that the CPU overhead is gone (round 7 above).
-2. **Rerun 70B (TP=4) on `round7`** with `scripts/echokv_bench_h100.sh`.
+**Decode kernel (branch `decode-speed`).** On the H100 it took 2× flash-attention's
+GPU time while reading 3.5× fewer bytes, so it is limited by latency and
+instruction count, not memory bandwidth. Changes, not yet measured on a GPU
+(the CPU and Triton-interpreter suites pass, on Triton 3.5.1):
+- **Code compiled per tier:** the kernel branches on each block's tier once
+  and reads each token's packed codes as one vector, unpacked in registers,
+  instead of one byte load per channel.
+- **The next block's metadata is fetched early:** its tier, residual slot and
+  chunk ids load while the current block is processed, not before it.
+- **Finer splits:** at least 4 blocks per split, down from 16, so a 1K-token
+  sequence spreads over 5 programs instead of 2.
+- **Softmax scale folded into the query** once per program.
+
+1. **Measure it on one H100:** `STEPS="unit decode profile short latency cap7"`
+   with `scripts/echokv_bench_graphs.sh`. `decode` times the kernel alone
+   against flash-attention, `profile` compares with round 7's 1.08 s, and
+   `cap7` separates kernel speed from concurrency in time per output token.
+2. **Rerun 70B (TP=4)** with `scripts/echokv_bench_h100.sh`.
 3. **Try long-context workloads** (e.g. RULER), where per-layer adaptation
    has more room to help.

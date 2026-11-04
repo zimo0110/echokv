@@ -8,10 +8,13 @@ The PyTorch path is also the oracle the kernel is tested against.
 Kernel layout: one program per (sequence, KV head, split). It owns the KV
 head's GQA group of query heads and walks its share of the sequence's
 blocks with an online softmax (flash-decoding). A second kernel merges the
-splits and writes each sequence's rows of the output directly. Each block's tier is read from its page header at
-runtime and drives all addressing (chunk, row, byte, bit shift), so INT2,
-INT4 and INT8 blocks share one code path. K for a block's open group is
-taken from the full-precision residual buffer.
+splits and writes each sequence's rows of the output directly. Each block's
+tier is read from its page header at runtime; the kernel branches on it
+once per block into code compiled for that tier, which reads each token's
+packed codes as one vector and unpacks them in registers. The next block's
+header and residual mapping are loaded while the current block is
+processed. K for a block's open group is taken from the full-precision
+residual buffer.
 """
 
 from __future__ import annotations
@@ -29,7 +32,7 @@ if HAS_TRITON:
     import triton
     import triton.language as tl
 
-    from echokv_vllm.kernels.common import block_info, load_kv_tile
+    from echokv_vllm.kernels.common import block_meta, load_kv_tile_packed
 
 
 def _use_triton(device: torch.device) -> bool:
@@ -38,7 +41,9 @@ def _use_triton(device: torch.device) -> bool:
     return device.type == "cuda" or os.environ.get("TRITON_INTERPRET") == "1"
 
 
-BLOCKS_PER_SPLIT = 16
+# Minimum blocks per split. Small, so even ~1K-token sequences spread over
+# several programs; each split costs one fp32 partial row per query head.
+BLOCKS_PER_SPLIT = 4
 
 
 def decode_attention(
@@ -132,6 +137,43 @@ def decode_attention_torch(
 if HAS_TRITON:
 
     @triton.jit
+    def _attend_block(
+        q16, m_i, l_i, acc,
+        blk, n_valid, h, rslot, rgrp, ids,
+        data_ptr, data_s0, data_s1,
+        ks_ptr, ks_s0, ks_s1, ks_s2, km_ptr,
+        vs_ptr, vs_s0, vs_s1, vs_s2, vm_ptr,
+        res_ptr, res_s0, res_s1, res_s2,
+        H: tl.constexpr, D: tl.constexpr, BS: tl.constexpr, KG: tl.constexpr, VG: tl.constexpr,
+        KC: tl.constexpr, TILE: tl.constexpr, BITS: tl.constexpr,
+    ):
+        """Online-softmax update over one block of tier ``BITS``."""
+        # TILE tokens at a time keeps the K/V tiles within the shared
+        # memory of smaller GPUs (~100 KB on GB10/sm_12x vs 228 KB on H100).
+        for t0 in tl.static_range(0, BS, TILE):
+            k, v, valid = load_kv_tile_packed(
+                blk, t0, n_valid, h, rslot, rgrp, ids,
+                data_ptr, data_s0, data_s1,
+                ks_ptr, ks_s0, ks_s1, ks_s2, km_ptr,
+                vs_ptr, vs_s0, vs_s1, vs_s2, vm_ptr,
+                res_ptr, res_s0, res_s1, res_s2,
+                H, D, BS, KG, VG, KC, TILE, BITS,
+            )
+            # fp16 operands, fp32 accumulation: tensor cores, as in stock
+            # attention kernels (|q|, |k|, |v| are far inside fp16 range, p <= 1).
+            s = tl.dot(q16, tl.trans(k.to(tl.float16)))
+            s = tl.where(valid[None, :], s, float("-inf"))
+            m_new = tl.maximum(m_i, tl.max(s, axis=1))
+            # A tile can be fully masked while m_i is still -inf: keep exp() finite.
+            m_safe = tl.where(m_new == float("-inf"), 0.0, m_new)
+            alpha = tl.exp(m_i - m_safe)
+            p = tl.exp(s - m_safe[:, None])
+            l_i = l_i * alpha + tl.sum(p, axis=1)
+            acc = acc * alpha[:, None] + tl.dot(p.to(tl.float16), v.to(tl.float16))
+            m_i = m_new
+        return m_i, l_i, acc
+
+    @triton.jit
     def _decode_kernel(
         q_ptr, q_s0, q_s1, q_rows_ptr,
         bt_ptr, bt_s0, bt_rows_ptr,
@@ -171,7 +213,7 @@ if HAS_TRITON:
             return
         b_end = tl.minimum(b_start + bps, n_blocks)
         q_row = tl.load(q_rows_ptr + seq).to(tl.int64)
-        bt_row = tl.load(bt_rows_ptr + seq).to(tl.int64)
+        bt = bt_ptr + tl.load(bt_rows_ptr + seq).to(tl.int64) * bt_s0
 
         offs_q = tl.arange(0, QBLOCK)
         offs_d = tl.arange(0, D)
@@ -181,42 +223,43 @@ if HAS_TRITON:
             mask=q_mask[:, None],
             other=0.0,
         ).to(tl.float32)
-
-        q16 = q.to(tl.float16)
+        q16 = (q * softmax_scale).to(tl.float16)  # scores come out scaled
         m_i = tl.full([QBLOCK], float("-inf"), tl.float32)
         l_i = tl.zeros([QBLOCK], tl.float32)
         acc = tl.zeros([QBLOCK, D], tl.float32)
 
+        blk = tl.load(bt + b_start).to(tl.int64)
+        bits, rslot, rgrp, ids = block_meta(blk, tag_ptr, tag_s0, table_ptr, table_s0, block_res_ptr, res_group_ptr)
         for bi in range(b_start, b_end):
-            blk = tl.load(bt_ptr + bt_row * bt_s0 + bi).to(tl.int64)
-            bits, tpc, side_bytes, head_off, byte_d, shift_d, mask_val, rslot, rgrp = block_info(
-                blk, h, tag_ptr, tag_s0, block_res_ptr, res_group_ptr, H, D, BS
+            # The next block's metadata now (block 0 past the end), so these
+            # dependent loads overlap this block's reads instead of preceding them.
+            blk_n = tl.load(bt + bi + 1, mask=bi + 1 < b_end, other=0).to(tl.int64)
+            bits_n, rslot_n, rgrp_n, ids_n = block_meta(
+                blk_n, tag_ptr, tag_s0, table_ptr, table_s0, block_res_ptr, res_group_ptr
             )
             n_valid = seq_len - bi * BS
-            # TILE tokens at a time keeps the K/V tiles within the shared
-            # memory of smaller GPUs (~100 KB on GB10/sm_12x vs 228 KB on H100).
-            for t0 in tl.static_range(0, BS, TILE):
-                k, v, offs_t, valid = load_kv_tile(
-                    blk, t0, n_valid, h,
-                    tpc, side_bytes, head_off, byte_d, shift_d, mask_val, rslot, rgrp,
-                    table_ptr, table_s0, data_ptr, data_s0, data_s1,
-                    ks_ptr, ks_s0, ks_s1, ks_s2, km_ptr,
-                    vs_ptr, vs_s0, vs_s1, vs_s2, vm_ptr,
-                    res_ptr, res_s0, res_s1, res_s2,
-                    D, KG, VG, KC, TILE,
+            if bits == 4:
+                m_i, l_i, acc = _attend_block(
+                    q16, m_i, l_i, acc, blk, n_valid, h, rslot, rgrp, ids,
+                    data_ptr, data_s0, data_s1, ks_ptr, ks_s0, ks_s1, ks_s2, km_ptr,
+                    vs_ptr, vs_s0, vs_s1, vs_s2, vm_ptr, res_ptr, res_s0, res_s1, res_s2,
+                    H, D, BS, KG, VG, KC, TILE, 4,
                 )
-                # fp16 operands, fp32 accumulation: tensor cores, as in stock
-                # attention kernels (|q|, |k|, |v| are far inside fp16 range, p <= 1).
-                s = tl.dot(q16, tl.trans(k.to(tl.float16))) * softmax_scale
-                s = tl.where(valid[None, :], s, float("-inf"))
-                m_new = tl.maximum(m_i, tl.max(s, axis=1))
-                # A tile can be fully masked while m_i is still -inf: keep exp() finite.
-                m_safe = tl.where(m_new == float("-inf"), 0.0, m_new)
-                alpha = tl.exp(m_i - m_safe)
-                p = tl.exp(s - m_safe[:, None])
-                l_i = l_i * alpha + tl.sum(p, axis=1)
-                acc = acc * alpha[:, None] + tl.dot(p.to(tl.float16), v.to(tl.float16))
-                m_i = m_new
+            elif bits == 8:
+                m_i, l_i, acc = _attend_block(
+                    q16, m_i, l_i, acc, blk, n_valid, h, rslot, rgrp, ids,
+                    data_ptr, data_s0, data_s1, ks_ptr, ks_s0, ks_s1, ks_s2, km_ptr,
+                    vs_ptr, vs_s0, vs_s1, vs_s2, vm_ptr, res_ptr, res_s0, res_s1, res_s2,
+                    H, D, BS, KG, VG, KC, TILE, 8,
+                )
+            else:
+                m_i, l_i, acc = _attend_block(
+                    q16, m_i, l_i, acc, blk, n_valid, h, rslot, rgrp, ids,
+                    data_ptr, data_s0, data_s1, ks_ptr, ks_s0, ks_s1, ks_s2, km_ptr,
+                    vs_ptr, vs_s0, vs_s1, vs_s2, vm_ptr, res_ptr, res_s0, res_s1, res_s2,
+                    H, D, BS, KG, VG, KC, TILE, 2,
+                )
+            blk, bits, rslot, rgrp, ids = blk_n, bits_n, rslot_n, rgrp_n, ids_n
 
         out_row = (seq * (H * GQA) + h * GQA + offs_q) * num_splits + split
         tl.store(acc_ptr + out_row[:, None] * D + offs_d[None, :], acc, mask=q_mask[:, None])

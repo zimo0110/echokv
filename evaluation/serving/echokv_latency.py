@@ -72,6 +72,8 @@ def main() -> None:
     p.add_argument("--concurrency", type=int, nargs="*", default=[4, 16, 32])
     p.add_argument("--prompts-per-level", type=int, default=2, help="prompts = this x concurrency (min 16)")
     p.add_argument("--configs", nargs="*", default=["stock", "echokv-int4"])
+    p.add_argument("--max-num-seqs", type=int, default=0,
+                   help="cap on requests running at once (vLLM --max-num-seqs; default: vLLM's)")
     p.add_argument("--port", type=int, default=8321)
     p.add_argument("--out", default="echokv_latency.json")
     args = p.parse_args()
@@ -91,6 +93,8 @@ def main() -> None:
             "--block-size", "64",
             "--no-enable-prefix-caching",
         ]
+        if args.max_num_seqs:
+            cmd += ["--max-num-seqs", str(args.max_num_seqs)]
         if CONFIGS[name]["ECHOKV_ENABLE"] == "1":
             cmd += ["--attention-config", json.dumps({"backend": "CUSTOM"})]
         log_path = os.path.join(out_dir, f"{name}.server.log")

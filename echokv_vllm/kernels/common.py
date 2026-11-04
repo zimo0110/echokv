@@ -1,4 +1,4 @@
-"""Triton helpers shared by the read kernels (decode, fused prefill, dequantize).
+"""Triton helpers for the read kernels (decode, fused prefill, dequantize).
 
 Reading a tile of TILE tokens from one block of the tiered store:
 
@@ -107,3 +107,86 @@ if HAS_TRITON:
             tl.reshape(v_code, [TILE, G, VG]) * v_scale[:, :, None] + v_min[:, :, None], [TILE, D]
         )
         return k, v, offs_t, valid
+
+    # -- tier-specialized reads (decode) ------------------------------------
+    #
+    # The helpers above take the tier at runtime, so every channel is its own
+    # byte load. The decode kernel instead branches once per block on the tier
+    # and reads with ``BITS`` known at compile time: each token row's codes
+    # are one contiguous, vectorized load, unpacked in registers.
+
+    @triton.jit
+    def block_meta(blk, tag_ptr, tag_s0, table_ptr, table_s0, block_res_ptr, res_group_ptr):
+        """A block's tier (never-written -> 2), residual slot and open group,
+        and its extra chunk ids as an int32 ``[4]`` (lanes past 3 are 0)."""
+        bits = tl.load(tag_ptr + blk * tag_s0).to(tl.int32)
+        bits = tl.where(bits == 0, 2, bits)
+        rslot = tl.load(block_res_ptr + blk)
+        rgrp = tl.load(res_group_ptr + tl.maximum(rslot, 0))
+        lane = tl.arange(0, 4)
+        ids = tl.load(table_ptr + blk * table_s0 + lane, mask=lane < 3, other=0)
+        return bits, rslot, rgrp, ids
+
+    @triton.jit
+    def unpack_codes(raw, BITS: tl.constexpr):
+        """Packed bytes ``[T, D * BITS / 8]`` -> int32 codes ``[T, D]``.
+
+        Channel c sits at bit ``(c * BITS) % 8`` of byte ``c * BITS // 8``.
+        """
+        x = raw.to(tl.int32)
+        if BITS == 4:
+            x = tl.interleave(x & 15, x >> 4)
+        elif BITS == 2:
+            x = tl.interleave(tl.interleave(x & 3, (x >> 4) & 3), tl.interleave((x >> 2) & 3, x >> 6))
+        return x
+
+    @triton.jit
+    def load_kv_tile_packed(
+        blk, t0, n_valid, h, rslot, rgrp, ids,
+        data_ptr, data_s0, data_s1,
+        ks_ptr, ks_s0, ks_s1, ks_s2, km_ptr,
+        vs_ptr, vs_s0, vs_s1, vs_s2, vm_ptr,
+        res_ptr, res_s0, res_s1, res_s2,
+        H: tl.constexpr, D: tl.constexpr, BS: tl.constexpr, KG: tl.constexpr, VG: tl.constexpr,
+        KC: tl.constexpr, TILE: tl.constexpr, BITS: tl.constexpr,
+    ):
+        """``load_kv_tile`` for a block of tier ``BITS``, from ``block_meta``'s outputs."""
+        TPC: tl.constexpr = (2 * BS) // BITS  # tokens per chunk
+        DB: tl.constexpr = (D * BITS) // 8  # bytes of one head's codes per token
+        SIDE: tl.constexpr = H * DB  # bytes of K (or V) codes per token row
+        offs_t = t0 + tl.arange(0, TILE)
+        offs_b = tl.arange(0, DB)
+        offs_d = tl.arange(0, D)
+        valid = offs_t < n_valid
+
+        # Chunk j > 0 of the block is extra pool chunk ids[j - 1].
+        j = offs_t // TPC
+        cid = tl.sum(tl.where((j - 1)[:, None] == tl.arange(0, 4)[None, :], ids[None, :], 0), axis=1)
+        cid = cid.to(tl.int64)
+        page = tl.where(j > 0, cid // KC, blk)
+        slot = tl.where(j > 0, cid % KC, 0)
+        row = page * data_s0 + slot * data_s1 + ((offs_t % TPC) * (2 * SIDE)).to(tl.int64)
+        codes = data_ptr + row[:, None] + h * DB + offs_b[None, :]
+
+        grp = t0 // KG
+        in_res = (rslot >= 0) & (grp == rgrp)
+        k_raw = tl.load(codes, mask=valid[:, None] & (in_res == 0), other=0)
+        st = blk * ks_s0 + grp * ks_s1 + h * ks_s2 + offs_d
+        k_scale = tl.load(ks_ptr + st).to(tl.float32)
+        k_min = tl.load(km_ptr + st).to(tl.float32)
+        k = unpack_codes(k_raw, BITS).to(tl.float32) * k_scale[None, :] + k_min[None, :]
+        k_res = tl.load(
+            res_ptr + tl.maximum(rslot, 0) * res_s0 + (offs_t % KG)[:, None] * res_s1 + h * res_s2 + offs_d[None, :],
+            mask=valid[:, None] & in_res, other=0.0,
+        ).to(tl.float32)
+        k = tl.where(in_res, k_res, k)
+
+        v_code = unpack_codes(tl.load(codes + SIDE, mask=valid[:, None], other=0), BITS).to(tl.float32)
+        G: tl.constexpr = D // VG
+        vs_off = blk * vs_s0 + offs_t[:, None] * vs_s1 + h * vs_s2 + tl.arange(0, G)[None, :]
+        v_scale = tl.load(vs_ptr + vs_off, mask=valid[:, None], other=0.0).to(tl.float32)
+        v_min = tl.load(vm_ptr + vs_off, mask=valid[:, None], other=0.0).to(tl.float32)
+        v = tl.reshape(
+            tl.reshape(v_code, [TILE, G, VG]) * v_scale[:, :, None] + v_min[:, :, None], [TILE, D]
+        )
+        return k, v, valid

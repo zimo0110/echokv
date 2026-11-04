@@ -21,6 +21,7 @@ MODEL=${MODEL:-unsloth/Llama-3.1-8B-Instruct}
 STEPS=${STEPS:-unit profile short latency}
 OUT=results/echokv_gpu/$(basename "$MODEL")
 mkdir -p "$OUT"
+nvidia-smi --query-gpu=index,name,memory.total,driver_version --format=csv > "$OUT/gpus.txt" 2>/dev/null || true
 # PY=... uses a Python that already has vLLM + this plugin (e.g. on Modal).
 PY=${PY:-.venv-gpu/bin/python}
 [ -x "$PY" ] || { echo "run scripts/echokv_gpu_validate.sh first (sets up .venv-gpu)"; exit 1; }

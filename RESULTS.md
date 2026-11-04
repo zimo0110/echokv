@@ -2,7 +2,7 @@
 
 Current results for the EchoKV vLLM plugin (`echokv_vllm/`, vLLM 0.32.0, no fork).
 Design and methodology: [docs/ECHOKV_VLLM_PLUGIN.md](docs/ECHOKV_VLLM_PLUGIN.md).
-Last updated: 2026-11-02.
+Last updated: 2026-11-03.
 
 ## TL;DR
 
@@ -43,10 +43,10 @@ on one H200 (Modal substituted H200s for that run; see
   CPU-bound. The GPU does the same work as stock but sits idle about
   two thirds of the time (8.1 s wall vs 3.5 s GPU busy on one H100) while
   Python launches per-layer work. A slow GPU (the Spark) hid this.
-- **Round 7 targets it:** decode steps now replay as full CUDA graphs.
-  On the Spark, EchoKV's wall time equals its GPU busy time, but the Spark
-  was barely CPU-bound to begin with. Whether this closes the gap on an
-  H100 is untested; that rerun is next.
+- **Round 7 removes it:** decode steps now replay as full CUDA graphs.
+  On one H100, EchoKV's wall time fell from 8.1 s to 3.8 s, the same as
+  stock, and short-prompt throughput is 0.90× stock (8B). At 8K prompts
+  it matches stock's throughput with 5× lower time to first token.
 
 ## GPU: DGX Spark (GB10), Llama-3.1-8B-Instruct, bf16
 
@@ -356,6 +356,56 @@ the e2e with graphs (`graphs_unit.txt`).
 These are 2–3% better than round 5. Prefill dominates this workload, and
 the TPOT gap is still set by concurrency, not kernel speed.
 
+### Round 7 on one H100 (commit `ac13e59`)
+
+Same script and workloads as the Spark run above, Llama-3.1-8B-Instruct,
+on one Modal H100. Raw files:
+`results/echokv_gpu/20261103_143942/Llama-3.1-8B-Instruct/`. All 93 unit
+tests and the three GPU e2e tests pass, including the check that greedy
+text with CUDA graphs matches eager.
+
+**The CPU bottleneck is gone.** 64 × (1,024 in, 128 out), from
+`graphs_profile.json`:
+
+| config | round 6 wall | round 6 GPU busy | round 7 wall | round 7 GPU busy |
+|---|---:|---:|---:|---:|
+| stock | 3.7 s | 3.6 s | 3.8 s | 3.6 s |
+| EchoKV INT4 | 8.1 s | 3.5 s | **3.8 s** | 3.5 s |
+
+The largest EchoKV cost is now the decode kernel: 1.08 s of GPU time,
+against 0.53 s for stock's flash-attention (prefill and decode together).
+KV writes are 0.07 s.
+
+**Throughput,** 256 × (1,024 in, 256 out), 8 GiB KV, from
+`graphs_short.json`. Memory isn't the limit here, so this measures overhead.
+
+| config | KV tokens | out tok/s | speed |
+|---|---:|---:|---:|
+| stock vLLM (bf16) | 65,536 | 3,477 | 1.00× |
+| EchoKV INT4 | 209,024 (3.19×) | 3,135 | **0.90×** |
+| live, 4-bit budget | 209,024 (3.19×) | 3,143 | **0.90×** |
+
+Round 6 measured 0.61× on this workload, but on an H200, so it is not a
+like-for-like comparison.
+
+**Serving latency,** 8,192-token prompts, 256 out, 8 GiB KV, medians in ms,
+from `graphs_latency.json`:
+
+| config | users | out tok/s | TTFT p50 | TPOT p50 | E2E p50 |
+|---|---:|---:|---:|---:|---:|
+| stock | 16 | 446 | 4,747 | 13 | 7,946 |
+| EchoKV INT4 | 16 | 427 | **954** | 33 | 9,454 |
+| live, 4-bit | 16 | 439 | **951** | 33 | 9,198 |
+| stock | 32 | 447 | 12,867 | 13 | 16,077 |
+| EchoKV INT4 | 32 | 442 | **2,689** | 51 | 15,982 |
+| live, 4-bit | 32 | 443 | **2,688** | 51 | 15,797 |
+
+- **Throughput matches stock** (0.96–0.99×) **with 4.8–5× lower time to
+  first token.**
+- **Time per output token is 2.5–4× stock's.** EchoKV admits more
+  requests at once, so each decodes alongside more others, and its decode
+  kernel is about 2× flash-attention's GPU time.
+
 ## GPU: Modal H100 / H200, round 6 (commit `b95f4b8`)
 
 Run with `scripts/echokv_bench_h100.sh`. **The 8B numbers below are from
@@ -495,7 +545,7 @@ changes:
   tier.
 
 **Round 7 (branch `round7`): decode steps run as full CUDA graphs.**
-Validated on the Spark (results above). The canary's measurements and
+Validated on the Spark and one H100 (results above). The canary's measurements and
 tier decisions are unchanged: a CPU run is identical to round 6.
 - **The builder does all host-side work, once per step, for all layers:**
   - write planning
@@ -515,9 +565,8 @@ tier decisions are unchanged: a CPU run is identical to round 6.
   a fixed split grid, with each sequence's split size taken from its own
   length (still batch-invariant).
 
-1. **Rerun the H100 script on `round7`.** The Spark confirms graphs
-   capture and wall time tracks GPU time; the H100 is where this matters.
-2. **Then the decode kernel** (2.5× flash-attention's GPU time on the
-   H100), if it is the next limit.
+1. **The decode kernel is the next limit:** about 2× flash-attention's
+   GPU time on the H100 now that the CPU overhead is gone (round 7 above).
+2. **Rerun 70B (TP=4) on `round7`** with `scripts/echokv_bench_h100.sh`.
 3. **Try long-context workloads** (e.g. RULER), where per-layer adaptation
    has more room to help.

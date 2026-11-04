@@ -26,10 +26,10 @@ All settings are `ECHOKV_*` environment variables (`echokv_vllm/config.py`):
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `ECHOKV_MEM_BITS` | 8 | Memory budget in bits/element (2, 4, 6, 8). vLLM sizes the cache for it. |
+| `ECHOKV_MEM_BITS` | 4 | Memory budget in bits/element (2, 4, 6, 8). vLLM sizes the cache for it. |
 | `ECHOKV_TAU0` | 0.01 | Per-layer canary KL budget: the quality/memory knob. |
 | `ECHOKV_FIXED_BITS` | unset | Pin every layer to one tier, with the controller off (static baselines). |
-| `ECHOKV_INIT_BITS` | 8 | Starting tier. |
+| `ECHOKV_INIT_BITS` | highest tier the budget fits (8, 4, 4, 2 for budgets 8, 6, 4, 2) | Starting tier. |
 | `ECHOKV_CANARY_INTERVAL` | 64 | Canary fires every N forward steps per layer. |
 | `ECHOKV_TAU_SCALING` | none | `sqrt`: τ0·√(max(L, L0)/L0), loosening only above L0. |
 
@@ -94,15 +94,21 @@ Each vLLM page (one block of `bs` tokens, one layer) is laid out as:
 
 ### Write path
 
-* Once per step, the metadata builder runs a `WritePlanner` on the host.
-  From the slot mapping alone it works out which blocks open, which K
-  groups complete, residual slot assignment and evictions. It needs one
-  small device-to-host copy.
-* Every layer applies the same plan with no host syncs:
-  * host-side chunk allocator with tiny tag/table uploads
-  * Triton V-write and K-finalize kernels; the tier is a runtime value,
-    so one launch covers all tiers
-  * residual scatter, with masked lanes sent to a trash row
+* Once per step, the metadata builder does all host-side work for every
+  layer:
+  * A `WritePlanner` works out, from the slot mapping alone, which blocks
+    open, which K groups complete, residual slot assignment, evictions and
+    each key's K_ref ring row. The slot mapping comes from a host mirror
+    of vLLM's block table, so no device-to-host copy is needed.
+  * Each layer's chunk allocator opens blocks at that layer's tier (host
+    decisions; the new page headers are written by one op per layer).
+  * One host-to-device copy uploads the whole step's metadata.
+* Each layer's KV update is then two kernel launches and nothing else:
+  * Triton K-finalize for completed groups.
+  * One Triton token kernel: V quantize, K to the residual (open groups)
+    or to codes under stored stats (sealed groups), and K into the K_ref
+    ring.
+  * The tier is a runtime value, so one launch covers all tiers.
 
 ### Read path
 
@@ -115,9 +121,11 @@ Each vLLM page (one block of `bs` tokens, one layer) is laid out as:
 
 ### Controller (`canary.py`, `controller.py`)
 
-* **Canary:** an FP16 ring of the last 64 keys per layer, filled from the
-  write path. Every `ECHOKV_CANARY_INTERVAL` steps it computes
-  δ̂_b = KL(softmax(Q·K̃_b) ‖ softmax(Q·K_ref)) for b ∈ {2, 4, 8}.
+* **Canary:** an FP32 ring of the last 64 keys per layer, filled by the
+  write kernel. Every `ECHOKV_CANARY_INTERVAL` steps, attention copies a
+  few query rows aside. At the next step the builder computes
+  δ̂_b = KL(softmax(Q·K̃_b) ‖ softmax(Q·K_ref)) for b ∈ {2, 4, 8}, for
+  all layers in one batched computation.
   * K̃_b is the cache's exact K format, so the canary measures what the
     cache does.
   * Under TP, δ̂ is averaged across ranks, so every rank makes the same
@@ -127,10 +135,21 @@ Each vLLM page (one block of `bs` tokens, one layer) is laid out as:
 
 ### CUDA graphs
 
-* The builder reports `AttentionCGSupport.NEVER`.
-* In vLLM's default piecewise mode, attention and the KV update run
-  eagerly and everything between them is graphed, so serving works with
-  CUDA graphs on.
+* The builder reports `AttentionCGSupport.UNIFORM_SINGLE_TOKEN_DECODE`.
+  vLLM's default mode then replays decode-only steps as one full CUDA
+  graph, attention included. Mixed prefill/decode steps run piecewise,
+  with attention eager.
+* This works because `forward` and the KV update only launch kernels on
+  device metadata:
+  * The metadata sits at fixed addresses (a persistent buffer).
+  * Every host decision (planning, block opens, seals, the canary) happens
+    in the builder, which runs every step outside the graph.
+  * Kernels launch at their full captured grid and mask padding by
+    device-side counts.
+  * Decode splits each sequence into a fixed number of splits, sized from
+    its own length.
+* `ECHOKV_CUDAGRAPH=0` reports `NEVER` instead, so attention always runs
+  eagerly.
 
 ## Results on GPU (DGX Spark, GB10, Llama-3.1-8B-Instruct, bf16)
 

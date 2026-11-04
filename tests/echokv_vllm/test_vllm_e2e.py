@@ -9,15 +9,15 @@ from pathlib import Path
 import pytest
 
 DRIVER = Path(__file__).resolve().parents[2] / "evaluation" / "serving" / "echokv_plugin_smoke.py"
+MAX_TOKENS = 120
 
 
-@pytest.mark.slow
-def test_live_mixed_tiers_in_vllm(tmp_path):
-    pytest.importorskip("vllm")
+def run_smoke(tmp_path, *extra) -> dict:
     out = tmp_path / "smoke.json"
     subprocess.run(
-        [sys.executable, str(DRIVER), "--tau0", "0.6", "--interval", "8", "--max-tokens", "120",
-         "--out", str(out)],
+        [sys.executable, str(DRIVER), "--tau0", "0.6", "--interval", "8", "--max-tokens", str(MAX_TOKENS),
+         "--mem-bits", "8", "--init-bits", "8",
+         "--out", str(out), *extra],
         check=True,
         cwd=tmp_path,
         # Every step: plan from the host slot mapping and check it against vLLM's.
@@ -31,3 +31,55 @@ def test_live_mixed_tiers_in_vllm(tmp_path):
     # layers must hold blocks at two tiers at once.
     assert any(sum(1 for v in layer["blocks_opened"].values() if v) > 1 for layer in st["layers"])
     assert all(len(t.strip()) > 0 for t in e["texts"])
+    return st
+
+
+@pytest.mark.slow
+def test_live_mixed_tiers_in_vllm(tmp_path):
+    pytest.importorskip("vllm")
+    run_smoke(tmp_path)
+
+
+@pytest.mark.slow
+def test_decode_steps_replay_cuda_graphs(tmp_path):
+    """With CUDA graphs on, decode-only steps replay a full graph: the canary
+    and controller still work, and forward() runs only for the mixed steps."""
+    pytest.importorskip("vllm")
+    torch = pytest.importorskip("torch")
+    if not torch.cuda.is_available():
+        pytest.skip("needs CUDA")
+    st = run_smoke(tmp_path, "--cudagraph", "--dtype", "bfloat16")  # as real models run
+    assert all(layer["forward_calls"] < MAX_TOKENS // 2 for layer in st["layers"])
+
+
+@pytest.mark.slow
+def test_cuda_graph_decode_matches_eager(tmp_path):
+    """Replayed graphs must read the step's metadata, not a stale buffer: greedy
+    text with graphs on tracks the eager run. CUDA graphs also bring
+    torch.compile, which can move bf16 rounding, so this compares long shared
+    prefixes rather than exact text; corrupted KV derails within a few tokens."""
+    pytest.importorskip("vllm")
+    torch = pytest.importorskip("torch")
+    if not torch.cuda.is_available():
+        pytest.skip("needs CUDA")
+
+    def texts(*extra):
+        out = tmp_path / f"smoke{len(extra)}.json"
+        subprocess.run(
+            [sys.executable, str(DRIVER), "--fixed-bits", "8", "--dtype", "bfloat16",
+             "--max-tokens", str(MAX_TOKENS), "--out", str(out), *extra],
+            check=True,
+            cwd=tmp_path,
+        )
+        return json.loads(out.read_text())["echokv"]["texts"]
+
+    eager, graphs = texts(), texts("--cudagraph")
+
+    def shared(a, b):
+        n = 0
+        while n < min(len(a), len(b)) and a[n] == b[n]:
+            n += 1
+        return n
+
+    prefixes = [shared(a, b) for a, b in zip(eager, graphs)]
+    assert sum(n >= 100 for n in prefixes) >= len(prefixes) - 1, prefixes

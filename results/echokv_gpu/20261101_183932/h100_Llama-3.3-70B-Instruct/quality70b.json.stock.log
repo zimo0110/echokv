@@ -1,0 +1,158 @@
+(MainProcess pid=4976) INFO 11-02 03:17:13 [api_utils.py:286] non-default args: {'dtype': 'bfloat16', 'max_model_len': 2560, 'tensor_parallel_size': 4, 'block_size': 64, 'enable_prefix_caching': False, 'gpu_memory_utilization': 0.9, 'kv_cache_memory_bytes': 8589934592, 'disable_log_stats': True, 'enforce_eager': True, 'model': 'unsloth/Llama-3.3-70B-Instruct'}
+(MainProcess pid=4976) INFO 11-02 03:17:14 [model.py:733] Resolved architecture: LlamaForCausalLM
+(MainProcess pid=4976) INFO 11-02 03:17:14 [model.py:2152] Using max model len 2560
+(MainProcess pid=4976) INFO 11-02 03:17:14 [scheduler.py:307] Chunked prefill is enabled with max_num_batched_tokens=16384.
+(MainProcess pid=4976) WARNING 11-02 03:17:14 [vllm.py:1703] Enforce eager set, disabling torch.compile, CUDAGraphs, and JIT kernel warmup. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none and --kernel_config.enable_jit_warmup=False
+(MainProcess pid=4976) WARNING 11-02 03:17:14 [vllm.py:1727] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+(MainProcess pid=4976) INFO 11-02 03:17:14 [kernel.py:467] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'], gelu_and_mul_sparse=['triton', 'native'])
+(MainProcess pid=4976) INFO 11-02 03:17:14 [vllm.py:1929] Cudagraph is disabled under eager mode
+(MainProcess pid=4976) INFO 11-02 03:17:15 [compilation.py:317] Enabled custom fusions: norm_quant, act_quant, allreduce_rms
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 9 files:  78%|███████▊  | 7/9 [00:00<00:00, 30.52it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 14.99it/s]
+(MainProcess pid=4976) WARNING 11-02 03:17:18 [system_utils.py:153] We must use the `spawn` multiprocessing start method. Overriding VLLM_WORKER_MULTIPROC_METHOD to 'spawn'. See https://docs.vllm.ai/en/latest/usage/troubleshooting.html#python-multiprocessing for more information. Reasons: CUDA is initialized
+(EngineCore pid=5005) INFO 11-02 03:17:26 [core.py:133] Initializing a V1 LLM engine (v0.32.0) with config: model='unsloth/Llama-3.3-70B-Instruct', speculative_config=None, tokenizer='unsloth/Llama-3.3-70B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revision=main, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=2560, download_dir=None, load_format=auto, tensor_parallel_size=4, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=None, quantization_config=None, enforce_eager=True, aux_output_config=AuxOutputConfig(enable_return_routed_experts=False, max_bytes=None), kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, custom_histogram_buckets=None, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=unsloth/Llama-3.3-70B-Instruct, enable_prefix_caching=False, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'cudagraph_decoder_replay': True, 'decoder_replay_cudagraph_capture_sizes': [], 'decoder_replay_trim_threshold': 768, 'compile_sizes': [], 'compile_ranges_endpoints': [128, 16384], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.NONE: 0>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'fuse_allreduce_rms': True, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 0, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'], gelu_and_mul_sparse=['triton', 'native']), enable_flashinfer_autotune=True, enable_rocm_segmented_attn_autotune=False, enable_cutedsl_warmup=True, enable_jit_warmup=False, moe_backend='auto', sparse_indexer_topk_backend='auto', linear_backend='auto', linear_backend_per_quant=None)
+(EngineCore pid=5005) INFO 11-02 03:17:27 [multiproc_executor.py:153] DP group leader: node_rank=0, node_rank_within_dp=0, master_addr=127.0.0.1, mq_connect_ip=172.20.12.107 (local), world_size=4, local_world_size=4
+(Worker pid=5022) INFO 11-02 03:17:43 [parallel_state.py:1906] world_size=4 rank=0 local_rank=0 distributed_init_method=file:///tmp/vllm_dist_bd60ed3bc47f4ccfbdc3be1a8dc34c29 backend=nccl
+(Worker pid=5025) INFO 11-02 03:17:44 [parallel_state.py:1906] world_size=4 rank=3 local_rank=3 distributed_init_method=file:///tmp/vllm_dist_bd60ed3bc47f4ccfbdc3be1a8dc34c29 backend=nccl
+(Worker pid=5023) INFO 11-02 03:17:44 [parallel_state.py:1906] world_size=4 rank=1 local_rank=1 distributed_init_method=file:///tmp/vllm_dist_bd60ed3bc47f4ccfbdc3be1a8dc34c29 backend=nccl
+(Worker pid=5024) INFO 11-02 03:17:44 [parallel_state.py:1906] world_size=4 rank=2 local_rank=2 distributed_init_method=file:///tmp/vllm_dist_bd60ed3bc47f4ccfbdc3be1a8dc34c29 backend=nccl
+(Worker pid=5022) INFO 11-02 03:17:46 [pynccl.py:148] vLLM is using nccl==2.29.7
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953] WorkerProc failed to start.
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953] Traceback (most recent call last):
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 920, in worker_main
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]     worker = WorkerProc(*args, **kwargs)
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]   File "/usr/local/lib/python3.12/site-packages/vllm/tracing/otel.py", line 175, in sync_wrapper
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]     return func(*args, **kwargs)
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 679, in __init__
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]     self.worker.init_device()
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/worker_base.py", line 350, in init_device
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]     self.worker.init_device()  # type: ignore
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]     ^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]   File "/usr/local/lib/python3.12/site-packages/vllm/tracing/otel.py", line 175, in sync_wrapper
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]     return func(*args, **kwargs)
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]            ^^^^^^^^^^^^^^^^^^^^^
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu_worker.py", line 509, in init_device
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]     init_worker_distributed_environment(
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/worker/gpu_worker.py", line 1673, in init_worker_distributed_environment
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]     ensure_model_parallel_initialized(
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]   File "/usr/local/lib/python3.12/site-packages/vllm/distributed/parallel_state.py", line 2383, in ensure_model_parallel_initialized
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]     initialize_model_parallel(
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]   File "/usr/local/lib/python3.12/site-packages/vllm/distributed/parallel_state.py", line 2152, in initialize_model_parallel
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]     _TP = init_model_parallel_group(
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]   File "/usr/local/lib/python3.12/site-packages/vllm/distributed/parallel_state.py", line 1523, in init_model_parallel_group
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]     return GroupCoordinator(
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]            ^^^^^^^^^^^^^^^^^
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]   File "/usr/local/lib/python3.12/site-packages/vllm/distributed/parallel_state.py", line 552, in __init__
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]     self.device_communicator = device_comm_cls(
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]                                ^^^^^^^^^^^^^^^^
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]   File "/usr/local/lib/python3.12/site-packages/vllm/distributed/device_communicators/cuda_communicator.py", line 108, in __init__
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]     self.pynccl_comm = PyNcclCommunicator(
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]                        ^^^^^^^^^^^^^^^^^^^
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]   File "/usr/local/lib/python3.12/site-packages/vllm/distributed/device_communicators/pynccl.py", line 163, in __init__
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]     self._init_comm(device)
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]   File "/usr/local/lib/python3.12/site-packages/vllm/distributed/device_communicators/pynccl.py", line 180, in _init_comm
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]     self.comm: ncclComm_t = self.nccl.ncclCommInitRank(
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]   File "/usr/local/lib/python3.12/site-packages/vllm/distributed/device_communicators/pynccl_wrapper.py", line 482, in ncclCommInitRank
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]     self.NCCL_CHECK(
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]   File "/usr/local/lib/python3.12/site-packages/vllm/distributed/device_communicators/pynccl_wrapper.py", line 448, in NCCL_CHECK
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953]     raise RuntimeError(f"NCCL error: {error_str}")
+(Worker pid=5025) ERROR 11-02 03:17:50 [multiproc_executor.py:953] RuntimeError: NCCL error: unhandled cuda error (run with NCCL_DEBUG=INFO for details)
+(EngineCore pid=5005) INFO 11-02 03:17:50 [multiproc_executor.py:479] [shutdown] Executor: waiting for worker exit count=4
+(EngineCore pid=5005) WARNING 11-02 03:17:55 [multiproc_executor.py:491] [shutdown] Executor: workers still running after grace period; sending SIGTERM count=3
+(EngineCore pid=5005) WARNING 11-02 03:17:59 [multiproc_executor.py:501] [shutdown] Executor: workers still running after SIGTERM; sending SIGKILL count=3
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510] EngineCore failed to start.
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510] Traceback (most recent call last):
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 1482, in run_engine_core
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]     engine_core = EngineCoreProc(*args, engine_index=dp_rank, **kwargs)
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]   File "/usr/local/lib/python3.12/site-packages/vllm/tracing/otel.py", line 175, in sync_wrapper
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]     return func(*args, **kwargs)
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 1194, in __init__
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]     super().__init__(
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 144, in __init__
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]     self.model_executor = executor_class(vllm_config)
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 116, in __init__
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]     super().__init__(vllm_config)
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]   File "/usr/local/lib/python3.12/site-packages/vllm/tracing/otel.py", line 175, in sync_wrapper
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]     return func(*args, **kwargs)
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/executor/abstract.py", line 126, in __init__
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]     self._init_executor()
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 215, in _init_executor
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]     self.workers = WorkerProc.wait_for_ready(unready_workers)
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]   File "/usr/local/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 815, in wait_for_ready
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510]     raise e from None
+(EngineCore pid=5005) ERROR 11-02 03:17:59 [core.py:1510] Exception: WorkerProc initialization failed due to an exception in a background process. See stack trace for root cause.
+Process EngineCore:
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/local/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 1514, in run_engine_core
+    raise e
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 1482, in run_engine_core
+    engine_core = EngineCoreProc(*args, engine_index=dp_rank, **kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/vllm/tracing/otel.py", line 175, in sync_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 1194, in __init__
+    super().__init__(
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core.py", line 144, in __init__
+    self.model_executor = executor_class(vllm_config)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 116, in __init__
+    super().__init__(vllm_config)
+  File "/usr/local/lib/python3.12/site-packages/vllm/tracing/otel.py", line 175, in sync_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/executor/abstract.py", line 126, in __init__
+    self._init_executor()
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 215, in _init_executor
+    self.workers = WorkerProc.wait_for_ready(unready_workers)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/executor/multiproc_executor.py", line 815, in wait_for_ready
+    raise e from None
+Exception: WorkerProc initialization failed due to an exception in a background process. See stack trace for root cause.
+Traceback (most recent call last):
+  File "/root/echokv/evaluation/serving/echokv_quality_sweep.py", line 183, in <module>
+    main()
+  File "/root/echokv/evaluation/serving/echokv_quality_sweep.py", line 148, in main
+    child(args)
+  File "/root/echokv/evaluation/serving/echokv_quality_sweep.py", line 76, in child
+    llm = LLM(**kw)
+          ^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/vllm/entrypoints/llm.py", line 342, in __init__
+    self.llm_engine = LLMEngine.from_engine_args(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/llm_engine.py", line 191, in from_engine_args
+    return cls(
+           ^^^^
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/llm_engine.py", line 116, in __init__
+    self.engine_core = EngineCoreClient.make_client(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 126, in make_client
+    return SyncMPClient(
+           ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/vllm/tracing/otel.py", line 175, in sync_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 925, in __init__
+    super().__init__(
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 682, in __init__
+    with launch_core_engines(
+  File "/usr/local/lib/python3.12/contextlib.py", line 144, in __exit__
+    next(self.gen)
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1351, in launch_core_engines
+    wait_for_engine_startup(
+  File "/usr/local/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1431, in wait_for_engine_startup
+    raise RuntimeError(
+RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {'EngineCore': 1}

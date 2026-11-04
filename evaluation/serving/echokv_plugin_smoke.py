@@ -35,7 +35,7 @@ def _engine_kwargs(args) -> dict:
         model=args.model,
         dtype=args.dtype,
         max_model_len=args.max_model_len,
-        enforce_eager=True,
+        enforce_eager=not args.cudagraph,
         tensor_parallel_size=args.tp,
         kv_cache_memory_bytes=args.kv_cache_mib * 2**20,
         enable_prefix_caching=False,
@@ -57,6 +57,10 @@ def run_child(args) -> None:
 
     llm = LLM(**_engine_kwargs(args))
     sp = SamplingParams(temperature=0.0, max_tokens=args.max_tokens, prompt_logprobs=0)
+    if args.mode == "echokv":
+        from echokv_vllm import control
+
+        llm.apply_model(control.reset_counters)  # count forwards of this run only
     t = time.time()
     outs = llm.generate(PROMPTS, sp)
     result = {
@@ -116,6 +120,7 @@ def main() -> None:
     p.add_argument("--init-bits", type=int)
     p.add_argument("--fixed-bits", type=int)
     p.add_argument("--fp-baseline", action="store_true")
+    p.add_argument("--cudagraph", action="store_true", help="CUDA graphs instead of enforce_eager")
     p.add_argument("--out", default="echokv_plugin_smoke.json")
     p.add_argument("--child", choices=["echokv", "stock"])
     p.add_argument("--child-out")
@@ -129,6 +134,8 @@ def main() -> None:
     engine_flags = ["--model", args.model, "--dtype", args.dtype, "--max-model-len",
                     str(args.max_model_len), "--max-tokens", str(args.max_tokens), "--tp",
                     str(args.tp), "--kv-cache-mib", str(args.kv_cache_mib)]
+    if args.cudagraph:
+        engine_flags.append("--cudagraph")
     args.passthrough = engine_flags
     report = {"echokv": spawn(args, "echokv", args.out + ".echokv.tmp")}
     if args.fp_baseline:

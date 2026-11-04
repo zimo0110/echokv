@@ -25,6 +25,9 @@ CONFIGS = {
     "stock": {"ECHOKV_ENABLE": "0"},
     "echokv-int4": {"ECHOKV_ENABLE": "1", "ECHOKV_MEM_BITS": "4", "ECHOKV_FIXED_BITS": "4"},
     "echokv-int8": {"ECHOKV_ENABLE": "1", "ECHOKV_MEM_BITS": "8", "ECHOKV_FIXED_BITS": "8"},
+    # Live controller (dynamic tiers) under a memory budget, default tau.
+    "echokv-live-mem4": {"ECHOKV_ENABLE": "1", "ECHOKV_MEM_BITS": "4"},
+    "echokv-live-mem6": {"ECHOKV_ENABLE": "1", "ECHOKV_MEM_BITS": "6"},
 }
 METRICS = ["ttft", "tpot", "itl", "e2el"]
 

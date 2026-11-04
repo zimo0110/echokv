@@ -33,8 +33,8 @@ hard memory budget: when the pool is empty, a block opens at the best tier
 that fits (INT2 always fits). When vLLM reassigns a block (offset 0 is
 written again), its old extra chunks and residual slot are released first.
 
-Residual slots are a fixed side buffer per layer (its last row is a trash
-row for masked writes). A request has at most one open K group per layer,
+Residual slots are a fixed side buffer per layer (plus one spare row); the
+slot map is shared by all layers. A request has at most one open K group,
 so ``max_num_seqs`` slots plus slack are enough. Slots of finished requests
 are reclaimed when their block is reused, or by LRU eviction under
 pressure. Eviction *seals* the group: the tokens present are quantized now,
@@ -42,11 +42,11 @@ and any later tokens in that group reuse the sealed stats (clamped). That
 is slightly lossy but never corrupts data.
 
 Writes are split into a host-side ``WritePlan`` (see write_plan.py: which
-blocks open, which groups complete, residual slot assignment) and a
-device-side ``apply_plan`` that issues no host synchronization on the
-common path: the chunk allocator is vectorized on the device, V and K
-codes are written by the kernels in kernels/write.py (Triton on CUDA,
-PyTorch elsewhere). ``write`` plans and applies in one call.
+blocks open, which groups complete, residual slot assignment), a host-side
+``prepare`` per layer (seals, chunk allocation; returns the page headers
+to write) and a device-side ``apply`` that only launches kernels
+(kernels/write.py: Triton on CUDA, PyTorch elsewhere), so a CUDA graph can
+capture it. ``write`` does all three in one call.
 """
 
 from __future__ import annotations
@@ -67,7 +67,7 @@ from echokv_vllm.quant import (
     unpack,
 )
 from echokv_vllm._util import to_device
-from echokv_vllm.write_plan import Eviction, WritePlan, WritePlanner
+from echokv_vllm.write_plan import Eviction, SharedState, WriteMeta, WritePlan, stage_plan
 
 # Extra pool chunks a block of each tier needs beyond its in-page chunk 0.
 NEXTRA = {2: 0, 4: 1, 8: 3}
@@ -148,7 +148,11 @@ class TieredLayout:
 
 
 class TieredKVCache:
-    """One layer's tiered store over ``pages``: a uint8 ``[num_blocks, >=page_bytes]`` view."""
+    """One layer's tiered store over ``pages``: a uint8 ``[num_blocks, >=page_bytes]`` view.
+
+    ``shared`` is the ``SharedState`` of the layer's KV cache group (planner,
+    residual map, per-block bookkeeping); a standalone store makes its own.
+    """
 
     def __init__(
         self,
@@ -157,6 +161,7 @@ class TieredKVCache:
         residual_slots: int = 256,
         residual_dtype: torch.dtype = torch.float32,
         residual: torch.Tensor | None = None,
+        shared: SharedState | None = None,
     ) -> None:
         if pages.dtype != torch.uint8 or pages.dim() != 2:
             raise ValueError("pages must be a 2-D uint8 tensor")
@@ -173,6 +178,7 @@ class TieredKVCache:
         self.num_blocks = n
         self.device = dev
         self.pages = pages
+        self.header = pages[:, :16]
         self.tag = pages[:, 0]
         self.sealed = pages[:, 1]
         self.table = pages[:, 4:16].view(torch.int32)
@@ -189,7 +195,7 @@ class TieredKVCache:
 
         # Chunk pool, managed on the host: every input to an allocation decision
         # (blocks opened, target tier, old tier, fill, recency) is host-known, so
-        # the device only receives small tag/table updates and nothing syncs.
+        # the device only receives page-header updates and nothing syncs.
         k = L.chunks_per_page
         self._free: list[int] = (
             np.arange(n * k).reshape(n, k)[:, 1:].reshape(-1)[::-1].tolist()
@@ -197,30 +203,43 @@ class TieredKVCache:
         self.pool_size = len(self._free)
         self._tag_h = np.zeros(n, dtype=np.int64)
         self._table_h = np.zeros((n, 3), dtype=np.int64)
-        self._fill_h = np.zeros(n, dtype=np.int64)
-        self._last_h = np.zeros(n, dtype=np.int64)
 
         if residual is None:
             residual = torch.zeros(residual_slots + 1, L.k_group, h, d, dtype=residual_dtype, device=dev)
         if residual.shape[1:] != (L.k_group, h, d) or residual.shape[0] < 2:
             raise ValueError(f"residual buffer shape {tuple(residual.shape)} does not match layout")
-        r = residual.shape[0] - 1  # last row is the trash row
+        r = residual.shape[0] - 1  # slots 0..r-1 (the last row is spare)
+        if shared is None:
+            shared = SharedState(n, bs, L.k_group, r, kref_window=L.k_group, device=dev)
+        if shared.num_blocks != n or shared.planner.num_slots > r:
+            raise ValueError("shared state does not match this layer's cache")
+        self.shared = shared
         self.res_k = residual
-        self.res_group = torch.zeros(r + 1, dtype=torch.long, device=dev)
-        self.block_res = torch.full((n,), -1, dtype=torch.long, device=dev)
-        self.planner = WritePlanner(bs, L.k_group, r)
+        self.res_group = shared.res_group
+        self.block_res = shared.block_res
+        self.planner = shared.planner
 
-        self._tokens_h = np.zeros(9, dtype=np.int64)
+        # Tokens written per tier, settled whenever a block's tier changes:
+        # tokens since the last settlement are cum_h - _mark_h at the current tag.
+        self._mark_h = np.zeros(n, dtype=np.int64)
+        self._tok_tier = np.zeros(9, dtype=np.int64)
         self.reset_counters()
 
-    # -- counters (read lazily; each read syncs) ---------------------------
+    # -- counters ----------------------------------------------------------
+
+    def _settle(self, blocks: np.ndarray) -> None:
+        cum = self.shared.cum_h[blocks]
+        np.add.at(self._tok_tier, self._tag_h[blocks], cum - self._mark_h[blocks])
+        self._mark_h[blocks] = cum
 
     @property
     def tokens_written(self) -> dict[int, int]:
-        return {b: int(self._tokens_h[b]) for b in SUPPORTED_BITS}
+        pending = np.bincount(self._tag_h, weights=self.shared.cum_h - self._mark_h, minlength=9)
+        return {b: int(self._tok_tier[b] + pending[b]) for b in SUPPORTED_BITS}
 
     def reset_counters(self) -> None:
-        self._tokens_h[:] = 0
+        self._tok_tier[:] = 0
+        self._mark_h[:] = self.shared.cum_h
         self.blocks_opened = {b: 0 for b in SUPPORTED_BITS}
         self.downgraded_blocks = 0
         self.demoted_blocks = 0
@@ -236,7 +255,7 @@ class TieredKVCache:
 
     # -- chunk pool (host-side decisions) ---------------------------------
 
-    def open_blocks(self, blocks, target_bits: int, protect=None) -> None:
+    def open_blocks(self, blocks, target_bits: int, protect=None) -> tuple[np.ndarray, np.ndarray]:
         """(Re)open ``blocks`` (unique ids) at ``target_bits`` or the best tier that fits.
 
         Old extra chunks go back to the pool first. If the pool cannot give a
@@ -244,18 +263,22 @@ class TieredKVCache:
         demoted to INT2 in place to free chunks (never ``protect`` blocks or
         blocks opened here). Only then does a new block open lower, down to
         INT2, which needs no extra chunks.
+
+        Decides on the host and returns ``(blocks, headers)``: the new 16-byte
+        page header of each block (tier, no sealed groups, chunk ids), for
+        ``write_headers``.
         """
         if target_bits not in SUPPORTED_BITS:
             raise ValueError(f"unsupported target bits {target_bits}")
         blocks = np.asarray(blocks.cpu() if torch.is_tensor(blocks) else blocks, dtype=np.int64)
+        self._settle(blocks)
         for b in blocks.tolist():
             ne = NEXTRA.get(int(self._tag_h[b]), 0)
             self._free.extend(self._table_h[b, :ne].tolist())
             self._tag_h[b] = 0
-            self._fill_h[b] = 0
         need = NEXTRA[target_bits] * blocks.size
         if need > len(self._free):
-            keep = set(blocks.tolist()) | (set() if protect is None else set(protect))
+            keep = set(blocks.tolist()) | (set() if protect is None else set(np.asarray(protect).tolist()))
             self._demote_lru(need - len(self._free), keep)
         # Greedy in block order: as many as fit at target, then the next tier down.
         tiers = np.full(blocks.size, 2, dtype=np.int64)
@@ -274,19 +297,20 @@ class TieredKVCache:
             self.blocks_opened[bits] += int((tiers == bits).sum())
         self.downgraded_blocks += int((tiers < target_bits).sum())
         self._tag_h[blocks] = tiers
-        # One host-to-device copy: [block, tier, chunk ids x3] per opened block.
-        packed = torch.from_numpy(np.concatenate([blocks[:, None], tiers[:, None], self._table_h[blocks]], 1))
-        dev = to_device(packed, self.device)
-        self.tag[dev[:, 0]] = dev[:, 1].to(torch.uint8)
-        self.table[dev[:, 0]] = dev[:, 2:].to(torch.int32)
-        # index_fill_, not ``t[idx] = 0``: a Python scalar on the right is a CPU
-        # tensor, and copying it to the device blocks until the stream drains.
-        self.sealed.index_fill_(0, dev[:, 0], 0)
+        headers = np.zeros((blocks.size, 16), dtype=np.uint8)
+        headers[:, 0] = tiers
+        headers[:, 4:] = np.ascontiguousarray(self._table_h[blocks].astype(np.int32)).view(np.uint8)
+        return blocks, headers
+
+    def write_headers(self, blocks: torch.Tensor, headers: torch.Tensor) -> None:
+        """Apply ``open_blocks`` headers (device ``[n]`` ids, ``[n, 16]`` uint8)."""
+        self.header[blocks] = headers
 
     def _demote_lru(self, chunks_needed: int, keep: set) -> None:
         """Requantize least recently written full INT4/INT8 blocks to INT2, freeing chunks."""
-        cand = np.nonzero((self._tag_h >= 4) & (self._fill_h == self.layout.block_size))[0]
-        cand = [b for b in cand[np.argsort(self._last_h[cand], kind="stable")].tolist() if b not in keep]
+        fill, last = self.shared.fill_h, self.shared.last_h
+        cand = np.nonzero((self._tag_h >= 4) & (fill == self.layout.block_size))[0]
+        cand = [b for b in cand[np.argsort(last[cand], kind="stable")].tolist() if b not in keep]
         victims, freed = [], 0
         for b in cand:
             if freed >= chunks_needed:
@@ -314,6 +338,7 @@ class TieredKVCache:
         self.v_min[blk, off] = v_min
         self._write_side(blk, off, 2, k_codes, side=0)
         self._write_side(blk, off, 2, v_codes, side=1)
+        self._settle(np.asarray(victims, dtype=np.int64))
         for b in victims:
             ne = NEXTRA[int(self._tag_h[b])]
             self._free.extend(self._table_h[b, :ne].tolist())
@@ -356,7 +381,7 @@ class TieredKVCache:
         if ev.fill <= 0:
             return
         g = self.layout.k_group
-        bits = int(self.tag[ev.block])
+        bits = int(self._tag_h[ev.block]) or 2
         ks = self.res_k[ev.slot, : ev.fill].float()
         scale, mn = stats_along(ks, bits, dim=0)
         self.k_scale[ev.block, ev.group] = scale
@@ -364,14 +389,16 @@ class TieredKVCache:
         blk = torch.full((ev.fill,), ev.block, device=self.device)
         off = ev.group * g + torch.arange(ev.fill, device=self.device)
         self._write_side(blk, off, bits, quantize_with(ks, scale, mn, bits), side=0)
-        self.sealed[ev.block] = int(self.sealed[ev.block]) | (1 << ev.group)
+        mask = self.planner.sealed.get(ev.block, 1 << ev.group)
+        self.sealed.index_fill_(0, blk[:1], mask)
         self.sealed_groups += 1
 
-    def apply_plan(self, plan: WritePlan, key: torch.Tensor, value: torch.Tensor, target_bits: int) -> None:
-        """Store ``key``/``value`` rows ``[*, H, D]`` as described by ``plan``."""
-        from echokv_vllm.kernels.write import finalize_k, write_v
+    def prepare(self, plan: WritePlan, target_bits: int) -> tuple[np.ndarray, np.ndarray] | None:
+        """Host side of a step's writes: seal evicted groups, open blocks.
 
-        L = self.layout
+        Runs once per step for every layer before any of the step's kernels.
+        Returns the page headers of opened blocks (see ``open_blocks``), or None.
+        """
         for ev in plan.evictions:  # rare; before the slot is reused below
             self._seal(ev)
         opens = plan.open_np
@@ -381,48 +408,43 @@ class TieredKVCache:
             fresh = plan.touched_np[self._tag_h[plan.touched_np] == 0]
             if fresh.size:
                 opens = np.union1d(opens, fresh)
-        if opens.size:
-            with record_function("echokv.write.open"):
-                self.open_blocks(opens, target_bits, protect=plan.touched_np)
-        if plan.touched_np.size:
-            t = plan.touched_np
-            self._fill_h[t] = np.maximum(self._fill_h[t], plan.touched_fill)
-            self._last_h[t] = plan.step
-            self._tokens_h += np.bincount(self._tag_h[t], weights=plan.touched_count, minlength=9)[:9].astype(np.int64)
-        if plan.res_clear_block.numel():
-            self.block_res.index_fill_(0, plan.res_clear_block, -1)
-        if plan.res_set_block.numel():
-            self.block_res[plan.res_set_block] = plan.res_set_slot
-            self.res_group[plan.res_set_slot] = plan.res_set_group
-        if plan.slots.numel() == 0:
-            return
+        if not opens.size:
+            return None
+        return self.open_blocks(opens, target_bits, protect=plan.touched_np)
 
-        with record_function("echokv.write.v"):
-            write_v(self, value, plan.rows, plan.slots)
-        # Finalize before the residual scatter: the planner may hand a slot freed
+    def apply(self, meta: WriteMeta, key: torch.Tensor, value: torch.Tensor,
+              kref: torch.Tensor | None = None, capturing: bool = False) -> None:
+        """Device side: quantize and store ``key``/``value`` ``[*, H, D]`` as ``meta`` says.
+
+        ``kref`` is the layer's K_ref ring. ``capturing`` launches every kernel
+        at its full grid (masked by the counts in ``meta``), as a CUDA graph
+        must replay any batch of the captured size.
+        """
+        from echokv_vllm.kernels.write import finalize_k, write_tokens
+
+        # Finalize before the token writes: the planner may hand a slot freed
         # by a completing group to a new group in the same step.
-        if plan.n_fin:
+        if capturing or meta.n_fin:
             with record_function("echokv.write.k_finalize"):
-                finalize_k(self, key, plan.fin_block, plan.fin_group, plan.fin_res_slot, plan.fin_rows)
-        # K of still-open groups to the residual (other tokens hit the trash row).
-        with record_function("echokv.write.residual"):
-            self.res_k[plan.res_index, plan.res_pos] = key[plan.rows].to(self.res_k.dtype)
-        if plan.n_sealed:
-            blk = plan.slots // L.block_size
-            off = plan.slots % L.block_size
-            m = plan.tok_sealed
-            b_, o_, r_ = blk[m], off[m], plan.rows[m]
-            for bits in SUPPORTED_BITS:
-                mb = self.tag[b_] == bits
-                if bool(mb.any()):
-                    sc = self.k_scale[b_[mb], o_[mb] // L.k_group]
-                    mn = self.k_min[b_[mb], o_[mb] // L.k_group]
-                    self._write_side(b_[mb], o_[mb], bits, quantize_with(key[r_[mb]], sc, mn, bits), 0)
+                finalize_k(self, key, meta, full_grid=capturing)
+        if meta.n_rows:
+            with record_function("echokv.write.tokens"):
+                write_tokens(self, key, value, meta, kref)
 
-    def write(self, key: torch.Tensor, value: torch.Tensor, slots: torch.Tensor, target_bits: int) -> None:
-        """Quantize and store ``key``/``value`` ``[n, H, D]`` at ``slots`` (-1 = skip)."""
-        plan = self.planner.plan(slots.detach().cpu(), self.device)
-        self.apply_plan(plan, key, value, target_bits)
+    def write(self, key: torch.Tensor, value: torch.Tensor, slots: torch.Tensor, target_bits: int,
+              kref: torch.Tensor | None = None) -> None:
+        """Quantize and store ``key``/``value`` ``[n, H, D]`` at ``slots`` (-1 = skip).
+
+        The standalone path (tests, tools): plan, prepare and apply in one call.
+        """
+        plan = self.planner.plan(slots.detach().cpu())
+        opened = self.prepare(plan, target_bits)
+        self.shared.commit(plan)
+        meta, extra = stage_plan(plan, self.device, opened)
+        self.shared.apply_res_map(*extra[:4])
+        if opened is not None:
+            self.write_headers(extra[4], extra[5])
+        self.apply(meta, key, value, kref)
 
     # -- read -------------------------------------------------------------
 

@@ -29,6 +29,9 @@ import time
 CONFIGS = {
     "stock": {"ECHOKV_ENABLE": "0"},
     "echokv-int4": {"ECHOKV_ENABLE": "1", "ECHOKV_MEM_BITS": "4", "ECHOKV_FIXED_BITS": "4"},
+    # Live controller (dynamic tiers) under a memory budget, default tau.
+    "echokv-live-mem4": {"ECHOKV_ENABLE": "1", "ECHOKV_MEM_BITS": "4"},
+    "echokv-live-mem6": {"ECHOKV_ENABLE": "1", "ECHOKV_MEM_BITS": "6"},
 }
 
 
@@ -129,7 +132,7 @@ def main() -> None:
     p.add_argument("--num-prompts", type=int, default=64)
     p.add_argument("--input-len", type=int, default=1024)
     p.add_argument("--output-len", type=int, default=128)
-    p.add_argument("--configs", nargs="*", default=list(CONFIGS))
+    p.add_argument("--configs", nargs="*", default=["stock", "echokv-int4"], choices=list(CONFIGS))
     p.add_argument("--out", default="echokv_profile.json")
     p.add_argument("--child-out")
     p.add_argument("--trace-dir")

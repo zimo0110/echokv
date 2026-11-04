@@ -4,20 +4,28 @@ Environment variables reach every vLLM worker process, including the
 spawned ones, so the backend can read them wherever vLLM constructs it.
 
     ECHOKV_ENABLE           1 to install the backend (see plugin.py)
-    ECHOKV_MEM_BITS         memory budget, bits/element: 2, 4, 6 or 8 (default 8)
-    ECHOKV_INIT_BITS        starting tier for every layer (default 8)
+    ECHOKV_MEM_BITS         memory budget, bits/element: 2, 4, 6 or 8 (default 4,
+                            or ECHOKV_FIXED_BITS when that is set)
+    ECHOKV_INIT_BITS        starting tier for every layer (default: highest tier
+                            the budget gives every block, i.e. 8, 4, 4, 2 for
+                            budgets 8, 6, 4, 2)
     ECHOKV_FIXED_BITS       pin every layer to this tier, controller off (static baselines)
     ECHOKV_FROZEN           1 to keep tiers fixed while the canary keeps measuring
     ECHOKV_TAU0             per-layer canary KL budget (default 0.01)
     ECHOKV_L0               reference context length for τ scaling (default 4096)
     ECHOKV_TAU_SCALING      none (default) or sqrt: τ0·sqrt(max(L, L0)/L0)
     ECHOKV_ALPHA            EMA weight of the newest sample (default 0.1)
-    ECHOKV_CANARY_INTERVAL  fire every N forward steps per layer (default 64)
+    ECHOKV_CANARY_INTERVAL  fire every N model steps, all layers together (default 64)
     ECHOKV_KREF_WINDOW      K_ref ring size in tokens (default 64)
     ECHOKV_CANARY_MAX_Q     decode queries sampled per fire (default 8)
-    ECHOKV_K_GROUP          tokens per per-channel K group (default 32; divides block size)
+    ECHOKV_K_GROUP          tokens per per-channel K group (default 32; a power of 2,
+                            >= 16, dividing the block size)
     ECHOKV_V_GROUP          head_dim elements per per-token V group (default 32)
     ECHOKV_RESIDUAL_SLOTS   open-K-group slots per layer (default max_num_seqs + 16)
+
+Read elsewhere: ECHOKV_CUDAGRAPH=0 keeps attention out of full CUDA graphs
+(backend.py), ECHOKV_CHECK_HOST_SLOTS=1 checks the host slot mapping every
+step (backend.py), ECHOKV_AUTOTUNE=0 pins the decode kernel's launch config.
 """
 
 from __future__ import annotations
@@ -31,7 +39,7 @@ from echokv_vllm.quant import SUPPORTED_BITS
 
 @dataclass(frozen=True)
 class EchoKVConfig:
-    mem_bits: int = 8
+    mem_bits: int = 4
     k_group: int = 32
     v_group: int = 32
     residual_slots: int | None = None
@@ -46,14 +54,21 @@ def _get(name: str, default, cast):
     return default if raw is None or raw == "" else cast(raw)
 
 
+def default_init_bits(mem_bits: int) -> int:
+    """Highest tier every block can hold under the budget (INT4 is +0.7% perplexity at 8B)."""
+    return max((b for b in SUPPORTED_BITS if b <= mem_bits), default=2)
+
+
 def load_config() -> EchoKVConfig:
     fixed = _get("ECHOKV_FIXED_BITS", None, int)
+    # A pinned tier with no explicit budget gets a budget that holds it.
+    mem_bits = _get("ECHOKV_MEM_BITS", 4 if fixed is None else max(fixed, 2), int)
     params = ControllerParams(
         tau0=_get("ECHOKV_TAU0", 0.01, float),
         l0=_get("ECHOKV_L0", 4096, int),
         tau_scaling=_get("ECHOKV_TAU_SCALING", "none", str),
         alpha=_get("ECHOKV_ALPHA", 0.1, float),
-        init_bits=_get("ECHOKV_INIT_BITS", 8, int),
+        init_bits=_get("ECHOKV_INIT_BITS", default_init_bits(mem_bits), int),
         fixed_bits=fixed,
         frozen=_get("ECHOKV_FROZEN", "0", str) == "1",
     )
@@ -61,7 +76,7 @@ def load_config() -> EchoKVConfig:
         if b is not None and b not in SUPPORTED_BITS:
             raise ValueError(f"{name} must be one of {SUPPORTED_BITS}, got {b}")
     cfg = EchoKVConfig(
-        mem_bits=_get("ECHOKV_MEM_BITS", 8, int),
+        mem_bits=mem_bits,
         k_group=_get("ECHOKV_K_GROUP", 32, int),
         v_group=_get("ECHOKV_V_GROUP", 32, int),
         residual_slots=_get("ECHOKV_RESIDUAL_SLOTS", None, int),
@@ -76,6 +91,9 @@ def load_config() -> EchoKVConfig:
         raise ValueError(f"ECHOKV_MEM_BITS must be 2, 4, 6 or 8, got {cfg.mem_bits}")
     if cfg.canary_interval < 1:
         raise ValueError("ECHOKV_CANARY_INTERVAL must be >= 1")
+    if cfg.k_group < 16 or cfg.k_group & (cfg.k_group - 1):
+        # The kernels tile K groups for tl.dot (>= 16) with power-of-2 ranges.
+        raise ValueError(f"ECHOKV_K_GROUP must be a power of 2 and >= 16, got {cfg.k_group}")
     if cfg.kref_window < cfg.k_group:
         raise ValueError("ECHOKV_KREF_WINDOW must be >= ECHOKV_K_GROUP")
     return cfg

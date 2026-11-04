@@ -82,17 +82,17 @@ def dequantize_with(codes: torch.Tensor, scale: torch.Tensor, mn: torch.Tensor) 
 def fake_quant_channels(k: torch.Tensor, bits: int, group: int) -> torch.Tensor:
     """K storage round-trip: per channel over consecutive groups of ``group`` tokens.
 
-    ``k`` is ``[T, H, D]`` in token order; a trailing partial group is left
-    in full precision, as the cache keeps it in the residual buffer.
+    ``k`` is ``[..., T, H, D]`` in token order; a trailing partial group is
+    left in full precision, as the cache keeps it in the residual buffer.
     """
-    t = k.shape[0]
+    t = k.shape[-3]
     full = (t // group) * group
     out = k.float().clone()
     if full:
-        kg = out[:full].unflatten(0, (full // group, group))  # [n, g, H, D]
-        scale, mn = stats_along(kg, bits, dim=1)
-        codes = quantize_with(kg, scale.unsqueeze(1), mn.unsqueeze(1), bits)
-        out[:full] = dequantize_with(codes, scale.unsqueeze(1), mn.unsqueeze(1)).flatten(0, 1)
+        kg = out[..., :full, :, :].unflatten(-3, (full // group, group))  # [..., n, g, H, D]
+        scale, mn = stats_along(kg, bits, dim=-3)
+        codes = quantize_with(kg, scale.unsqueeze(-3), mn.unsqueeze(-3), bits)
+        out[..., :full, :, :] = dequantize_with(codes, scale.unsqueeze(-3), mn.unsqueeze(-3)).flatten(-4, -3)
     return out
 
 
